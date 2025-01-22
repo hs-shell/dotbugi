@@ -1,0 +1,43 @@
+# Node.js 의존성
+node_modules/
+
+# 빌드 및 배포 산출물
+dist/
+
+# Vite 캐시 (만약 사용 중이라면)
+.vite/
+
+# TypeScript 빌드 정보 (예: tsconfig의 tsBuildInfoFile)
+**/*.tsbuildinfo
+
+# 환경 설정 파일 (환경에 따라 사용)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 로그 파일들
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS에서 생성되는 파일들
+.DS_Store
+Thumbs.db
+
+# 에디터 및 IDE 설정 폴더/파일
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.bak
+
+# 기타 임시 파일
+tmp/
+temp/
