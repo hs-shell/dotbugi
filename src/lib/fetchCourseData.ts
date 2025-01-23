@@ -25,9 +25,9 @@ const fetchVodData = async (link: string) => {
       const items = Array.from(week.querySelectorAll('.content .vod .activityinstance'))
         .filter((item) => !item.closest('.dimmed'))
         .map((item) => {
-          const title = item.querySelector('.instancename')?.textContent?.trim() || null;
-          const url = item.querySelector('a')?.getAttribute('href') || null;
-          const range = item.querySelector('.text-ubstrap')?.textContent?.trim() || null;
+          const title = item.querySelector('.instancename')?.textContent?.trim() || 'No Title';
+          const url = item.querySelector('a')?.getAttribute('href') || 'No URL';
+          const range = item.querySelector('.text-ubstrap')?.textContent?.trim() || 'No Range';
           return { title, url, range };
         });
 
@@ -81,8 +81,8 @@ const fetchAssignData = async (link: string) => {
         row.querySelector(headerMap.assign)?.textContent?.trim() ||
         'No Title';
 
-      const url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || null;
-      const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || null;
+      const url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || 'No URL';
+      const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || 'No DueDate';
       const isSubmit = row.querySelector(headerMap.isSubmit)?.textContent?.trim() === '미제출' ? false : true;
 
       return { title, url, dueDate, isSubmit };
@@ -127,9 +127,9 @@ const fetchQuizData = async (link: string) => {
     const rows = Array.from(doc.querySelectorAll('table.generaltable tbody tr'));
     const quizzes = rows
       .map((row) => {
-        const title = row.querySelector(headerMap.title)?.textContent?.trim() || null;
-        let url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || null;
-        const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || null;
+        const title = row.querySelector(headerMap.title)?.textContent?.trim() || 'No Title';
+        let url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || 'No URL';
+        const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || 'No DueDate';
 
         if (url) {
           const index = url.indexOf('view');
