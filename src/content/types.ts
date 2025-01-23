@@ -1,38 +1,71 @@
-export type VodItem = {
-  title: string | null;
-  url: string | null;
-  range: string | null;
-};
-
-export type VodData = {
-  items: VodItem[];
-  isAttendance: boolean | null;
-};
-
-export type AssignData = {
-  title: string | null;
-  url: string | null;
-  isSubmit: boolean;
-  dueDate: string | null;
-};
-
-export type QuizData = {
-  title: string | null;
-  url: string | null;
-  dueDate: string | null;
-};
-
 export type CourseBase = {
   courseId: string;
   title: string;
   prof: string;
 };
 
-export type CourseData = CourseBase & {
-  data?: {
-    vodData: VodData[];
-    assignData: AssignData[];
-    quizData: QuizData[];
+export type VodData = CourseBase & {
+  data: {
+    items: {
+      title: string;
+      url: string;
+      range: string;
+    }[];
+    isAttendance: boolean | null;
+  }[];
+};
+
+export type VodItem = {
+  courseId: string;
+  title: string;
+  prof: string;
+  data: {
+    items: {
+      title: string;
+      url: string;
+      range: string;
+    }[];
+    isAttendance: boolean | null;
+  };
+};
+
+export type AssignData = CourseBase & {
+  data: {
+    title: string;
+    url: string;
+    isSubmit: boolean;
+    dueDate: string;
+  }[];
+};
+
+export type AssignItem = {
+  courseId: string;
+  title: string;
+  prof: string;
+  data: {
+    title: string;
+    url: string;
+    isSubmit: boolean;
+    dueDate: string;
+  };
+};
+
+export type QuizData = CourseBase & {
+  data: {
+    title: string;
+    url: string;
+    dueDate: string;
+  }[];
+};
+
+export type QuizItem = {
+  courseId: string;
+  title: string;
+  prof: string;
+  data: {
+    title: string;
+    url: string;
+    dueDate: string;
   };
 };
 
@@ -45,6 +78,12 @@ export type TimeDifferenceResult = {
 export interface Item {
   prof: string;
   title: string;
-  dueDate: number;
+  dueDate: string;
   isCompleted: boolean;
 }
+
+export const TAB_TYPE = {
+  VIDEO: 'VIDEO',
+  ASSIGN: 'ASSIGN',
+  QUIZ: 'QUIZ',
+} as const;
