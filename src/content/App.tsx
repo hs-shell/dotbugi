@@ -1,6 +1,7 @@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useEffect, useMemo, useState } from 'react';
 import Bugi from '@/assets/bugi.png';
+import Close from '@/assets/close.png';
 import Video from './components/Video';
 import Assign from './components/Assign';
 import Quiz from './components/Quiz';
@@ -10,6 +11,7 @@ import { ChevronDown, Filter, RefreshCw, Search } from 'lucide-react';
 import PopoverFooter from './components/PopoverFooter';
 import { Input } from '@/components/ui/input';
 import { isCurrentDateInRange, isWithinSevenDays } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export default function App() {
   const [courseData, setCourseData] = useState<CourseBase[]>([]);
@@ -76,6 +78,7 @@ export default function App() {
                       courseId: item.courseId,
                       title: item.title,
                       prof: item.prof,
+                      subject: data.subject,
                       data: {
                         items: data.items,
                         isAttendance: data.isAttendance,
@@ -93,6 +96,7 @@ export default function App() {
                       courseId: item.courseId,
                       prof: item.prof,
                       title: item.title,
+                      subject: data.subject,
                       data: { title: data.title, url: data.url, dueDate: data.dueDate, isSubmit: data.isSubmit },
                     },
                   ];
@@ -107,6 +111,7 @@ export default function App() {
                       courseId: item.courseId,
                       prof: item.prof,
                       title: item.title,
+                      subject: data.subject,
                       data: {
                         title: data.title,
                         url: data.url,
@@ -229,20 +234,28 @@ export default function App() {
 
   return (
     <Popover open={isOpen}>
-      <PopoverTrigger asChild>
-        <img
-          src={Bugi}
-          onClick={() => setIsOpen(!isOpen)}
-          className="rounded-full w-20 h-20 bg-white border-zinc-500"
-        />
+      <PopoverTrigger asChild className="transition-all duration-1000">
+        {isOpen ? (
+          <img
+            src={Close}
+            onClick={() => setIsOpen(!isOpen)}
+            className="rounded-full w-20 h-20 bg-white border-zinc-500 shadow-xl"
+          />
+        ) : (
+          <img
+            src={Bugi}
+            onClick={() => setIsOpen(!isOpen)}
+            className="rounded-full w-20 h-20 bg-white border-zinc-500 shadow-xl"
+          />
+        )}
       </PopoverTrigger>
       <PopoverContent
-        className="bg-white opacity-100 rounded-xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[300px] h-[400px]"
+        className="bg-white opacity-100 rounded-3xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[350px] h-[550px]"
         side="top"
       >
-        <div className="bg-white w-full rounded-xl">
-          <div className="w-full flex items-center justify-between px-4 py-6">
-            <div className="items-center justify-center font-bold text-2xl">
+        <div className="bg-white w-full rounded-3xl">
+          <div className="w-full flex items-center justify-between px-5 pt-8 pb-6">
+            <div className="items-center justify-center font-bold text-3xl">
               {activeTab === TAB_TYPE.VIDEO
                 ? '온라인 강의 목록'
                 : activeTab === TAB_TYPE.ASSIGN
@@ -253,22 +266,26 @@ export default function App() {
             </div>
             <RefreshCw className="rounded-md w-10 h-10 p-1.5 hover:bg-zinc-200" />
           </div>
-          <div className="mb-4 flex px-4 relative">
-            <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
+          <div className="mb-4 flex px-5 relative py-0">
+            <Search className="absolute left-9 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
               type="text"
               placeholder={`검색`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white rounded-xl border-zinc-300 w-full text-xl h-12 pl-12 pr-4 placeholder-gray-400 font-medium"
+              autoFocus={false}
+              className="bg-zinc-50 rounded-xl border border-zinc-300 w-full text-lg h-12 pl-12 pr-4 placeholder-gray-400 font-medium py-0 outline-none focus:ring-0 focus:border-zinc-300 focus:bg-slate-50 transition-all duration-200"
             />
           </div>
-          <div className="rounded-md hover:bg-zinc-200">
-            <Filter className="w-10 h-10 p-2" />
-            <ChevronDown className="w-10 h-10 p-1.5" />
+          <div className="flex rounded-md mb-1">
+            {/* <div className="pl-2 flex overflow-x-auto max-w-full rounded-md space-x-1"></div> */}
+            <div className="flex justify-self-end rounded-lg gap-1 hover:bg-zinc-100 transition-all duration-200 mb-2 p-2 pl-3">
+              <Filter className="w-6 h-6 p-0" />
+              <ChevronDown className="w-6 h-6 p-0" />
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 bg-zinc-100 opacity-100 w-full px-3 py-4 overflow-y-auto h-[400px]">
+        <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full px-5 py-4 overflow-y-scroll h-[400px]">
           {activeTab === TAB_TYPE.VIDEO && <Video courseData={filteredVodData} />}
           {activeTab === TAB_TYPE.ASSIGN && <Assign courseData={filteredAssignData} />}
           {activeTab === TAB_TYPE.QUIZ && <Quiz courseData={filteredQuizData} />}
