@@ -19,25 +19,29 @@ const fetchVodData = async (link: string) => {
       doc.querySelectorAll('#region-main > div > div > div.user_attendance.course_box > div > ul > li')
     );
 
-    const weeklyData = Array.from(
-      doc.querySelectorAll('#region-main > div > div > div.total_sections > div > ul > li')
-    ).map((week, index) => {
-      const subject = week.querySelector('.content .sectionname')?.textContent?.trim() || index + '주차';
-      const items = Array.from(week.querySelectorAll('.content .vod .activityinstance'))
-        .filter((item) => !item.closest('.dimmed'))
-        .map((item) => {
-          const title = item.querySelector('.instancename')?.textContent?.replace('동영상', '').trim() || 'No Title';
-          const url = item.querySelector('a')?.getAttribute('href') || 'No URL';
-          const range = item.querySelector('.text-ubstrap')?.textContent?.trim() || 'No Range';
-          const length = item.querySelector('.text-info')?.textContent?.replace(',', '').trim() || 'No Length';
-          return { title, url, range, length };
-        });
+    const weeklyData = Array.from(doc.querySelectorAll('#region-main > div > div > div.total_sections > div > ul > li'))
+      .map((week, index) => {
+        const subject = week.querySelector('.content .sectionname')?.textContent?.trim() || index + '주차';
+        const items = Array.from(week.querySelectorAll('.content .vod .activityinstance'))
+          .filter((item) => !item.closest('.dimmed'))
+          .map((item) => {
+            const title = item.querySelector('.instancename')?.textContent?.replace('동영상', '').trim() || null;
+            const url = item.querySelector('a')?.getAttribute('href') || null;
+            const range = item.querySelector('.text-ubstrap')?.textContent?.trim() || '';
+            const length = item.querySelector('.text-info')?.textContent?.replace(',', '').trim() || '';
 
-      const attendanceText = isAttendances[index]?.textContent?.trim();
-      const isAttendance = attendanceText?.includes('출석') ? true : attendanceText?.includes('-') ? null : false;
+            if (!title || !url) return null;
+            return { title, url, range, length };
+          })
+          .filter((item) => item !== null);
 
-      return { subject, items, isAttendance };
-    });
+        const attendanceText = isAttendances[index]?.textContent?.trim();
+        const isAttendance = attendanceText?.includes('출석') ? true : attendanceText?.includes('-') ? null : false;
+
+        if (!items) return null;
+        return { subject, items, isAttendance };
+      })
+      .filter((week) => week !== null);
 
     return weeklyData;
   } catch (error) {
@@ -78,19 +82,22 @@ const fetchAssignData = async (link: string) => {
 
     let subject: string;
     const rows = Array.from(doc.querySelectorAll('table.generaltable tbody tr'));
-    const assignments = rows.map((row) => {
-      const title =
-        row.querySelector(headerMap.title)?.textContent?.trim() ||
-        row.querySelector(headerMap.assign)?.textContent?.trim() ||
-        'No Title';
-      let sbj = row.querySelector(headerMap.subject)?.textContent?.trim() || '';
-      const url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || 'No URL';
-      const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || 'No DueDate';
-      const isSubmit = row.querySelector(headerMap.isSubmit)?.textContent?.trim() === '미제출' ? false : true;
+    const assignments = rows
+      .map((row) => {
+        const title =
+          row.querySelector(headerMap.title)?.textContent?.trim() ||
+          row.querySelector(headerMap.assign)?.textContent?.trim() ||
+          null;
+        let sbj = row.querySelector(headerMap.subject)?.textContent?.trim() || '';
+        const url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || null;
+        const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || null;
+        const isSubmit = row.querySelector(headerMap.isSubmit)?.textContent?.trim() === '미제출' ? false : true;
 
-      if (sbj.length !== 0) subject = sbj;
-      return { subject, title, url, dueDate, isSubmit };
-    });
+        if (sbj.length !== 0) subject = sbj;
+        if (!title || !url || !dueDate) return null;
+        return { subject, title, url, dueDate, isSubmit };
+      })
+      .filter((assign) => assign !== null);
 
     return assignments;
   } catch (error) {
@@ -133,9 +140,9 @@ const fetchQuizData = async (link: string) => {
     const quizzes = rows
       .map((row) => {
         let sbj = row.querySelector(headerMap.subject)?.textContent?.trim() || '';
-        const title = row.querySelector(headerMap.title)?.textContent?.trim() || 'No Title';
-        let url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || 'No URL';
-        const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || 'No DueDate';
+        const title = row.querySelector(headerMap.title)?.textContent?.trim() || null;
+        let url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || null;
+        const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || null;
 
         if (sbj.length !== 0) subject = sbj;
 
@@ -143,7 +150,8 @@ const fetchQuizData = async (link: string) => {
           const index = url.indexOf('view');
           url = url.slice(0, index) + 'mod/quiz/' + url.slice(index);
         }
-        if (title && dueDate) {
+
+        if (title && dueDate && url) {
           return { title, subject, url, dueDate };
         }
         return null;
