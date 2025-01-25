@@ -6,12 +6,12 @@ import Video from './components/Video';
 import Assign from './components/Assign';
 import Quiz from './components/Quiz';
 import { requestData } from '@/lib/fetchCourseData';
-import { AssignData, AssignItem, CourseBase, Item, QuizData, QuizItem, TAB_TYPE, VodData, VodItem } from './types';
+import { AssignItem, CourseBase, Item, QuizItem, TAB_TYPE, VodItem } from './types';
 import { ChevronDown, Filter, RefreshCw, Search } from 'lucide-react';
 import PopoverFooter from './components/PopoverFooter';
-import { Input } from '@/components/ui/input';
-import { isCurrentDateInRange, isWithinSevenDays } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { isCurrentDateByDate, isCurrentDateInRange, isWithinSevenDays } from '@/lib/utils';
+import { Spinner } from '@/components/ui/spinner';
+import { loadDataFromStorage, saveDataToStorage } from './storage';
 
 export default function App() {
   const [courseData, setCourseData] = useState<CourseBase[]>([]);
@@ -27,6 +27,24 @@ export default function App() {
   const [vodSortBy, setVodSortBy] = useState<keyof Item>('title');
   const [assignSortBy, setAssignSortBy] = useState<keyof Item>('isCompleted');
   const [quizSortBy, setQuizSortBy] = useState<keyof Item>('title');
+
+  const [refreshTime, setRefreshTime] = useState<string | null>();
+  const [isPending, setIsPending] = useState<boolean>(false);
+  const [remainingTime, setRemainingTime] = useState(0);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (remainingTime >= 60) {
+      updateData();
+    } else {
+      timer = setTimeout(() => {
+        setRemainingTime((prev) => prev + 1);
+      }, 60 * 1000);
+    }
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [remainingTime]);
 
   useEffect(() => {
     if (!document) return;
@@ -54,88 +72,124 @@ export default function App() {
     const currentTime = new Date().getTime();
     const oneHour = 60 * 60 * 1000;
 
-    if (!lastRequestTime || currentTime - parseInt(lastRequestTime, 10) >= 0) {
-      (async () => {
-        try {
-          await Promise.all(
-            courseData.map(async (item) => {
-              const result = await requestData(item.courseId);
-              const vodItem = result.vodData.filter((data) => {
-                return data.items.some((item) => isCurrentDateInRange(item.range!));
-              });
-              const assignItem = result.assignData.filter((data) => {
-                return isWithinSevenDays(data.dueDate!);
-              });
-              const quizItem = result.quizData.filter((data) => {
-                return isWithinSevenDays(data.dueDate!);
-              });
+    if (lastRequestTime) setRefreshTime(new Date(parseInt(lastRequestTime, 10)).toLocaleTimeString());
 
-              vodItem.forEach((data, index) => {
-                setVodItems((prev: VodItem[]) => {
-                  return [
-                    ...prev,
-                    {
-                      courseId: item.courseId,
-                      title: item.title,
-                      prof: item.prof,
-                      subject: data.subject,
-                      data: {
-                        items: data.items,
-                        isAttendance: data.isAttendance,
-                      },
-                    },
-                  ];
-                });
-              });
-
-              assignItem.forEach((data, index) => {
-                setAssignItems((prev: AssignItem[]) => {
-                  return [
-                    ...prev,
-                    {
-                      courseId: item.courseId,
-                      prof: item.prof,
-                      title: item.title,
-                      subject: data.subject,
-                      data: { title: data.title, url: data.url, dueDate: data.dueDate, isSubmit: data.isSubmit },
-                    },
-                  ];
-                });
-              });
-
-              quizItem.forEach((data, index) => {
-                setQuizItems((prev: QuizItem[]) => {
-                  return [
-                    ...prev,
-                    {
-                      courseId: item.courseId,
-                      prof: item.prof,
-                      title: item.title,
-                      subject: data.subject,
-                      data: {
-                        title: data.title,
-                        url: data.url,
-                        dueDate: data.dueDate,
-                      },
-                    },
-                  ];
-                });
-              });
-            })
-          );
-          localStorage.setItem('lastRequestTime', currentTime.toString());
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      })();
+    if (!lastRequestTime || currentTime - parseInt(lastRequestTime, 10) >= oneHour) {
+      setIsPending(true);
+      updateData();
     } else {
-      console.log('1시간 이내로 요청을 보냈기 때문에, 새로 요청을 보내지 않습니다.');
+      const minutes = (currentTime - parseInt(lastRequestTime, 10)) / (60 * 1000);
+      setRemainingTime(minutes);
+      loadDataFromStorage('vod', (data) => {
+        setVodItems(
+          (data as VodItem[]).filter((vod) => {
+            return !vod.data.items.some((item) => {
+              isCurrentDateInRange(item.range);
+            });
+          })
+        );
+      });
+      loadDataFromStorage('assign', (data) => {
+        setAssignItems(
+          (data as AssignItem[]).filter((assign) => {
+            return isCurrentDateByDate(assign.data.dueDate);
+          })
+        );
+      });
+      loadDataFromStorage('quiz', (data) => {
+        setQuizItems(
+          (data as QuizItem[]).filter((quiz) => {
+            return isCurrentDateByDate(quiz.data.dueDate);
+          })
+        );
+      });
     }
   }, [courseData]);
 
   useEffect(() => {
     setSearchTerm('');
   }, [activeTab]);
+
+  const updateData = async () => {
+    try {
+      const currentTime = new Date().getTime();
+      setVodItems([]);
+      setAssignItems([]);
+      setQuizItems([]);
+
+      const tempVodItems: VodItem[] = [];
+      const tempAssignItems: AssignItem[] = [];
+      const tempQuizItems: QuizItem[] = [];
+
+      await Promise.all(
+        courseData.map(async (item) => {
+          const result = await requestData(item.courseId);
+          const vodItem = result.vodData.filter((data) => {
+            return data.items.some((item) => isCurrentDateInRange(item.range!));
+          });
+          const assignItem = result.assignData.filter((data) => {
+            return isWithinSevenDays(data.dueDate!);
+          });
+          const quizItem = result.quizData.filter((data) => {
+            return isWithinSevenDays(data.dueDate!);
+          });
+
+          vodItem.forEach((data, index) => {
+            tempVodItems.push({
+              courseId: item.courseId,
+              title: item.title,
+              prof: item.prof,
+              subject: data.subject,
+              data: {
+                items: data.items,
+                isAttendance: data.isAttendance,
+              },
+            });
+          });
+
+          assignItem.forEach((data, index) => {
+            tempAssignItems.push({
+              courseId: item.courseId,
+              prof: item.prof,
+              title: item.title,
+              subject: data.subject,
+              data: { title: data.title, url: data.url, dueDate: data.dueDate, isSubmit: data.isSubmit },
+            });
+          });
+
+          quizItem.forEach((data, index) => {
+            tempQuizItems.push({
+              courseId: item.courseId,
+              prof: item.prof,
+              title: item.title,
+              subject: data.subject,
+              data: {
+                title: data.title,
+                url: data.url,
+                dueDate: data.dueDate,
+              },
+            });
+          });
+        })
+      );
+
+      setVodItems(tempVodItems);
+      setAssignItems(tempAssignItems);
+      setQuizItems(tempQuizItems);
+
+      saveDataToStorage('vod', tempVodItems);
+      saveDataToStorage('assign', tempAssignItems);
+      saveDataToStorage('quiz', tempQuizItems);
+
+      setRefreshTime(new Date(currentTime).toLocaleTimeString());
+
+      setRemainingTime(0);
+      localStorage.setItem('lastRequestTime', currentTime.toString());
+      setIsPending(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   const filteredVodData = useMemo(() => {
     return vodItems
@@ -264,7 +318,22 @@ export default function App() {
                     ? '퀴즈 목록'
                     : '오류'}
             </div>
-            <RefreshCw className="rounded-md w-10 h-10 p-1.5 hover:bg-zinc-200" />
+            <div className="flex justify-center items-center">
+              {/* <span className="text-sm text-zinc-400 px-1">{refreshTime}</span> */}
+              <span
+                className={`text-sm px-1 ${Math.round(remainingTime) >= 30 ? 'text-amber-500 font-semibold' : 'text-zinc-400'}`}
+              >
+                {Math.round(remainingTime)}분 전
+              </span>
+              <RefreshCw
+                className="rounded-md w-10 h-10 p-1.5 hover:bg-zinc-200"
+                onClick={() => {
+                  if (isPending) return;
+                  setIsPending(true);
+                  updateData();
+                }}
+              />
+            </div>
           </div>
           <div className="mb-4 flex px-5 relative py-0">
             <Search className="absolute left-9 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -286,9 +355,17 @@ export default function App() {
           </div>
         </div>
         <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full px-5 py-4 overflow-y-scroll h-[400px]">
-          {activeTab === TAB_TYPE.VIDEO && <Video courseData={filteredVodData} />}
-          {activeTab === TAB_TYPE.ASSIGN && <Assign courseData={filteredAssignData} />}
-          {activeTab === TAB_TYPE.QUIZ && <Quiz courseData={filteredQuizData} />}
+          {isPending ? (
+            <div className="flex justify-center items-center h-full">
+              <Spinner className="h-8 w-8" />
+            </div>
+          ) : (
+            <div>
+              {activeTab === TAB_TYPE.VIDEO && <Video courseData={filteredVodData} />}
+              {activeTab === TAB_TYPE.ASSIGN && <Assign courseData={filteredAssignData} />}
+              {activeTab === TAB_TYPE.QUIZ && <Quiz courseData={filteredQuizData} />}
+            </div>
+          )}
         </div>
         <PopoverFooter activeTab={activeTab} setActiveTab={setActiveTab} />
       </PopoverContent>

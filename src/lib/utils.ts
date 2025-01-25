@@ -16,6 +16,11 @@ export function isCurrentDateInRange(dateRange: string) {
 
   return currentDate >= startDate && currentDate <= endDate;
 }
+export function isCurrentDateByDate(date: string) {
+  const endDate = new Date(date);
+  const currentDate = new Date();
+  return currentDate <= endDate;
+}
 
 export function isWithinSevenDays(date: string) {
   const dueDate = new Date(date); // 문자열을 Date 객체로 변환
@@ -43,7 +48,12 @@ export const calculateTimeDifference = (timeRange: string): TimeDifferenceResult
       return { message: `${days}일 후`, borderColor: 'border-amber-500', textColor: 'text-amber-500' };
     } else {
       const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-      return { message: `${hours}시간 후`, borderColor: 'border-red-700', textColor: 'text-red-700' };
+      const minutes = Math.floor(timeDiff / (1000 * 60));
+      return {
+        message: `${hours !== 0 ? `${hours}시간 후` : `${minutes}분 후`}`,
+        borderColor: 'border-red-700',
+        textColor: 'text-red-700',
+      };
     }
   } else {
     return { message: '마감', borderColor: 'border-red-950', textColor: 'text-red-950' };
@@ -66,7 +76,12 @@ export const calculateDueDate = (dueDate: string): TimeDifferenceResult => {
       return { message: `${days}일 후`, borderColor: 'border-amber-500', textColor: 'text-amber-500' };
     } else {
       const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-      return { message: `${hours}시간 후`, borderColor: 'border-red-700', textColor: 'text-red-700' };
+      const minutes = Math.floor(timeDiff / (1000 * 60));
+      return {
+        message: `${hours !== 0 ? `${hours}시간 후` : `${minutes}분 후`}`,
+        borderColor: 'border-red-700',
+        textColor: 'text-red-700',
+      };
     }
   } else {
     return { message: '마감', borderColor: 'border-red-950', textColor: 'text-red-950' };
@@ -74,12 +89,12 @@ export const calculateDueDate = (dueDate: string): TimeDifferenceResult => {
 };
 
 export const formatDateString = (input: string) => {
-  const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}):\d{2} ~ \d{4}-(\d{2})-(\d{2}) (\d{2}:\d{2}):\d{2}/;
+  const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}):\d{2} ~ (\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}):\d{2}/;
 
   const formatted = input.replace(
     regex,
-    (_, year1, month1, day1, time1, month2, day2, time2) =>
-      `${year1.slice(2)}.${month1}.${day1} ${time1} ~ ${year1.slice(2)}.${month2}.${day2} ${time2}`
+    (_, year1, month1, day1, time1, year2, month2, day2, time2) =>
+      `${year1.slice(2)}.${month1}.${day1} ${time1} ~ ${year2.slice(2)}.${month2}.${day2} ${time2}`
   );
 
   return formatted;
