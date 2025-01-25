@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { VodItem } from '../types';
-import {
-  calculateRemainingTimeByRange,
-  calculateTimeDifference,
-  cn,
-  formatDateString,
-  isCurrentDateInRange,
-} from '@/lib/utils';
+import { calculateRemainingTimeByRange, calculateTimeDifference, cn, formatDateString } from '@/lib/utils';
 import { AlarmClock, BadgeCheck, ChevronDown, ChevronUp, Clock, Siren, TriangleAlert } from 'lucide-react';
-import { Spinner } from '@/components/ui/spinner';
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
+import thung from '@/assets/thung.jpg';
 
 interface Props {
   courseData: VodItem[];
@@ -19,14 +15,14 @@ interface Props {
 export default function Video({ courseData }: Props) {
   const [expandedCards, setExpandedCards] = useState<{ [key: string]: boolean }>({});
 
-  if (courseData.length === 0) {
+  if (!courseData || courseData.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner className="h-8 w-8" />
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <img src={thung} width={100} height={100} />
+        <div>과제가 없습니다</div>
       </div>
     );
   }
-
   const toggleCard = (courseId: string) => {
     setExpandedCards((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
   };

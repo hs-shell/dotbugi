@@ -5,15 +5,19 @@ import { Spinner } from '@/components/ui/spinner';
 import { AlarmClock, BadgeCheck, Clock, Siren, TriangleAlert } from 'lucide-react';
 import { Tooltip } from '@radix-ui/react-tooltip';
 import { TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
+import thung from '@/assets/thung.jpg';
 interface Props {
   courseData: AssignItem[];
 }
 export default function Assign({ courseData }: Props) {
-  if (courseData.length === 0)
-    <div className="flex justify-center items-center h-64">
-      <Spinner className="h-8 w-8" />
-    </div>;
+  if (!courseData || courseData.length === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <img src={thung} width={100} height={100} />
+        <div>과제가 없습니다</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -69,7 +73,7 @@ export default function Assign({ courseData }: Props) {
               >
                 {assign.isSubmit ? (
                   <BadgeCheck className="w-5 h-5" strokeWidth={2.5} />
-                ) : timeDifference.message.includes('시간') ? (
+                ) : timeDifference.textColor.includes('red') ? (
                   <Siren className="w-5 h-5 mb-1" strokeWidth={2.5} />
                 ) : (
                   <TriangleAlert className="w-5 h-5" strokeWidth={2.5} />
