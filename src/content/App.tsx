@@ -307,7 +307,7 @@ export default function App() {
         className="bg-white opacity-100 rounded-3xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[350px] h-[550px]"
         side="top"
       >
-        <div className="bg-white w-full rounded-3xl">
+        <div className="bg-white w-full rounded-3xl z-10">
           <div className="w-full flex items-center justify-between px-5 pt-8 pb-6">
             <div className="items-center justify-center font-bold text-3xl">
               {activeTab === TAB_TYPE.VIDEO
@@ -354,7 +354,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full px-5 py-4 overflow-y-scroll h-[400px]">
+        <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full px-5 py-4 overflow-y-scroll overscroll-none h-[400px]">
           {isPending ? (
             <div className="flex justify-center items-center h-full">
               <Spinner className="h-8 w-8" />

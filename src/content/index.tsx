@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import styles from '@/styles/index.css?inline';
+import styles from '@/styles/shadow.css?inline';
 import { createShadowRoot } from '@/lib/createShadowRoot';
 import { ShadowRootContext } from '@/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
