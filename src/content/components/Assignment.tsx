@@ -1,15 +1,15 @@
 import { calculateDueDate, calculateRemainingTime, cn, isWithinSevenDays } from '@/lib/utils';
-import { AssignData, AssignItem } from '../types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
-import { AlarmClock, BadgeCheck, Clock, Siren, TriangleAlert } from 'lucide-react';
+import { BadgeCheck, Clock, Siren, TriangleAlert } from 'lucide-react';
 import { Tooltip } from '@radix-ui/react-tooltip';
 import { TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import thung from '@/assets/thung.jpg';
+import { Assign } from '../types';
+
 interface Props {
-  courseData: AssignItem[];
+  courseData: Assign[];
 }
-export default function Assign({ courseData }: Props) {
+export default function Assignment({ courseData }: Props) {
   if (!courseData || courseData.length === 0) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center">
@@ -22,24 +22,21 @@ export default function Assign({ courseData }: Props) {
   return (
     <div className="space-y-4">
       {courseData.map((course, index) => {
-        const assign = course.data;
-        if (!course.data || !assign) return null;
+        if (!course) return null;
 
         let isDueDateSame = true;
-        const timeDifference = calculateDueDate(assign.dueDate!);
+        const timeDifference = calculateDueDate(course.dueDate!);
 
         return (
           <Card
-            onClick={() => window.open(`${assign.url}`, '_blank')}
+            onClick={() => window.open(`${course.url}`, '_blank')}
             key={`${course.title}-${index}`}
-            className={`cursor-pointer w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${assign.isSubmit ? 'border-green-500' : timeDifference.borderColor} hover:bg-zinc-100 transition-all duration-200`}
+            className={`cursor-pointer w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${course.isSubmit ? 'border-green-500' : timeDifference.borderColor} hover:bg-zinc-100 transition-all duration-200`}
           >
             <CardHeader className={`flex flex-row items-center justify-between p-5 pb-3`}>
               <div className="grid grid-cols-1">
-                <div className="font-semibold text-2xl mb-1">{course.title}</div>
-                <div className="font-light text-lg">
-                  {course.subject} - {assign.title}
-                </div>
+                <div className="font-semibold text-2xl mb-1">{course.courseTitle}</div>
+                <div className="font-light text-lg">{course.title}</div>
               </div>
             </CardHeader>
             <CardFooter className="flex justify-between items-center px-4 py-2 bg-zinc-50 font-medium ">
@@ -65,20 +62,20 @@ export default function Assign({ courseData }: Props) {
                     clipPath: 'inset(0 0 0 0);',
                   }}
                 >
-                  {calculateRemainingTime(assign.dueDate)}
+                  {calculateRemainingTime(course.dueDate)}
                 </TooltipContent>
               </Tooltip>
               <div
-                className={`flex items-center space-x-2 ${assign.isSubmit ? 'text-green-500' : timeDifference.textColor} font-semibold`}
+                className={`flex items-center space-x-2 ${course.isSubmit ? 'text-green-500' : timeDifference.textColor} font-semibold`}
               >
-                {assign.isSubmit ? (
+                {course.isSubmit ? (
                   <BadgeCheck className="w-5 h-5" strokeWidth={2.5} />
                 ) : timeDifference.textColor.includes('red') ? (
                   <Siren className="w-5 h-5 mb-1" strokeWidth={2.5} />
                 ) : (
                   <TriangleAlert className="w-5 h-5" strokeWidth={2.5} />
                 )}
-                <div className="text-base ">{assign.isSubmit ? '제출 완료' : '제출 필요'}</div>
+                <div className="text-base ">{course.isSubmit ? '제출 완료' : '제출 필요'}</div>
               </div>
             </CardFooter>
           </Card>

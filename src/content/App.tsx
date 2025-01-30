@@ -2,30 +2,31 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { useEffect, useMemo, useState } from 'react';
 import Bugi from '@/assets/bugi.png';
 import Close from '@/assets/close.png';
-import Video from './components/Video';
-import Assign from './components/Assign';
-import Quiz from './components/Quiz';
-import { requestData } from '@/lib/fetchCourseData';
-import { AssignItem, CourseBase, Item, QuizItem, TAB_TYPE, VodItem } from './types';
+import { Assign, Item, Quiz, TAB_TYPE, Vod, VodAttendanceData } from './types';
 import { ChevronDown, Filter, RefreshCw, Search } from 'lucide-react';
 import PopoverFooter from './components/PopoverFooter';
-import { isCurrentDateByDate, isCurrentDateInRange, isWithinSevenDays } from '@/lib/utils';
 import { Spinner } from '@/components/ui/spinner';
 import { loadDataFromStorage, saveDataToStorage } from './storage';
+import { useGetCourses } from '@/hooks/useGetCourse';
+import { requestData } from '@/lib/fetchCourseData';
+import Video from './components/Video';
+import Assignment from './components/Assignment';
+import QuizTab from './components/QuizTab';
+import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
 
 export default function App() {
-  const [courseData, setCourseData] = useState<CourseBase[]>([]);
+  const { courses } = useGetCourses();
 
-  const [vodItems, setVodItems] = useState<VodItem[]>([]);
-  const [assignItems, setAssignItems] = useState<AssignItem[]>([]);
-  const [quizItems, setQuizItems] = useState<QuizItem[]>([]);
+  const [vods, setVods] = useState<Vod[]>([]);
+  const [assigns, setAssigns] = useState<Assign[]>([]);
+  const [quizes, setQuizes] = useState<Quiz[]>([]);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_TYPE.VIDEO);
   const [isOpen, setIsOpen] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [vodSortBy, setVodSortBy] = useState<keyof Item>('title');
-  const [assignSortBy, setAssignSortBy] = useState<keyof Item>('isCompleted');
+  const [assignSortBy, setAssignSortBy] = useState<keyof Item>('title');
   const [quizSortBy, setQuizSortBy] = useState<keyof Item>('title');
 
   const [refreshTime, setRefreshTime] = useState<string | null>();
@@ -47,33 +48,13 @@ export default function App() {
   }, [remainingTime]);
 
   useEffect(() => {
-    if (!document) return;
-    const courses = Array.from(document.querySelectorAll('.course_box'));
-    const data = courses
-      .map((div) => {
-        const a = div.querySelector('a');
-        const url = new URL((a as HTMLAnchorElement).href);
-        const urlParams = new URLSearchParams(url.search);
-        const courseId = urlParams.get('id') || '';
-        const titleSection = div.querySelector('.course_link .course-name .course-title');
-        const prof = titleSection?.querySelector('p')?.textContent?.trim() || '';
-        const title = titleSection?.querySelector('h1, h2, h3')?.textContent?.replace(/new/i, '').trim() || '';
-        return { courseId, title, prof };
-      })
-      .filter((item) => item.courseId !== '' && item.title !== '' && item.prof !== '');
-    setCourseData(data);
-  }, []);
+    if (!courses || courses.length === 0) return;
 
-  useEffect(() => {
-    if (!courseData || courseData.length === 0) return;
-
-    // 1시간 이내 요청 제한
     const lastRequestTime = localStorage.getItem('lastRequestTime');
     const currentTime = new Date().getTime();
     const oneHour = 60 * 60 * 1000;
 
     if (lastRequestTime) setRefreshTime(new Date(parseInt(lastRequestTime, 10)).toLocaleTimeString());
-
     if (!lastRequestTime || currentTime - parseInt(lastRequestTime, 10) >= oneHour) {
       setIsPending(true);
       updateData();
@@ -81,30 +62,28 @@ export default function App() {
       const minutes = (currentTime - parseInt(lastRequestTime, 10)) / (60 * 1000);
       setRemainingTime(minutes);
       loadDataFromStorage('vod', (data) => {
-        setVodItems(
-          (data as VodItem[]).filter((vod) => {
-            return !vod.data.items.some((item) => {
-              isCurrentDateInRange(item.range);
-            });
+        setVods(
+          (data as Vod[]).filter((vod) => {
+            return isCurrentDateInRange(vod.range);
           })
         );
       });
       loadDataFromStorage('assign', (data) => {
-        setAssignItems(
-          (data as AssignItem[]).filter((assign) => {
-            return isCurrentDateByDate(assign.data.dueDate);
+        setAssigns(
+          (data as Assign[]).filter((assign) => {
+            return isCurrentDateByDate(assign.dueDate);
           })
         );
       });
       loadDataFromStorage('quiz', (data) => {
-        setQuizItems(
-          (data as QuizItem[]).filter((quiz) => {
-            return isCurrentDateByDate(quiz.data.dueDate);
+        setQuizes(
+          (data as Quiz[]).filter((quiz) => {
+            return isCurrentDateByDate(quiz.dueDate);
           })
         );
       });
     }
-  }, [courseData]);
+  }, [courses]);
 
   useEffect(() => {
     setSearchTerm('');
@@ -113,73 +92,77 @@ export default function App() {
   const updateData = async () => {
     try {
       const currentTime = new Date().getTime();
-      setVodItems([]);
-      setAssignItems([]);
-      setQuizItems([]);
+      setVods([]);
+      setAssigns([]);
+      setQuizes([]);
 
-      const tempVodItems: VodItem[] = [];
-      const tempAssignItems: AssignItem[] = [];
-      const tempQuizItems: QuizItem[] = [];
+      const tempVods: Vod[] = [];
+      const tempAssigns: Assign[] = [];
+      const tempQuizes: Quiz[] = [];
 
       await Promise.all(
-        courseData.map(async (item) => {
-          const result = await requestData(item.courseId);
-          const vodItem = result.vodData.filter((data) => {
-            return data.items.some((item) => isCurrentDateInRange(item.range!));
-          });
-          const assignItem = result.assignData.filter((data) => {
-            return isWithinSevenDays(data.dueDate!);
-          });
-          const quizItem = result.quizData.filter((data) => {
-            return isWithinSevenDays(data.dueDate!);
-          });
-
-          vodItem.forEach((data, index) => {
-            tempVodItems.push({
-              courseId: item.courseId,
-              title: item.title,
-              prof: item.prof,
-              subject: data.subject,
-              data: {
-                items: data.items,
-                isAttendance: data.isAttendance,
-              },
-            });
-          });
-
-          assignItem.forEach((data, index) => {
-            tempAssignItems.push({
-              courseId: item.courseId,
-              prof: item.prof,
-              title: item.title,
-              subject: data.subject,
-              data: { title: data.title, url: data.url, dueDate: data.dueDate, isSubmit: data.isSubmit },
-            });
+        courses.map(async (course, index) => {
+          const result = await requestData(course.courseId);
+          result.vodDataArray.map((vodData) => {
+            if (isCurrentDateInRange(vodData.range)) {
+              result.vodAttendanceArray.map((vodAttendanceData, index) => {
+                if (vodAttendanceData.title === vodData.title && vodAttendanceData.week === vodData.week) {
+                  tempVods.push({
+                    courseId: course.courseId,
+                    prof: course.prof,
+                    courseTitle: course.courseTitle,
+                    week: vodAttendanceData.week,
+                    title: vodAttendanceData.title,
+                    isAttendance: vodAttendanceData.isAttendance,
+                    weeklyAttendance: vodAttendanceData.weeklyAttendance,
+                    length: vodData.length,
+                    range: vodData.range,
+                    subject: vodData.subject,
+                    url: vodData.url,
+                  });
+                }
+              });
+            }
           });
 
-          quizItem.forEach((data, index) => {
-            tempQuizItems.push({
-              courseId: item.courseId,
-              prof: item.prof,
-              title: item.title,
-              subject: data.subject,
-              data: {
-                title: data.title,
-                url: data.url,
-                dueDate: data.dueDate,
-              },
-            });
+          result.assignDataArray.map((assignData) => {
+            if (isCurrentDateByDate(assignData.dueDate)) {
+              tempAssigns.push({
+                courseId: course.courseId,
+                prof: course.prof,
+                courseTitle: course.courseTitle,
+                subject: assignData.subject,
+                title: assignData.title,
+                dueDate: assignData.dueDate,
+                isSubmit: assignData.isSubmit,
+                url: assignData.url,
+              });
+            }
+          });
+
+          result.quizDataArray.map((quizData) => {
+            if (isCurrentDateByDate(quizData.dueDate)) {
+              tempQuizes.push({
+                courseId: course.courseId,
+                prof: course.prof,
+                courseTitle: course.courseTitle,
+                subject: quizData.subject,
+                title: quizData.title,
+                dueDate: quizData.dueDate,
+                url: quizData.url,
+              });
+            }
           });
         })
       );
 
-      setVodItems(tempVodItems);
-      setAssignItems(tempAssignItems);
-      setQuizItems(tempQuizItems);
+      setVods(tempVods);
+      setAssigns(tempAssigns);
+      setQuizes(tempQuizes);
 
-      saveDataToStorage('vod', tempVodItems);
-      saveDataToStorage('assign', tempAssignItems);
-      saveDataToStorage('quiz', tempQuizItems);
+      saveDataToStorage('vod', tempVods);
+      saveDataToStorage('assign', tempAssigns);
+      saveDataToStorage('quiz', tempQuizes);
 
       setRefreshTime(new Date(currentTime).toLocaleTimeString());
 
@@ -192,99 +175,58 @@ export default function App() {
   };
 
   const filteredVodData = useMemo(() => {
-    return vodItems
-      .filter((item) => {
-        return (
-          searchTerm === '' ||
-          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      })
-      .sort((a, b) => {
-        switch (vodSortBy) {
-          case 'title': {
-            return a.title.localeCompare(b.title);
-          }
-          case 'dueDate': {
-            const aRange = a.data?.items[0]?.range;
-            const bRange = b.data?.items[0]?.range;
-            if (!aRange || !bRange) return 0;
-            return new Date(aRange).getTime() - new Date(bRange).getTime();
-          }
-          default: {
-            const aAttendance = a.data.isAttendance;
-            const bAttendance = b.data.isAttendance;
-
-            if (aAttendance === false && bAttendance !== false) return -1;
-            if (bAttendance === false && aAttendance !== false) return 1;
-
-            return a.title.localeCompare(b.title);
-          }
-        }
-      });
-  }, [searchTerm, vodSortBy, vodItems]);
+    return vods.filter((item) => {
+      return (
+        searchTerm === '' ||
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+    // .sort((a, b) => {
+    // });
+  }, [searchTerm, vodSortBy, vods]);
 
   const filteredAssignData = useMemo(() => {
-    return assignItems
-      .filter((item) => {
-        return (
-          searchTerm === '' ||
-          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      })
-      .sort((a, b) => {
-        switch (assignSortBy) {
-          case 'title': {
-            return a.title.localeCompare(b.title);
-          }
-          case 'dueDate': {
-            if (!a.data.dueDate || !b.data.dueDate) return 0;
-            return new Date(a.data.dueDate).getTime() - new Date(b.data.dueDate).getTime();
-          }
-          case 'isCompleted': {
-            if (a.data.isSubmit === false && b.data.isSubmit !== false) return -1;
-            if (b.data.isSubmit === false && a.data.isSubmit !== false) return 1;
-            return a.title.localeCompare(b.title);
-          }
-          default: {
-            if (a.data.isSubmit === false && b.data.isSubmit !== false) return -1;
-            if (b.data.isSubmit === false && a.data.isSubmit !== false) return 1;
-            return a.title.localeCompare(b.title);
-          }
-        }
-      });
-  }, [searchTerm, assignSortBy, assignItems]);
+    return assigns.filter((item) => {
+      return (
+        searchTerm === '' ||
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+    // .sort((a, b) => {
+
+    // });
+  }, [searchTerm, assignSortBy, assigns]);
 
   const filteredQuizData = useMemo(() => {
-    return quizItems
-      .filter((item) => {
-        return (
-          searchTerm === '' ||
-          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      })
-      .sort((a, b) => {
-        switch (quizSortBy) {
-          case 'title': {
-            if (a.title < b.title) return -1;
-            if (a.title > b.title) return 1;
-            return 0;
-          }
-          case 'dueDate': {
-            if (a.data! < b.data!) return -1;
-            if (a.data! > b.data!) return 1;
-            return 0;
-          }
-          default: {
-            if (a.title < b.title) return -1;
-            if (a.title > b.title) return 1;
-            return 0;
-          }
-        }
-      });
-  }, [searchTerm, quizSortBy, quizItems]);
+    return quizes.filter((item) => {
+      return (
+        searchTerm === '' ||
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+    // .sort((a, b) => {
+    //   switch (quizSortBy) {
+    //     case 'title': {
+    //       if (a.title < b.title) return -1;
+    //       if (a.title > b.title) return 1;
+    //       return 0;
+    //     }
+    //     case 'dueDate': {
+    //       if (a.data! < b.data!) return -1;
+    //       if (a.data! > b.data!) return 1;
+    //       return 0;
+    //     }
+    //     default: {
+    //       if (a.title < b.title) return -1;
+    //       if (a.title > b.title) return 1;
+    //       return 0;
+    //     }
+    //   }
+    // });
+  }, [searchTerm, quizSortBy, quizes]);
 
   return (
     <Popover open={isOpen}>
@@ -362,8 +304,8 @@ export default function App() {
           ) : (
             <div>
               {activeTab === TAB_TYPE.VIDEO && <Video courseData={filteredVodData} />}
-              {activeTab === TAB_TYPE.ASSIGN && <Assign courseData={filteredAssignData} />}
-              {activeTab === TAB_TYPE.QUIZ && <Quiz courseData={filteredQuizData} />}
+              {activeTab === TAB_TYPE.ASSIGN && <Assignment courseData={filteredAssignData} />}
+              {activeTab === TAB_TYPE.QUIZ && <QuizTab courseData={filteredQuizData} />}
             </div>
           )}
         </div>
