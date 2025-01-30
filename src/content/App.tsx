@@ -485,7 +485,7 @@ export default function App() {
               </button>
             </div>
           </div>
-          <div className="mb-4 flex px-5 relative py-0">
+          <div className="mb-2 flex px-5 relative py-0">
             <Search className="absolute left-9 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
@@ -496,9 +496,8 @@ export default function App() {
               className="bg-zinc-50 rounded-xl border border-zinc-300 w-full text-lg h-12 pl-12 pr-4 placeholder-gray-400 font-medium py-0 outline-none focus:ring-0 focus:border-zinc-300 focus:bg-slate-50 transition-all duration-200"
             />
           </div>
-          <div className="flex w-full items-center pl-5">
-            {/* 스크롤 가능한 필터 배지 영역 */}
-            <div className="flex-1 flex space-x-2 overflow-x-scroll flex-nowrap min-w-0">
+          <div className="flex w-full items-center pl-5 my-1">
+            <div className="whitespace-nowrap space-x-2 overflow-x-auto flex-1 min-w-0 flex overscroll-none">
               {filters[activeTab].courseTitles.map((title) => (
                 <FilterBadge key={`course-${title}`} label={title} onRemove={() => handleCourseTitleChange(title)} />
               ))}
