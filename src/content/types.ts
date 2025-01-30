@@ -1,80 +1,46 @@
 export type CourseBase = {
   courseId: string;
-  title: string;
+  courseTitle: string;
   prof: string;
 };
 
-export type VodData = CourseBase & {
-  subject: string;
-  data: {
-    items: {
-      title: string;
-      url: string;
-      range: string;
-      length: string;
-    }[];
-    isAttendance: boolean | null;
-  }[];
-};
+export type Vod = CourseBase & VodDetail;
 
-export type VodItem = {
-  courseId: string;
+export type VodDetail = VodData & VodAttendanceData;
+
+export type VodData = {
+  week: number;
+  subject: string;
   title: string;
-  prof: string;
-  subject: string;
-  data: {
-    items: {
-      title: string;
-      url: string;
-      range: string;
-      length: string;
-    }[];
-    isAttendance: boolean | null;
-  };
+  url: string;
+  range: string;
+  length: string;
 };
 
-export type AssignData = CourseBase & {
-  subject: string;
-  data: {
-    title: string;
-    url: string;
-    isSubmit: boolean;
-    dueDate: string;
-  }[];
-};
-
-export type AssignItem = {
-  courseId: string;
+export interface VodAttendanceData {
   title: string;
-  prof: string;
-  subject: string;
-  data: {
-    title: string;
-    url: string;
-    isSubmit: boolean;
-    dueDate: string;
-  };
-};
+  isAttendance: string;
+  weeklyAttendance: string;
+  week: number;
+}
 
-export type QuizData = CourseBase & {
-  subject: string;
-  data: {
-    title: string;
-    url: string;
-    dueDate: string;
-  }[];
-};
+export type Assign = CourseBase & AssignData;
 
-export type QuizItem = {
-  courseId: string;
+export type AssignData = {
+  subject: string;
   title: string;
-  prof: string;
+  url: string;
+  isSubmit: boolean;
+  dueDate: string;
+};
+
+export type Quiz = CourseBase & QuizData;
+
+export type QuizData = {
   subject: string;
-  data: {
-    title: string;
-    url: string;
-    dueDate: string;
-  };
+  title: string;
+  url: string;
+  dueDate: string;
 };
 
 export type TimeDifferenceResult = {

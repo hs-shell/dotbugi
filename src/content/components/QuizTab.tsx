@@ -1,44 +1,43 @@
 import { calculateDueDate, calculateRemainingTime, isWithinSevenDays } from '@/lib/utils';
-import { QuizItem } from '../types';
+import { Quiz } from '../types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { AlarmClock, Clock, Siren, TriangleAlert } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import thung from '@/assets/thung.jpg';
+
 interface Props {
-  courseData: QuizItem[];
+  courseData: Quiz[];
 }
 
-export default function Quiz({ courseData }: Props) {
+export default function QuizTab({ courseData }: Props) {
   if (!courseData || courseData.length === 0) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center">
         <img src={thung} width={100} height={100} />
-        <div>과제가 없습니다</div>
+        <div>퀴즈가 없습니다</div>
       </div>
     );
   }
+
   return (
     <div className="space-y-4">
       {courseData.map((course, index) => {
-        const quiz = course.data;
-        if (!course.data || !quiz) return null;
+        if (!course) return null;
 
         let isDueDateSame = true;
-        const timeDifference = calculateDueDate(quiz.dueDate!);
+        const timeDifference = calculateDueDate(course.dueDate!);
 
         return (
           <Card
-            onClick={() => window.open(`${quiz.url}`, '_blank')}
+            onClick={() => window.open(`${course.url}`, '_blank')}
             key={`${course.title}-${index}`}
             className={`cursor-pointer w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${timeDifference.borderColor} hover:bg-zinc-100 transition-all duration-200`}
           >
             <CardHeader className={`flex flex-row items-center justify-between p-5 pb-3`}>
               <div className="grid grid-cols-1">
-                <div className="font-semibold text-2xl mb-1">{course.title}</div>
-                <div className="font-light text-lg">
-                  {course.subject} - {quiz.title}
-                </div>
+                <div className="font-semibold text-2xl mb-1">{course.courseTitle}</div>
+                <div className="font-light text-lg">{course.title}</div>
               </div>
             </CardHeader>
             <CardFooter className="flex justify-between items-center px-4 py-2 bg-zinc-50 font-medium">
@@ -63,7 +62,7 @@ export default function Quiz({ courseData }: Props) {
                     paddingRight: '4px',
                   }}
                 >
-                  {calculateRemainingTime(quiz.dueDate)}
+                  {calculateRemainingTime(course.dueDate)}
                 </TooltipContent>
               </Tooltip>
               <div className={`flex items-center space-x-2 ${timeDifference.textColor} font-semibold`}>
