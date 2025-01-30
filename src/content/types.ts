@@ -56,8 +56,14 @@ export interface Item {
   isCompleted: boolean;
 }
 
-export const TAB_TYPE = {
-  VIDEO: 'VIDEO',
-  ASSIGN: 'ASSIGN',
-  QUIZ: 'QUIZ',
-} as const;
+export interface Filters {
+  courseTitles: string[];
+  attendanceStatuses?: string[]; // Vods용
+  submitStatuses?: boolean[]; // Assigns용
+}
+
+export enum TAB_TYPE {
+  VIDEO = 'VIDEO',
+  ASSIGN = 'ASSIGN',
+  QUIZ = 'QUIZ',
+}
