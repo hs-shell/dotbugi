@@ -33,17 +33,17 @@ export default function Quiz({ courseData }: Props) {
             key={`${course.title}-${index}`}
             className={`cursor-pointer w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${timeDifference.borderColor} hover:bg-zinc-100 transition-all duration-200`}
           >
-            <CardHeader className={`flex flex-row items-center justify-between p-4 pb-2`}>
+            <CardHeader className={`flex flex-row items-center justify-between p-5 pb-3`}>
               <div className="grid grid-cols-1">
                 <div className="font-semibold text-2xl mb-1">{course.title}</div>
-                <div className="font-light text-base">
+                <div className="font-light text-lg">
                   {course.subject} - {quiz.title}
                 </div>
               </div>
             </CardHeader>
             <CardFooter className="flex justify-between items-center px-4 py-2 bg-zinc-50 font-medium">
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger className="bg-transparent">
                   <div className="flex items-center space-x-2">
                     <Clock className="w-5 h-5" strokeWidth={2} />
                     <span className={`text-base items-center`}>

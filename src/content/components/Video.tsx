@@ -43,12 +43,12 @@ export default function Video({ courseData }: Props) {
             className={`w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${vods.isAttendance ? 'border-green-500' : timeDifference.borderColor}`}
           >
             <CardHeader
-              className={`cursor-pointer flex flex-row items-center justify-between p-4 pb-2  hover:bg-zinc-100 transition-all duration-200`}
+              className={`cursor-pointer flex flex-row items-center justify-between px-5 pt-5 pb-3  hover:bg-zinc-100  transition-all duration-100 ${isExpanded && 'shadow-2xl shadow-zinc-950'}`}
               onClick={() => toggleCard(`${course.title}-${index}`)}
             >
               <div className="grid grid-cols-1">
                 <div className="font-semibold text-2xl mb-1">{course.title}</div>
-                <div className="font-light text-base">{course.subject}</div>
+                <div className="font-light text-lg">{course.subject}</div>
               </div>
               {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </CardHeader>
@@ -59,11 +59,13 @@ export default function Video({ courseData }: Props) {
                   return (
                     <div
                       key={vodIndex}
-                      className="w-full px-4 py-1 hover:bg-zinc-100 cursor-pointer"
+                      className="w-full px-4 py-3 bg-[rgb(246,250,255)] hover:bg-[rgb(238,246,255)] cursor-pointer transition-colors duration-300"
                       onClick={() => window.open(`${vod.url.replace('view', 'viewer')}`, '_blank', 'VodContentWindow')}
                     >
-                      <div className="font-medium text-xl">{vod.title}</div>
-                      <div className="text-sm font-light text-gray-400">
+                      <div className="font-medium" style={{ fontWeight: 550 }}>
+                        {vod.title}
+                      </div>
+                      <div className="font-light text-zinc-500" style={{ fontSize: 10 }}>
                         {formatDateString(vod.range)}, {vod.length}
                       </div>
                     </div>
@@ -71,11 +73,10 @@ export default function Video({ courseData }: Props) {
                 })}
               </CardContent>
             )}
-            <CardFooter className="flex justify-between items-center px-4 py-2 bg-zinc-50 font-medium">
+            <CardFooter className="flex justify-between items-center px-4 py-2 bg-[rgb(246,246,247)] font-medium">
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger className="bg-transparent">
                   <div className="flex items-center space-x-2">
-                    {/* 제일 최소인 값으로 변경 */}
                     <Clock className="w-5 h-5" strokeWidth={2} />
                     <span className={`text-base items-center`}>
                       {isDueDateSame ? timeDifference.message : '확인 필요'}
@@ -85,7 +86,6 @@ export default function Video({ courseData }: Props) {
                 <TooltipContent
                   style={{
                     backgroundColor: 'rgba(24, 24, 27, 0.6)',
-                    opacity: 60,
                     borderRadius: '4px',
                     fontSize: '11px',
                     paddingTop: '1px',
