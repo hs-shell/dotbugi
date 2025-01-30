@@ -4,7 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import { defineConfig } from 'vite';
 
-import manifest from './public/manifest.config';
+import manifest from './manifest.config';
 
 export default defineConfig({
   base: './',
