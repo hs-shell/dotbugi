@@ -3,7 +3,7 @@ import { TAB_TYPE } from '../types';
 
 interface Prop {
   activeTab: string;
-  setActiveTab: (tabType: string) => void;
+  setActiveTab: (tabType: TAB_TYPE) => void;
 }
 
 export default function PopoverFooter({ activeTab, setActiveTab }: Prop) {
