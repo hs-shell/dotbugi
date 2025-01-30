@@ -39,7 +39,7 @@ export default function Video({ courseData }: Props) {
         return (
           <Card
             key={`${course.title}-${index}`}
-            className={`w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${course.isAttendance ? 'border-green-500' : timeDifference.borderColor}`}
+            className={`w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${course.isAttendance.toLocaleLowerCase().trim() === 'o' ? 'border-green-500' : timeDifference.borderColor}`}
           >
             <CardHeader
               className={`cursor-pointer flex flex-row items-center justify-between px-5 pt-5 pb-3  hover:bg-zinc-100  transition-all duration-100 ${isExpanded && 'shadow-2xl shadow-zinc-950'}`}
@@ -98,10 +98,10 @@ export default function Video({ courseData }: Props) {
                 </TooltipContent>
               </Tooltip>
               <div
-                className={`flex items-center space-x-2 ${course.isAttendance ? 'text-green-500' : timeDifference.textColor} font-semibold`}
+                className={`flex items-center space-x-2 ${course.isAttendance.toLocaleLowerCase().trim() === 'o' ? 'text-green-500' : timeDifference.textColor} font-semibold`}
               >
                 <div>
-                  {course.isAttendance ? (
+                  {course.isAttendance.toLocaleLowerCase().trim() === 'o' ? (
                     <BadgeCheck className="w-5 h-5" strokeWidth={2.5} />
                   ) : timeDifference.message.includes('시간') ? (
                     <Siren className="w-5 h-5 mb-1" strokeWidth={2.5} />
@@ -109,7 +109,9 @@ export default function Video({ courseData }: Props) {
                     <TriangleAlert className="w-5 h-5" strokeWidth={2.5} />
                   )}
                 </div>
-                <div className="text-base">{course.isAttendance ? '출석' : '결석'}</div>
+                <div className="text-base">
+                  {course.isAttendance.toLocaleLowerCase().trim() === 'o' ? '출석' : '결석'}
+                </div>
               </div>
             </CardFooter>
           </Card>

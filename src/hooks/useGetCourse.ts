@@ -23,7 +23,11 @@ export const useGetCourses = (): UseCouresResult => {
     //   })
     //   .filter((item) => item.courseId !== '' && item.courseTitle !== '' && item.prof !== '');
     // setCourses(data);
-    setCourses([{ courseId: '32153', courseTitle: '프로그래밍언어론', prof: '김성동' }]);
+    setCourses([
+      { courseId: '32153', courseTitle: '프로그래밍언어론', prof: '김성동' },
+      { courseId: '36786', courseTitle: '운영체제[A,B,7,8]', prof: '황기태' },
+      { courseId: '36821', courseTitle: '데이터베이스[B,C]', prof: '김영웅' },
+    ]);
   }, []);
 
   return { courses };
