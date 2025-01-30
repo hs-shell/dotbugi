@@ -16,7 +16,7 @@ const FilterItem: React.FC<FilterItemProps> = ({ id, label, checked, onChange })
         id={id}
         checked={checked}
         onChange={onChange}
-        className="shadow-md rounded-lg peer h-7 w-7 cursor-pointer appearance-none border border-zinc-800 bg-white checked:border-primary checked:bg-primary focus:outline-none focus:ring-1 focus:ring-primary focus:ring-offset-0"
+        className="shadow-md rounded-lg peer h-7 w-7 cursor-pointer appearance-none border border-zinc-800 bg-white checked:border-primary checked:bg-primary focus:outline-none focus:ring-primary focus:ring-offset-0"
       />
       <svg
         className="pointer-events-none absolute h-5 w-5 text-white opacity-0 peer-checked:opacity-100"
