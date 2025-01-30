@@ -13,6 +13,7 @@ permissions:
 jobs:
   bump-version:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true # PR이 병합된 경우에만 실행
 
     steps:
       # 1단계: 리포지토리 체크아웃
@@ -63,7 +64,14 @@ jobs:
         run: |
           echo "PR 라벨: ${{ steps.get_labels.outputs.result }}"
 
-      # 7단계: 다음 버전 결정
+      # 7단계: 파일 존재 확인 및 목록 출력
+      - name: List files to verify manifest.config.ts
+        run: |
+          echo "현재 작업 디렉토리: $(pwd)"
+          ls -al
+          find . -name "manifest.config.ts"
+
+      # 8단계: 다음 버전 결정
       - name: 다음 버전 결정
         id: version
         run: |
@@ -119,7 +127,7 @@ jobs:
           # 출력 설정
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      # 8단계: package.json 및 manifest.config.ts 버전 업데이트
+      # 9단계: package.json 및 manifest.config.ts 버전 업데이트
       - name: package.json 및 manifest.config.ts 버전 업데이트
         run: |
           NEW_VERSION=${{ steps.version.outputs.new_version }}
@@ -130,13 +138,18 @@ jobs:
           npm version $NEW_VERSION --no-git-tag-version
 
           # manifest.config.ts 업데이트
-          echo "manifest.config.ts를 버전 $NEW_VERSION으로 업데이트합니다."
-          sed -i "s/\(version: '\)[0-9]\+\.[0-9]\+\.[0-9]\+'/\1$NEW_VERSION'/" manifest.config.ts
+          FILE_PATH="manifest.config.ts"
+          if [ -f "$FILE_PATH" ]; then
+            echo "manifest.config.ts를 버전 $NEW_VERSION으로 업데이트합니다."
+            sed -i "s/\(version: '\)[0-9]\+\.[0-9]\+\.[0-9]\+'/\1$NEW_VERSION'/" "$FILE_PATH"
+            echo "🔄 업데이트된 manifest.config.ts 내용:"
+            cat "$FILE_PATH"
+          else
+            echo "❌ manifest.config.ts 파일을 찾을 수 없습니다!"
+            exit 1
+          fi
 
-          echo "🔄 업데이트된 manifest.config.ts 내용:"
-          cat manifest.config.ts
-
-      # 9단계: 변경 사항 커밋 및 푸시
+      # 10단계: 변경 사항 커밋 및 푸시
       - name: 변경 사항 커밋 및 푸시
         run: |
           git config user.name "github-actions[bot]"
@@ -145,14 +158,14 @@ jobs:
           git commit -m "🔖 chore: bump version to v${{ steps.version.outputs.new_version }}"
           git push origin main
 
-      # 10단계: 새 태그 생성 및 푸시
+      # 11단계: 새 태그 생성 및 푸시
       - name: 새 태그 생성 및 푸시
         run: |
           NEW_VERSION=${{ steps.version.outputs.new_version }}
           git tag -a v$NEW_VERSION -m "Release v$NEW_VERSION"
           git push origin v$NEW_VERSION
 
-      # 11단계: 릴리스 생성
+      # 12단계: 릴리스 생성
       - name: 릴리스 생성
         uses: actions/create-release@v1
         env:
