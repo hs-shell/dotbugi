@@ -37,7 +37,7 @@ export const calculateTimeDifference = (timeRange: string): TimeDifferenceResult
   const endDate = new Date(endString);
 
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    return { message: 'Invalid date format', borderColor: 'gray', textColor: 'black' };
+    return { message: 'Invalid date format', borderColor: 'gray', borderLeftColor: 'gray', textColor: 'black' };
   }
 
   if (now < endDate) {
@@ -45,18 +45,29 @@ export const calculateTimeDifference = (timeRange: string): TimeDifferenceResult
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
     if (days >= 1) {
-      return { message: `${days}일 후`, borderColor: 'border-amber-500', textColor: 'text-amber-500' };
+      return {
+        message: `${days}일 후`,
+        borderColor: 'border-amber-500',
+        borderLeftColor: 'border-l-amber-500',
+        textColor: 'text-amber-500',
+      };
     } else {
       const hours = Math.floor(timeDiff / (1000 * 60 * 60));
       const minutes = Math.floor(timeDiff / (1000 * 60));
       return {
         message: `${hours !== 0 ? `${hours}시간 후` : `${minutes}분 후`}`,
         borderColor: 'border-red-700',
+        borderLeftColor: 'border-l-red-700',
         textColor: 'text-red-700',
       };
     }
   } else {
-    return { message: '마감', borderColor: 'border-red-950', textColor: 'text-red-950' };
+    return {
+      message: '마감',
+      borderColor: 'border-red-950',
+      borderLeftColor: 'border-l-red-950',
+      textColor: 'text-red-950',
+    };
   }
 };
 
@@ -65,7 +76,7 @@ export const calculateDueDate = (dueDate: string): TimeDifferenceResult => {
   const endDate = new Date(dueDate);
 
   if (isNaN(endDate.getTime())) {
-    return { message: 'Invalid date format', borderColor: 'gray', textColor: 'black' };
+    return { message: 'Invalid date format', borderColor: 'gray', borderLeftColor: 'gray', textColor: 'black' };
   }
 
   if (now < endDate) {
@@ -73,18 +84,29 @@ export const calculateDueDate = (dueDate: string): TimeDifferenceResult => {
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
     if (days >= 1) {
-      return { message: `${days}일 후`, borderColor: 'border-amber-500', textColor: 'text-amber-500' };
+      return {
+        message: `${days}일 후`,
+        borderColor: 'border-amber-500',
+        borderLeftColor: 'border-l-amber-500',
+        textColor: 'text-amber-500',
+      };
     } else {
       const hours = Math.floor(timeDiff / (1000 * 60 * 60));
       const minutes = Math.floor(timeDiff / (1000 * 60));
       return {
         message: `${hours !== 0 ? `${hours}시간 후` : `${minutes}분 후`}`,
         borderColor: 'border-red-700',
+        borderLeftColor: 'border-l-red-700',
         textColor: 'text-red-700',
       };
     }
   } else {
-    return { message: '마감', borderColor: 'border-red-950', textColor: 'text-red-950' };
+    return {
+      message: '마감',
+      borderColor: 'border-red-950',
+      borderLeftColor: 'border-l-red-950',
+      textColor: 'text-red-950',
+    };
   }
 };
 
@@ -110,6 +132,7 @@ export const calculateRemainingTimeByRange = (range: string) => {
   const daysLeft = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
   const hoursLeft = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutesLeft = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
   return `${daysLeft === 0 ? '' : daysLeft + '일'} ${hoursLeft === 0 ? '' : hoursLeft + '시간'} ${minutesLeft}분 남음`;
 };
 
@@ -123,5 +146,10 @@ export const calculateRemainingTime = (endTime: string) => {
   const hoursLeft = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutesLeft = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
+  if (daysLeft < 0 || hoursLeft < 0 || minutesLeft < 0) return `마감`;
   return `${daysLeft === 0 ? '' : daysLeft + '일'} ${hoursLeft === 0 ? '' : hoursLeft + '시간'} ${minutesLeft}분 남음`;
+};
+
+export const removeSquareBrackets = (str: string) => {
+  return str.replace(/\[[^\]]*\]/g, '');
 };

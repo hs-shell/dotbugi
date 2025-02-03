@@ -46,6 +46,7 @@ export type QuizData = {
 export type TimeDifferenceResult = {
   message: string;
   borderColor: string;
+  borderLeftColor: string;
   textColor: string;
 };
 

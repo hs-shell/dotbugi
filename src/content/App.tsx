@@ -7,7 +7,7 @@ import { ListFilter, RefreshCw, Search } from 'lucide-react';
 import filter from '@/assets/filter.svg';
 import PopoverFooter from './components/PopoverFooter';
 import { Spinner } from '@/components/ui/spinner';
-import { loadDataFromStorage, saveDataToStorage } from './storage';
+import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { useGetCourses } from '@/hooks/useGetCourse';
 import { requestData } from '@/lib/fetchCourseData';
 import Video from './components/Video';
