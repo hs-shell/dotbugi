@@ -7,13 +7,15 @@ import { BadgeCheck, Siren, TriangleAlert, Video, X } from 'lucide-react';
 import { calculateRemainingTimeByRange, calculateTimeDifference, formatDateString } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type React from 'react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 
 interface ModalProps {
   vodList: Vod[];
   onClose: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProps) => {
+const CourseDetailModal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [showRemainingTime, setShowRemainingTime] = useState(false);
 
@@ -29,7 +31,7 @@ const Modal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProps) => {
     if (showRemainingTime) {
       timer = setTimeout(() => {
         setShowRemainingTime(false);
-      }, 5000); // 5초 후에 원래 상태로 돌아갑니다
+      }, 5000);
     }
     return () => clearTimeout(timer);
   }, [showRemainingTime]);
@@ -100,20 +102,30 @@ const Modal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProps) => {
               })}
             </div>
           </ScrollArea>
-          <div className="w-full flex flex-col items-start mt-4 space-y-2">
-            <button
-              className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-300 ease-in-out ${
-                showRemainingTime ? 'bg-red-100 text-red-700' : 'bg-zinc-100 text-zinc-600'
-              }`}
-              onClick={toggleRemainingTime}
-            >
-              <span className={`transition-all duration-300 ${showRemainingTime ? 'scale-0' : 'scale-100'}`}>
-                출석인정기간: {formatDateString(vodList[0].range)}
-              </span>
-              <span className={`absolute transition-all duration-300 ${showRemainingTime ? 'scale-100' : 'scale-0'}`}>
-                {timeDifference.message}
-              </span>
-            </button>
+          <div className="w-full flex flex-col items-start mt-2 space-y-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="bg-transparent">
+                  <Badge variant="secondary" className="font-semibold hover:bg-zinc-200 py-1">
+                    출석인정기간 : {formatDateString(vodList[0].range)}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent
+                  style={{
+                    backgroundColor: 'rgba(24, 24, 27, 0.6)',
+                    opacity: 60,
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    paddingTop: '1px',
+                    paddingBottom: '1px',
+                    paddingLeft: '4px',
+                    paddingRight: '4px',
+                  }}
+                >
+                  {calculateRemainingTimeByRange(vodList[0].range)}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </div>
@@ -129,4 +141,4 @@ const Modal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProps) => {
   return ReactDOM.createPortal(modalContent, modalRoot);
 };
 
-export default Modal;
+export default CourseDetailModal;

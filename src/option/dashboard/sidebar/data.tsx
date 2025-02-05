@@ -1,8 +1,5 @@
-import { DocIcon } from './icons/DocIcon';
-import { StatusIcon } from './icons/StatusIcon';
-import { CreditIcon } from './icons/CreditIcon';
 import { SettingsIcon } from './icons/SettingsIcon';
-import { BadgeCheckIcon, Home, NotebookText, Video, Zap } from 'lucide-react';
+import { Home, NotebookText, Video, Zap } from 'lucide-react';
 
 export const data = [
   {
@@ -11,19 +8,19 @@ export const data = [
     link: '/',
   },
   {
-    title: 'Archives',
+    title: '강의',
     icon: <Video />,
-    link: '/admin/archives',
+    link: '/vod/',
   },
   {
-    title: 'Credits',
+    title: '과제',
     icon: <NotebookText />,
-    link: '/admin/credits',
+    link: '/assignment/',
   },
   {
-    title: 'Documentation',
+    title: '퀴즈',
     icon: <Zap />,
-    link: '/admin/documentation',
+    link: '/quiz/',
   },
   {
     title: 'Settings',

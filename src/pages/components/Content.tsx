@@ -2,10 +2,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useState } from 'react';
 import { CustomTabs } from './CustomTabs';
 import VodContent from './VodContent';
-import { Toaster } from '@/components/ui/toaster';
+import AssignContent from './AssignContent';
+import QuizContent from './QuizContent';
 
 interface ContentProps {
-  title: string;
+  type: TYPES;
 }
 
 export enum TYPES {
@@ -15,7 +16,7 @@ export enum TYPES {
 }
 
 export function Content(props: ContentProps) {
-  const [activeTab, setActiveTab] = useState<TYPES>(TYPES.vod);
+  const [activeTab, setActiveTab] = useState<TYPES>(props.type);
   const date = new Date();
   const formattedDate = date.toLocaleDateString('ko-KR', {
     weekday: 'long',
@@ -31,15 +32,19 @@ export function Content(props: ContentProps) {
           <CustomTabs tabs={tabs} activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab as TYPES)} />
         </div>
       </div>
-      <div className="flex flex-col overflow-y-scroll h-screen md:flex-row md:overflow-hidden gap-6">
-        <Card className="w-full md:w-8/12 rounded-xl min-h-[80lvh] max-h-[80lvh] bg-white zinc-900 p-6 shadow-none overflow-y-auto">
-          <CardHeader className="p-0">
+      <div className="flex flex-col h-screen md:flex-row md:overflow-hidden gap-6">
+        <Card className="w-full md:w-8/12 rounded-xl min-h-[80lvh] max-h-[80lvh] bg-white zinc-900 p-6 pr-3 shadow-none overflow-hidden">
+          <CardHeader className="p-0 pb-6">
             <div className="flex justify-between items-center p-0">
               <p className="text-2xl font-bold">{activeTab} 현황</p>
               <p className="font-semibold text-slate-500">{formattedDate}</p>
             </div>
           </CardHeader>
-          <CardContent className="p-0">{activeTab === TYPES.vod && <VodContent />}</CardContent>
+          <CardContent className="p-0 overflow-y-scroll h-full pr-3">
+            {activeTab === TYPES.vod && <VodContent />}
+            {activeTab === TYPES.assignment && <AssignContent />}
+            {activeTab === TYPES.quiz && <QuizContent />}
+          </CardContent>
         </Card>
         <div className="w-full md:w-4/12 mt-0">
           <Card className="rounded-xl min-h-[80lvh] bg-white zinc-800 px-6 pt-6 shadow-none">

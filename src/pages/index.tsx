@@ -1,5 +1,5 @@
-import { Content } from './components/Content';
+import { Content, TYPES } from './components/Content';
 
 export default function HomePage() {
-  return <Content title="Home" />;
+  return <Content type={TYPES.vod} />;
 }
