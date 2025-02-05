@@ -4,21 +4,27 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Check, Play, Clock } from 'lucide-react';
 import { Vod } from '@/content/types';
-import Modal from './Modal';
+
 import NotificationSwitch from '@/components/ui/notification-switch';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { toast, useToast } from '@/hooks/use-toast';
-import { removeSquareBrackets } from '@/lib/utils';
+import {
+  calculateRemainingTimeByRange,
+  calculateTimeDifference,
+  formatDateString,
+  removeSquareBrackets,
+} from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import CourseDetailModal from './CourseDetailModal';
 
 interface TaskStatusCardProps {
   notification: boolean;
   vodList: Vod[];
 }
 
-const TaskStatusCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
+const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
   if (vodList.length === 0) return <></>;
 
-  // 진행률 계산
   let value = 0;
   vodList.forEach((vod) => {
     if (vod.isAttendance.toLowerCase() === 'o') value += 1;
@@ -27,11 +33,9 @@ const TaskStatusCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }
 
   const [isVisible, setIsVisible] = useState(false);
   const [toggle, setToggle] = useState(notification);
-  // 사용자가 직접 토글을 변경했는지 여부를 추적하는 상태
   const [userInitiatedToggle, setUserInitiatedToggle] = useState(false);
   const { toast } = useToast();
 
-  // 부모에서 전달된 notification 값이 변경되면 toggle을 동기화
   useEffect(() => {
     setToggle(notification);
   }, [notification]);
@@ -59,14 +63,12 @@ const TaskStatusCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }
         }
         saveDataToStorage('notification', JSON.stringify(parsedData));
 
-        // 사용자가 직접 토글 변경한 경우에만 toast 표시
         if (userInitiatedToggle) {
           toast({
             title: toggle ? '알림 설정 🔔' : '알림 취소 🔕',
             description: removeSquareBrackets(`${vodList[0].courseTitle} - ${vodList[0].subject}`),
             variant: 'default',
           });
-          // toast 표시 후 flag 초기화
           setUserInitiatedToggle(false);
         }
       } catch (error) {
@@ -76,13 +78,12 @@ const TaskStatusCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }
         });
       }
     });
-    // userInitiatedToggle도 의존성에 포함하여, 사용자가 토글한 경우 toast가 발생하도록 함
   }, [toggle, userInitiatedToggle, toast, vodList]);
 
   return (
     <>
       {isVisible && (
-        <Modal
+        <CourseDetailModal
           vodList={vodList}
           onClose={() => {
             setIsVisible(false);
@@ -90,7 +91,7 @@ const TaskStatusCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }
         />
       )}
       <Card
-        className="w-full cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-lg"
+        className={`w-full cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-lg`}
         role="article"
         aria-label={`${vodList[0].courseTitle}`}
         onClick={() => {
@@ -115,19 +116,43 @@ const TaskStatusCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }
             <div className="font-medium text-slate-400 text-sm line-clamp-1 text-ellipsis">{vodList[0].subject}</div>
           </div>
 
-          <div className="mt-2">
-            <Badge variant="secondary" className="font-semibold">
+          <div className="mt-2 flex space-x-1">
+            <Badge variant="secondary" className="font-semibold hover:bg-zinc-200">
               {total === 0 ? '학습전' : vodList[0].weeklyAttendance.toLowerCase() === 'o' ? '학습완료' : '학습중'}
             </Badge>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="bg-transparent">
+                  <Badge variant="secondary" className="font-semibold hover:bg-zinc-200">
+                    {formatDateString(vodList[0].range)}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent
+                  style={{
+                    backgroundColor: 'rgba(24, 24, 27, 0.6)',
+                    opacity: 60,
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    paddingTop: '1px',
+                    paddingBottom: '1px',
+                    paddingLeft: '4px',
+                    paddingRight: '4px',
+                  }}
+                >
+                  {calculateRemainingTimeByRange(vodList[0].range)}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <div className="mt-2">
             <div className="flex justify-between mb-1">
-              <span className="text-sm text-gray-500">Progress</span>
+              <span className="text-sm text-gray-500 font-semibold">진도율</span>
               <span className="text-sm text-gray-500">{Math.round(total)}%</span>
             </div>
             <Progress
               value={Math.round(total)}
               className="h-2"
+              indicatorColor={`${Math.round(total) === 100 ? 'bg-green-500' : Math.round(total) === 0 ? '' : 'bg-amber-500'}`}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Math.round(total)}
@@ -139,4 +164,4 @@ const TaskStatusCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }
   );
 };
 
-export default TaskStatusCard;
+export default VodCard;

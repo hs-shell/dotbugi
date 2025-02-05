@@ -1,6 +1,6 @@
 import { Vod } from '@/content/types';
 import { useEffect, useState } from 'react';
-import TaskStatusCard from './TaskStatusCard';
+import VodCard from './VodCard';
 import { loadDataFromStorage } from '@/lib/storage';
 import data from './data.json';
 
@@ -72,12 +72,12 @@ export default function VodContent() {
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-2 px-0 py-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-2 px-0 gap-4">
         {vodArray.map((vodGroup, index) => {
           const item = vodGroup[0];
           const key = `${item.courseId}-${item.subject}-${item.range}`;
           const notification = notificationMap[key] === null || notificationMap[key] === undefined ? false : true;
-          return <TaskStatusCard key={index} vodList={vodGroup} notification={notification} />;
+          return <VodCard key={index} vodList={vodGroup} notification={notification} />;
         })}
       </div>
     </>
