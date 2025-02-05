@@ -5,15 +5,7 @@ const manifest = {
   name: 'dotbugi',
   version: '1.2.0',
   description: 'dotbugi',
-  action: {
-    default_popup: 'index.html',
-    icons: {
-      '16': 'images/icon/icon-16.png',
-      '32': 'images/icon/icon-32.png',
-      '48': 'images/icon/icon-48.png',
-      '128': 'images/icon/icon-128.png',
-    },
-  },
+  action: {},
   icons: {
     '16': 'images/icon/icon-16.png',
     '32': 'images/icon/icon-32.png',
@@ -35,8 +27,8 @@ const manifest = {
       matches: ['*://*/*'],
     },
   ],
-  options_page: '/options.html',
-  permissions: ['scripting', 'storage', 'activeTab'],
+  options_page: '/option.html',
+  permissions: ['scripting', 'storage', 'activeTab', 'notifications', 'alarms'],
   host_permissions: ['https://*/*', 'http://*/*'],
 } as ManifestV3Export;
 
