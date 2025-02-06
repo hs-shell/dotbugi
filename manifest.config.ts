@@ -3,7 +3,7 @@ import { ManifestV3Export } from '@crxjs/vite-plugin';
 const manifest = {
   manifest_version: 3,
   name: 'dotbugi',
-  version: '1.1.0',
+  version: '1.2.1',
   description: 'dotbugi',
   action: {},
   icons: {
