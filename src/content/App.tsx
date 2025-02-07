@@ -7,38 +7,38 @@ import { ListFilter, RefreshCw, Search } from 'lucide-react';
 import filter from '@/assets/filter.svg';
 import PopoverFooter from './components/PopoverFooter';
 import { Spinner } from '@/components/ui/spinner';
-import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { useGetCourses } from '@/hooks/useGetCourse';
-import { requestData } from '@/lib/fetchCourseData';
 import Video from './components/Video';
 import Assignment from './components/Assignment';
 import QuizTab from './components/QuizTab';
-import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import FilterItem from './components/FilterItem';
 import FilterBadge from './components/FilterBadge';
+
+import FilterPanel from './components/FilterPanel';
+import { useCourseData } from '@/hooks/useCourseData';
+import { filterVods, filterAssigns, filterQuizes } from '@/lib/filterData';
+
+// 리팩토링: 필터 옵션 추출
+const attendanceOptions = ['출석', '결석']; // string[]
+const submitOptions = [
+  { label: '제출완료', value: true },
+  { label: '제출필요', value: false },
+]; // { label: string, value: boolean }[]
 
 export default function App() {
   const { courses } = useGetCourses();
 
-  const [vods, setVods] = useState<Vod[]>([]);
-  const [assigns, setAssigns] = useState<Assign[]>([]);
-  const [quizes, setQuizes] = useState<Quiz[]>([]);
+  // 데이터 관련 상태를 useCourseData 커스텀 훅으로 관리
+  const { vods, assigns, quizes, isPending, remainingTime, refreshTime, updateData, setIsPending } =
+    useCourseData(courses);
 
   // activeTab의 타입을 TAB_TYPE으로 지정
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
-
   const [isOpen, setIsOpen] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [vodSortBy, setVodSortBy] = useState<keyof Vod>('isAttendance');
   const [assignSortBy, setAssignSortBy] = useState<keyof Assign>('isSubmit');
   const [quizSortBy, setQuizSortBy] = useState<keyof Quiz>('dueDate');
-
-  const [refreshTime, setRefreshTime] = useState<string | null>();
-  const [isPending, setIsPending] = useState<boolean>(false);
-  const [remainingTime, setRemainingTime] = useState(0);
-
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // 필터 상태 관리 - Record을 사용하여 TAB_TYPE을 키로 지정
@@ -49,47 +49,6 @@ export default function App() {
   });
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    if (remainingTime >= 60) {
-      updateData();
-    } else {
-      timer = setTimeout(() => {
-        setRemainingTime((prev) => prev + 1);
-      }, 60 * 1000);
-    }
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [remainingTime]);
-
-  useEffect(() => {
-    if (!courses || courses.length === 0) return;
-
-    const lastRequestTime = localStorage.getItem('lastRequestTime');
-    const currentTime = new Date().getTime();
-    const oneHour = 60 * 60 * 1000;
-
-    if (lastRequestTime) setRefreshTime(new Date(parseInt(lastRequestTime, 10)).toLocaleTimeString());
-    updateData();
-    if (!lastRequestTime || currentTime - parseInt(lastRequestTime, 10) >= oneHour) {
-      setIsPending(true);
-      updateData();
-    } else {
-      const minutes = (currentTime - parseInt(lastRequestTime, 10)) / (60 * 1000);
-      setRemainingTime(minutes);
-      loadDataFromStorage('vod', (data) => {
-        setVods((data as Vod[]).filter((vod) => isCurrentDateInRange(vod.range)));
-      });
-      loadDataFromStorage('assign', (data) => {
-        setAssigns((data as Assign[]).filter((assign) => isCurrentDateByDate(assign.dueDate)));
-      });
-      loadDataFromStorage('quiz', (data) => {
-        setQuizes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
-      });
-    }
-  }, [courses]);
-
-  useEffect(() => {
     setSearchTerm('');
   }, [activeTab]);
 
@@ -97,94 +56,6 @@ export default function App() {
     setSearchTerm('');
     setIsFilterOpen(false);
   }, [activeTab]);
-
-  const updateData = async () => {
-    try {
-      setIsPending(true);
-      const currentTime = new Date().getTime();
-      setVods([]);
-      setAssigns([]);
-      setQuizes([]);
-
-      const tempVods: Vod[] = [];
-      const tempAssigns: Assign[] = [];
-      const tempQuizes: Quiz[] = [];
-
-      await Promise.all(
-        courses.map(async (course) => {
-          const result = await requestData(course.courseId);
-
-          result.vodDataArray.forEach((vodData) => {
-            // if (isCurrentDateInRange(vodData.range)) {
-            result.vodAttendanceArray.forEach((vodAttendanceData) => {
-              if (vodAttendanceData.title === vodData.title && vodAttendanceData.week === vodData.week) {
-                tempVods.push({
-                  courseId: course.courseId,
-                  prof: course.prof,
-                  courseTitle: course.courseTitle,
-                  week: vodAttendanceData.week,
-                  title: vodAttendanceData.title,
-                  isAttendance: vodAttendanceData.isAttendance,
-                  weeklyAttendance: vodAttendanceData.weeklyAttendance,
-                  length: vodData.length,
-                  range: vodData.range,
-                  subject: vodData.subject,
-                  url: vodData.url,
-                });
-              }
-            });
-            // }
-          });
-
-          result.assignDataArray.forEach((assignData) => {
-            // if (isCurrentDateByDate(assignData.dueDate)) {
-            tempAssigns.push({
-              courseId: course.courseId,
-              prof: course.prof,
-              courseTitle: course.courseTitle,
-              subject: assignData.subject,
-              title: assignData.title,
-              dueDate: assignData.dueDate,
-              isSubmit: assignData.isSubmit,
-              url: assignData.url,
-            });
-            // }
-          });
-
-          result.quizDataArray.forEach((quizData) => {
-            // if (isCurrentDateByDate(quizData.dueDate)) {
-            tempQuizes.push({
-              courseId: course.courseId,
-              prof: course.prof,
-              courseTitle: course.courseTitle,
-              subject: quizData.subject,
-              title: quizData.title,
-              dueDate: quizData.dueDate,
-              url: quizData.url,
-            });
-            // }
-          });
-        })
-      );
-
-      setVods(tempVods);
-      setAssigns(tempAssigns);
-      setQuizes(tempQuizes);
-
-      saveDataToStorage('vod', tempVods);
-      saveDataToStorage('assign', tempAssigns);
-      saveDataToStorage('quiz', tempQuizes);
-
-      setRefreshTime(new Date(currentTime).toLocaleTimeString());
-
-      setRemainingTime(0);
-      localStorage.setItem('lastRequestTime', currentTime.toString());
-      setIsPending(false);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setIsPending(false);
-    }
-  };
 
   // 필터 옵션 추출
   const courseTitlesMap = useMemo(
@@ -196,117 +67,18 @@ export default function App() {
     [vods, assigns, quizes]
   );
 
-  const attendanceOptions = ['출석', '결석']; // string[]
-  const submitOptions = [
-    { label: '제출완료', value: true },
-    { label: '제출필요', value: false },
-  ]; // { label: string, value: boolean }[]
-
   // 필터 적용
   const filteredVods = useMemo(() => {
-    let data = vods;
-
-    const { courseTitles, attendanceStatuses } = filters[activeTab];
-
-    if (courseTitles.length > 0) {
-      data = data.filter((vod) => courseTitles.includes(vod.courseTitle));
-    }
-
-    if (attendanceStatuses && attendanceStatuses.length > 0) {
-      data = data.filter((vod) => {
-        const status = vod.isAttendance.toLowerCase().trim() === 'o' ? '출석' : '결석';
-        return attendanceStatuses.includes(status);
-      });
-    }
-
-    if (searchTerm !== '') {
-      data = data.filter(
-        (item) =>
-          item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    return data.sort((a, b) => {
-      const attendanceA = a.isAttendance.toLowerCase().trim() === 'o';
-      const attendanceB = b.isAttendance.toLowerCase().trim() === 'o';
-      if (attendanceA !== attendanceB) {
-        return attendanceA ? -1 : 1;
-      }
-
-      switch (vodSortBy) {
-        case 'title':
-          return a.title.localeCompare(b.title);
-        default:
-          return a.range.localeCompare(b.range);
-      }
-    });
-  }, [vods, searchTerm, vodSortBy, filters, activeTab]);
+    return filterVods(vods, filters[activeTab], searchTerm, vodSortBy);
+  }, [vods, filters, activeTab, searchTerm, vodSortBy]);
 
   const filteredAssigns = useMemo(() => {
-    let data = assigns;
-
-    const { courseTitles, submitStatuses } = filters[activeTab];
-
-    if (courseTitles.length > 0) {
-      data = data.filter((assign) => courseTitles.includes(assign.courseTitle));
-    }
-
-    if (submitStatuses && submitStatuses.length > 0) {
-      data = data.filter((assign) => submitStatuses.includes(assign.isSubmit));
-    }
-
-    if (searchTerm !== '') {
-      data = data.filter(
-        (item) =>
-          item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    return data.sort((a, b) => {
-      if (a.isSubmit !== b.isSubmit) {
-        return a.isSubmit ? -1 : 1;
-      }
-
-      switch (assignSortBy) {
-        case 'title':
-          return a.title.localeCompare(b.title);
-        default:
-          return a.dueDate.localeCompare(b.dueDate);
-      }
-    });
-  }, [assigns, searchTerm, assignSortBy, filters, activeTab]);
+    return filterAssigns(assigns, filters[activeTab], searchTerm, assignSortBy);
+  }, [assigns, filters, activeTab, searchTerm, assignSortBy]);
 
   const filteredQuizes = useMemo(() => {
-    let data = quizes;
-
-    const { courseTitles } = filters[activeTab];
-
-    if (courseTitles.length > 0) {
-      data = data.filter((quiz) => courseTitles.includes(quiz.courseTitle));
-    }
-
-    if (searchTerm !== '') {
-      data = data.filter(
-        (item) =>
-          item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    return data.sort((a, b) => {
-      switch (quizSortBy) {
-        case 'title':
-          return a.title.localeCompare(b.title);
-        default:
-          return a.dueDate.localeCompare(b.dueDate);
-      }
-    });
-  }, [quizes, searchTerm, quizSortBy, filters, activeTab]);
+    return filterQuizes(quizes, filters[activeTab], searchTerm, quizSortBy);
+  }, [quizes, filters, activeTab, searchTerm, quizSortBy]);
 
   // Vods용 필터 핸들러
   const handleAttendanceFilterChange = (status: string) => {
@@ -353,60 +125,6 @@ export default function App() {
         },
       };
     });
-  };
-
-  const FilterComponent = () => {
-    const currentFilters = filters[activeTab];
-
-    return (
-      <div className="space-y-3 my-4">
-        <div>
-          <div className="space-y-3">
-            {courseTitlesMap[activeTab].map((courseTitle) => (
-              <FilterItem
-                key={courseTitle}
-                id={`course-${courseTitle}`}
-                label={courseTitle}
-                checked={currentFilters.courseTitles.includes(courseTitle)} // 이미 boolean임
-                onChange={() => handleCourseTitleChange(courseTitle)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {activeTab === 'VIDEO' && (
-          <div>
-            <div className="space-y-3">
-              {attendanceOptions.map((option) => (
-                <FilterItem
-                  key={`attendance-${option}`}
-                  id={`attendance-${option}`}
-                  label={option}
-                  checked={currentFilters.attendanceStatuses?.includes(option) ?? false}
-                  onChange={() => handleAttendanceFilterChange(option)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'ASSIGN' && (
-          <div>
-            <div className="space-y-3">
-              {submitOptions.map((option) => (
-                <FilterItem
-                  key={`submit-${option.value}`}
-                  id={`submit-${option.value}`}
-                  label={option.label}
-                  checked={currentFilters.submitStatuses?.includes(option.value) ?? false}
-                  onChange={() => handleSubmitFilterChange(option.value)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
   };
 
   const isFilterSet = useMemo(() => {
@@ -465,18 +183,26 @@ export default function App() {
                     : '오류'}
             </div>
             <div className="flex justify-center items-center">
-              {/* <span className="text-sm text-zinc-400 px-1">{refreshTime}</span> */}
+              {/* refreshTime 대신 남은 시간을 표시 */}
               <span
                 className={`text-sm px-1 ${
-                  Math.round(remainingTime) >= 30 ? 'text-amber-500 font-semibold' : 'text-zinc-400'
+                  // 필요에 따라 색상 조건은 수정 가능 (예시로 30분 기준)
+                  remainingTime < 60
+                    ? Math.round(remainingTime) >= 30
+                      ? 'text-amber-500 font-semibold'
+                      : 'text-zinc-400'
+                    : Math.floor(remainingTime / 60) >= 1
+                      ? 'text-amber-500 font-semibold'
+                      : 'text-zinc-400'
                 }`}
               >
-                {Math.round(remainingTime)}분 전
+                {remainingTime < 60 ? `${Math.round(remainingTime)}분 전` : `${Math.floor(remainingTime / 60)}시간 전`}
               </span>
               <button
-                className="flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1"
+                className={`flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1 ${(isPending || remainingTime <= 15) && 'cursor-not-allowed'}`}
+                disabled={isPending || remainingTime <= 15}
                 onClick={() => {
-                  if (isPending) return;
+                  if (isPending || remainingTime <= 15) return;
                   setIsPending(true);
                   updateData();
                 }}
@@ -537,7 +263,16 @@ export default function App() {
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 shadow-md rounded-xl p-4 space-y-2">
-                  <FilterComponent />
+                  <FilterPanel
+                    filters={filters}
+                    activeTab={activeTab}
+                    courseTitlesMap={courseTitlesMap}
+                    handleCourseTitleChange={handleCourseTitleChange}
+                    handleAttendanceFilterChange={handleAttendanceFilterChange}
+                    handleSubmitFilterChange={handleSubmitFilterChange}
+                    attendanceOptions={attendanceOptions}
+                    submitOptions={submitOptions}
+                  />
                   <Button
                     className="w-full text-xl h-12 font-semibold"
                     variant={'outline'}

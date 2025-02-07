@@ -39,15 +39,14 @@ function schedulePreEventAlarm(alarmId: string, dateTimeStr: string, title: stri
   const alarmTime = eventDate.getTime() - 24 * 60 * 60 * 1000;
   const now = Date.now();
 
-  // if (alarmTime <= now) {
-  //   console.warn('Alarm time is in the past. Cannot schedule alarm.');
-  //   return;
-  // }
+  if (alarmTime <= now) {
+    console.warn('Alarm time is in the past. Cannot schedule alarm.');
+    return;
+  }
 
   alarmsMap[alarmId] = { title, message };
 
-  // chrome.alarms.create(alarmId, { when: alarmTime });
-  chrome.alarms.create(alarmId, { delayInMinutes: 1 });
+  chrome.alarms.create(alarmId, { when: alarmTime });
   console.log(`Alarm [${alarmId}] scheduled for ${new Date(alarmTime).toString()}`);
 }
 
@@ -55,16 +54,6 @@ function cancelAlarm(alarmId: string): void {
   chrome.alarms.clear(alarmId, (wasCleared: boolean) => {
     if (wasCleared) {
       delete alarmsMap[alarmId];
-      console.log(`Alarm [${alarmId}] cancelled successfully.`);
-      chrome.notifications.create(`${alarmId}-cancelNotification`, {
-        type: 'basic',
-        iconUrl: 'images/icon/icon-128.png',
-        title: '알람 취소됨',
-        message: `알람 [${alarmId}]이 취소되었습니다.`,
-        priority: 2,
-      });
-    } else {
-      console.warn(`Failed to cancel alarm [${alarmId}] or it does not exist.`);
     }
   });
 }
