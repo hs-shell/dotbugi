@@ -1,10 +1,24 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Suspense } from 'react';
-import { useRoutes } from 'react-router-dom';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import routes from '~react-pages';
+import { Toaster } from '@/components/ui/toaster';
+import Sidebar from './Sidebar';
+import { Calendar } from './calendar';
+import SummaryCard from './SummaryCard';
 
 export default function App() {
-  return <Suspense fallback={<p>Loading...</p>}>{useRoutes(routes)}</Suspense>;
+  return (
+    <>
+      <div className="bg-white min-h-screen flex">
+        <Sidebar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="flex flex-col h-screen px-4 w-full">
+            <main className="h-screen overflow-y-scroll px-12 py-16">
+              <SummaryCard />
+              {/* <hr className="my-8" /> */}
+              <Calendar />
+            </main>
+          </div>
+        </div>
+      </div>
+      <Toaster />
+    </>
+  );
 }
