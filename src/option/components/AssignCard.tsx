@@ -28,7 +28,7 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => 
   }, [notification]);
 
   useEffect(() => {
-    loadDataFromStorage('notification', (data: string | null) => {
+    loadDataFromStorage('assign-notification', (data: string | null) => {
       try {
         let parsedData: Record<string, any> = {};
         if (data) {
@@ -38,7 +38,7 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => 
             console.error('저장된 데이터를 파싱하는 중 오류가 발생했습니다.', error);
           }
         }
-        const key = `${assign.courseId}-${assign.subject}-${assign.dueDate}`;
+        const key = `${assign.courseId}-${assign.title}-${assign.dueDate}`;
 
         if (toggle) {
           parsedData[key] = true;
@@ -47,7 +47,7 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => 
             delete parsedData[key];
           }
         }
-        saveDataToStorage('notification', JSON.stringify(parsedData));
+        saveDataToStorage('assign-notification', JSON.stringify(parsedData));
 
         if (userInitiatedToggle) {
           toast({
@@ -97,6 +97,26 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => 
               <NotificationSwitch
                 isSelected={toggle}
                 onChange={() => {
+                  if (!toggle) {
+                    chrome.runtime.sendMessage(
+                      {
+                        action: 'scheduleAlarm',
+                        alarmId: `${assign.courseId}-${assign.title}-${assign.dueDate}`,
+                        dateTime: assign.dueDate, // 이벤트 날짜/시간
+                        title: '과제 제출 하셨나요?', // 알림 제목
+                        message: '하루 뒤에 마감이에요 서두르세요!', // 알림 메시지
+                      },
+                      (response) => {}
+                    );
+                  } else {
+                    chrome.runtime.sendMessage(
+                      {
+                        action: 'cancelAlarm',
+                        alarmId: `${assign.courseId}-${assign.title}-${assign.dueDate}`,
+                      },
+                      (response) => {}
+                    );
+                  }
                   setToggle((prev) => !prev);
                   setUserInitiatedToggle(true);
                 }}
@@ -106,7 +126,7 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => 
           <div className="font-medium text-slate-400 text-sm line-clamp-1 text-ellipsis">{assign.title}</div>
         </div>
 
-        <div className="mt-2 flex space-x-1">
+        <div className="mt-6 flex space-x-1">
           <Badge
             variant="secondary"
             className={`font-semibold hover:bg-zinc-200`}

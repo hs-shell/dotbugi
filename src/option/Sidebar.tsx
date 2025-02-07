@@ -1,6 +1,6 @@
 import { Home, NotepadText, Video, Zap } from 'lucide-react';
 import type React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Sidebar: React.FC = () => {
   return (
@@ -45,16 +45,25 @@ interface SidebarItemProps {
   label: string;
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label }) => (
-  <li>
-    <Link
-      to={to}
-      className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-slate-200 transition-colors duration-200"
-    >
-      <span className="text-gray-500">{icon}</span>
-      <span className="ml-3 text-sm font-medium">{label}</span>
-    </Link>
-  </li>
-);
+const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to; // 현재 경로와 to가 일치하는지 확인
+
+  return (
+    <li>
+      <Link
+        to={to}
+        className={`flex items-center p-3 rounded-lg transition-colors duration-200 text-slate-700 ${
+          isActive
+            ? 'bg-slate-200' // 현재 탭이면 파란색 배경 + 흰색 글씨
+            : 'hover:bg-slate-200'
+        }`}
+      >
+        <span className={'text-slate-700'}>{icon}</span>
+        <span className="ml-3 text-sm font-medium">{label}</span>
+      </Link>
+    </li>
+  );
+};
 
 export default Sidebar;
