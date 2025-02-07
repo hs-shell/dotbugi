@@ -41,7 +41,7 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
   }, [notification]);
 
   useEffect(() => {
-    loadDataFromStorage('notification', (data: string | null) => {
+    loadDataFromStorage('vod-notification', (data: string | null) => {
       try {
         let parsedData: Record<string, any> = {};
         if (data) {
@@ -61,7 +61,7 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
             delete parsedData[key];
           }
         }
-        saveDataToStorage('notification', JSON.stringify(parsedData));
+        saveDataToStorage('vod-notification', JSON.stringify(parsedData));
 
         if (userInitiatedToggle) {
           toast({
@@ -106,7 +106,26 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
                 <NotificationSwitch
                   isSelected={toggle}
                   onChange={() => {
-                    // 사용자가 토글을 변경할 때 flag를 true로 설정
+                    if (!toggle) {
+                      chrome.runtime.sendMessage(
+                        {
+                          action: 'scheduleAlarm',
+                          alarmId: `${vodList[0].courseId}-${vodList[0].subject}-${vodList[0].range.split(' ~ ')[1]}`,
+                          dateTime: vodList[0].range.split(' ~ ')[1], // 이벤트 날짜/시간
+                          title: '강의 출석 하셨나요?', // 알림 제목
+                          message: '하루 뒤에 마감이에요 서두르세요!', // 알림 메시지
+                        },
+                        (response) => {}
+                      );
+                    } else {
+                      chrome.runtime.sendMessage(
+                        {
+                          action: 'cancelAlarm',
+                          alarmId: `${vodList[0].courseId}-${vodList[0].subject}-${vodList[0].range.split(' ~ ')[1]}`,
+                        },
+                        (response) => {}
+                      );
+                    }
                     setToggle((prev) => !prev);
                     setUserInitiatedToggle(true);
                   }}

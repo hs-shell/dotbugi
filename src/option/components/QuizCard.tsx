@@ -27,7 +27,7 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ notification, quiz }) => {
   }, [notification]);
 
   useEffect(() => {
-    loadDataFromStorage('notification', (data: string | null) => {
+    loadDataFromStorage('quiz-notification', (data: string | null) => {
       try {
         let parsedData: Record<string, any> = {};
         if (data) {
@@ -37,7 +37,7 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ notification, quiz }) => {
             console.error('저장된 데이터를 파싱하는 중 오류가 발생했습니다.', error);
           }
         }
-        const key = `${quiz.courseId}-${quiz.subject}-${quiz.dueDate}`;
+        const key = `${quiz.courseId}-${quiz.title}-${quiz.dueDate}`;
 
         if (toggle) {
           parsedData[key] = true;
@@ -46,7 +46,7 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ notification, quiz }) => {
             delete parsedData[key];
           }
         }
-        saveDataToStorage('notification', JSON.stringify(parsedData));
+        saveDataToStorage('quiz-notification', JSON.stringify(parsedData));
 
         if (userInitiatedToggle) {
           toast({
@@ -96,6 +96,26 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ notification, quiz }) => {
               <NotificationSwitch
                 isSelected={toggle}
                 onChange={() => {
+                  if (!toggle) {
+                    chrome.runtime.sendMessage(
+                      {
+                        action: 'scheduleAlarm',
+                        alarmId: `${quiz.courseId}-${quiz.title}-${quiz.dueDate}`,
+                        dateTime: quiz.dueDate, // 이벤트 날짜/시간
+                        title: '퀴즈 참여 하셨나요?', // 알림 제목
+                        message: '하루 뒤에 마감이에요 서두르세요!', // 알림 메시지
+                      },
+                      (response) => {}
+                    );
+                  } else {
+                    chrome.runtime.sendMessage(
+                      {
+                        action: 'cancelAlarm',
+                        alarmId: `${quiz.courseId}-${quiz.title}-${quiz.dueDate}`,
+                      },
+                      (response) => {}
+                    );
+                  }
                   setToggle((prev) => !prev);
                   setUserInitiatedToggle(true);
                 }}
@@ -105,7 +125,7 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ notification, quiz }) => {
           <div className="font-medium text-slate-400 text-sm line-clamp-1 text-ellipsis">{quiz.title}</div>
         </div>
 
-        <div className="mt-2 flex space-x-1">
+        <div className="mt-6 flex space-x-1">
           <Badge variant="secondary" className={`font-semibold hover:bg-zinc-200`}>
             직접확인
           </Badge>
