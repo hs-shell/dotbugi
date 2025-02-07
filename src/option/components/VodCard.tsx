@@ -101,7 +101,9 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
         <CardContent className="p-4 flex flex-col">
           <div>
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold truncate flex-1 mr-2">{vodList[0].courseTitle}</h2>
+              <h2 className="text-lg font-semibold truncate flex-1 mr-2">
+                {removeSquareBrackets(vodList[0].courseTitle)}
+              </h2>
               <p>
                 <NotificationSwitch
                   isSelected={toggle}
@@ -111,9 +113,12 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
                         {
                           action: 'scheduleAlarm',
                           alarmId: `${vodList[0].courseId}-${vodList[0].subject}-${vodList[0].range.split(' ~ ')[1]}`,
-                          dateTime: vodList[0].range.split(' ~ ')[1], // 이벤트 날짜/시간
-                          title: '강의 출석 하셨나요?', // 알림 제목
-                          message: '하루 뒤에 마감이에요 서두르세요!', // 알림 메시지
+                          dateTime: vodList[0].range.split(' ~ ')[1],
+                          title: '하루 뒤 출석 마감!',
+                          message:
+                            removeSquareBrackets(vodList[0].courseTitle) +
+                            '-' +
+                            removeSquareBrackets(vodList[0].subject),
                         },
                         (response) => {}
                       );

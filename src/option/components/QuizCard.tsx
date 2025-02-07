@@ -101,9 +101,9 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ notification, quiz }) => {
                       {
                         action: 'scheduleAlarm',
                         alarmId: `${quiz.courseId}-${quiz.title}-${quiz.dueDate}`,
-                        dateTime: quiz.dueDate, // 이벤트 날짜/시간
-                        title: '퀴즈 참여 하셨나요?', // 알림 제목
-                        message: '하루 뒤에 마감이에요 서두르세요!', // 알림 메시지
+                        dateTime: quiz.dueDate,
+                        title: '하루 뒤 퀴즈 마감!',
+                        message: removeSquareBrackets(quiz.courseTitle) + '-' + quiz.title,
                       },
                       (response) => {}
                     );

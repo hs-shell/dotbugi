@@ -56,8 +56,8 @@ const colorClasses = [
 ];
 
 export function Calendar() {
-  // const events = useCalendarEvents();
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const events = useCalendarEvents();
+  // const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
 
@@ -112,15 +112,15 @@ export function Calendar() {
 
           if (rangePosition === 'single') {
             return (
-              <div key={event.id} className="flex items-center mx-1">
-                <span className="mx-0.5">
+              <div key={event.id} className="flex items-center px-1">
+                <span className="px-0.5">
                   {event.type === 'assign' ? (
                     <NotebookText className={`w-3 h-3 ${isCurrent && 'text-violet-900'}`} />
                   ) : (
                     <Zap className={`w-3 h-3 ${isCurrent && 'text-amber-500'}`} />
                   )}
                 </span>
-                <span className="text-xs text-ellipsis line-clamp-1">
+                <span className="text-xs text-ellipsis line-clamp-1 overflow-hidden">
                   {event.title} - {event.subject}
                 </span>
               </div>
@@ -137,12 +137,12 @@ export function Calendar() {
               className={cn(
                 isCurrent ? `${colorClasses[index % 8]} text-zinc-700` : 'bg-zinc-100 text-zinc-300',
                 'relative h-4 flex items-center justify-start z-10',
-                isStart && 'rounded-l-sm ml-1',
-                isEnd && 'rounded-r-sm mr-1'
+                isStart && 'rounded-l-sm pl-1',
+                isEnd && 'rounded-r-sm pr-1'
               )}
             >
               {showTitle && (
-                <span className="ml-1 text-xs font-medium line-clamp-1 text-ellipsis px-1">
+                <span className="pl-1 text-xs font-medium line-clamp-1 text-ellipsis px-1 overflow-hidden">
                   {event.title} - {event.subject}
                 </span>
               )}
@@ -154,7 +154,7 @@ export function Calendar() {
   };
 
   return (
-    <Card className="p-0 w-full mx-auto border-none shadow-none">
+    <Card className="p-0 w-full max-w-7xl border-none shadow-none">
       <div className="flex items-center justify-center my-8 gap-4 ">
         <Button variant="ghost" onClick={handlePrevMonth}>
           <ChevronLeft />
@@ -185,7 +185,7 @@ export function Calendar() {
               key={dayItem.toISOString()}
               onClick={() => handleSelectDate(dayItem)}
               className={cn(
-                'relative cursor-pointer min-h-[120px] py-2 rounded-lg',
+                'relative cursor-pointer w-full min-h-[120px] py-2 rounded-lg',
                 isCurrent ? 'bg-white' : ' text-gray-300',
                 isTodayDate && 'text-blue-600 font-semibold',
                 isSelected && 'bg-zinc-50',

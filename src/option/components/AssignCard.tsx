@@ -22,7 +22,6 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => 
   const [userInitiatedToggle, setUserInitiatedToggle] = useState(false);
   const { toast } = useToast();
 
-  console.log(assign.dueDate);
   useEffect(() => {
     setToggle(notification);
   }, [notification]);
@@ -102,9 +101,9 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => 
                       {
                         action: 'scheduleAlarm',
                         alarmId: `${assign.courseId}-${assign.title}-${assign.dueDate}`,
-                        dateTime: assign.dueDate, // 이벤트 날짜/시간
-                        title: '과제 제출 하셨나요?', // 알림 제목
-                        message: '하루 뒤에 마감이에요 서두르세요!', // 알림 메시지
+                        dateTime: assign.dueDate,
+                        title: '하루 뒤 과제 마감!',
+                        message: removeSquareBrackets(assign.courseTitle) + '-' + assign.title,
                       },
                       (response) => {}
                     );

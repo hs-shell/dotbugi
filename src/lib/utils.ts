@@ -133,6 +133,7 @@ export const calculateRemainingTimeByRange = (range: string) => {
   const hoursLeft = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutesLeft = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
+  if (daysLeft < 0 || hoursLeft < 0 || minutesLeft < 0) return `마감`;
   return `${daysLeft === 0 ? '' : daysLeft + '일'} ${hoursLeft === 0 ? '' : hoursLeft + '시간'} ${minutesLeft}분 남음`;
 };
 
@@ -152,4 +153,21 @@ export const calculateRemainingTime = (endTime: string) => {
 
 export const removeSquareBrackets = (str: string) => {
   return str.replace(/\[[^\]]*\]/g, '');
+};
+
+export const TimeAgo = (givenTimestamp: number) => {
+  const now = Date.now();
+  const diffMs = now - givenTimestamp;
+
+  // 각 단위별 밀리초
+  const msPerMinute = 1000 * 60;
+  const msPerHour = msPerMinute * 60;
+  const msPerDay = msPerHour * 24;
+
+  // 차이를 일, 시간, 분 단위로 계산
+  const days = Math.floor(diffMs / msPerDay);
+  const hours = Math.floor((diffMs % msPerDay) / msPerHour);
+  const minutes = Math.floor((diffMs % msPerHour) / msPerMinute);
+  if (days === 0 && hours === 0 && minutes === 0) return '지금 막';
+  return `${days !== 0 ? days + '일 ' : ''}${hours !== 0 ? hours + '시간 ' : ''}${minutes !== 0 ? minutes + '분 전' : '전'}`;
 };
