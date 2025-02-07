@@ -34,7 +34,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               key={courseTitle}
               id={`course-${courseTitle}`}
               label={courseTitle}
-              checked={currentFilters.courseTitles.includes(courseTitle)} // 이미 boolean임
+              checked={currentFilters.courseTitles.includes(courseTitle)}
               onChange={() => handleCourseTitleChange(courseTitle)}
             />
           ))}
