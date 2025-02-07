@@ -1,4 +1,5 @@
 import { CourseBase } from '@/content/types';
+import { removeSquareBrackets } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 
 interface UseCouresResult {
@@ -18,15 +19,16 @@ export const useGetCourses = (): UseCouresResult => {
     //     const courseId = urlParams.get('id') || '';
     //     const titleSection = div.querySelector('.course_link .course-name .course-title');
     //     const prof = titleSection?.querySelector('p')?.textContent?.trim() || '';
-    //     const courseTitle = titleSection?.querySelector('h1, h2, h3')?.textContent?.replace(/new/i, '').trim() || '';
+    //     let courseTitle = titleSection?.querySelector('h1, h2, h3')?.textContent?.replace(/new/i, '').trim() || '';
+    //      courseTitle = removeSquareBrackets(courseTitle)
     //     return { courseId, courseTitle, prof };
     //   })
     //   .filter((item) => item.courseId !== '' && item.courseTitle !== '' && item.prof !== '');
     // setCourses(data);
     setCourses([
       { courseId: '32153', courseTitle: '프로그래밍언어론', prof: '김성동' },
-      { courseId: '36786', courseTitle: '운영체제[A,B,7,8]', prof: '황기태' },
-      { courseId: '36821', courseTitle: '데이터베이스[B,C]', prof: '김영웅' },
+      { courseId: '36786', courseTitle: '운영체제', prof: '황기태' },
+      { courseId: '36821', courseTitle: '데이터베이스', prof: '김영웅' },
     ]);
   }, []);
 

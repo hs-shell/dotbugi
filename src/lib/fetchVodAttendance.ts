@@ -93,6 +93,8 @@ export const fetchVodAttendance = async (link: string) => {
         weeklyAttendance = lastWeeklyAttendance;
       }
 
+      if (weeklyAttendance.includes('일괄출석인정')) weeklyAttendance = 'o';
+
       const title = headerMap['title'] !== undefined ? rowData[headerMap['title']] || '' : '';
       const isAttendance = headerMap['isAttendance'] !== undefined ? rowData[headerMap['isAttendance']] || '' : '';
 

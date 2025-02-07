@@ -1,10 +1,9 @@
-import { calculateDueDate, calculateRemainingTime, isWithinSevenDays } from '@/lib/utils';
+import { calculateDueDate, calculateRemainingTime } from '@/lib/utils';
 import { Quiz } from '../types';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
-import { AlarmClock, Clock, Siren, TriangleAlert } from 'lucide-react';
+import { Card, CardFooter, CardHeader } from '@/components/ui/card';
+import { Clock, Siren, TriangleAlert } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import thung from '@/assets/thung.jpg';
+import thung from '@/assets/thung.png';
 
 interface Props {
   courseData: Quiz[];
@@ -13,9 +12,11 @@ interface Props {
 export default function QuizTab({ courseData }: Props) {
   if (!courseData || courseData.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center">
+      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
         <img src={thung} width={100} height={100} />
-        <div>퀴즈가 없습니다</div>
+        <div>
+          <span className="py-3 text-2xl font-medium">퀴즈가 없습니다</span>
+        </div>
       </div>
     );
   }

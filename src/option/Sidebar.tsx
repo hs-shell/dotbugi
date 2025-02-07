@@ -1,6 +1,7 @@
-import { Home, NotepadText, Video, Zap } from 'lucide-react';
+import { Home, LayoutDashboard, NotebookText, NotepadText, Video, Zap } from 'lucide-react';
 import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import bugi from '@/assets/bugi.png';
 
 const Sidebar: React.FC = () => {
   return (
@@ -9,10 +10,10 @@ const Sidebar: React.FC = () => {
         <div className="flex items-center mb-8">
           <div className="shrink-0">
             <a
-              className="flex items-center justify-center w-14 h-14 text-white text-2xl font-bold rounded-full bg-gradient-to-r from-blue-500 to-teal-400"
+              className="flex items-center justify-center w-14 h-14 text-white text-2xl font-bold rounded-full"
               href="/"
             >
-              P
+              <img src={bugi} className="rounded-full" />
             </a>
           </div>
           <div className="ml-4">
@@ -24,13 +25,13 @@ const Sidebar: React.FC = () => {
         <nav className="flex flex-col flex-grow">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">메인</div>
           <ul className="space-y-2">
-            <SidebarItem to="/" icon={<Home size={20} />} label="홈" />
+            <SidebarItem to="/" icon={<LayoutDashboard size={20} />} label="대시보드" />
           </ul>
 
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-8 mb-4">항목</div>
           <ul className="space-y-2">
             <SidebarItem to="/vod" icon={<Video size={20} />} label="강의" />
-            <SidebarItem to="/assignment" icon={<NotepadText size={20} />} label="과제" />
+            <SidebarItem to="/assignment" icon={<NotebookText size={20} />} label="과제" />
             <SidebarItem to="/quiz" icon={<Zap size={20} />} label="퀴즈" />
           </ul>
         </nav>

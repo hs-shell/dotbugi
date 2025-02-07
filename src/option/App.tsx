@@ -7,6 +7,7 @@ import VodPage from 'src/pages/VodPage';
 import AssignmentPage from 'src/pages/AssignmentPage';
 import DashboardPage from '@/pages/DashboardPage';
 import QuizPage from '@/pages/QuizPage';
+import Header from './Header';
 
 const pageVariants = {
   initial: {
@@ -41,6 +42,7 @@ const AnimatedRoutes = () => {
         variants={pageVariants}
         transition={pageTransition}
       >
+        <Header location={location.pathname} />
         <Routes location={location}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/vod" element={<VodPage />} />
