@@ -6,16 +6,19 @@ import { createShadowRoot } from '@/lib/createShadowRoot';
 import { ShadowRootContext } from '@/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
-const body = document.querySelector('#page-site-index');
+const footer = document.getElementById('page-footer');
+// const address = footer ? (footer.getElementsByClassName('address')[0] as HTMLDivElement) : null;
 
-if (body) {
-  const top = document.getElementById('back-top');
+if (footer) {
+  footer.style.paddingBottom = '24px';
   const host = document.createElement('div');
   host.id = 'extension-content-root';
-  host.style.position = 'fixed';
-  host.style.left = '0px';
-  host.style.bottom = '108px';
-  body.appendChild(host);
+  host.style.display = 'block';
+  host.style.position = 'relative';
+  host.style.bottom = '8px';
+  host.style.zIndex = '100';
+  host.style.backgroundColor = 'transparent';
+  footer.prepend(host);
 
   const shadowRoot = createShadowRoot(host, [styles]);
 

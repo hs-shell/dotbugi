@@ -150,19 +150,19 @@ export default function App() {
 
   return (
     <Popover open={isOpen}>
-      <PopoverTrigger asChild className="transition-all duration-1000">
+      <PopoverTrigger asChild className="transition-all duration-1000 justify-self-end">
         {isOpen ? (
           <img
             src={Close}
             onClick={() => setIsOpen(!isOpen)}
-            className="rounded-full w-20 h-20 bg-white border-zinc-500 shadow-xl cursor-pointer"
+            className="rounded-2xl w-32 h-32 bg-white border-zinc-500 shadow-xl cursor-pointer"
             alt="Close"
           />
         ) : (
           <img
             src={Bugi}
             onClick={() => setIsOpen(!isOpen)}
-            className="rounded-full w-20 h-20 bg-white border-zinc-500 shadow-xl cursor-pointer"
+            className="rounded-2xl w-32 h-32 bg-white border-zinc-500 shadow-xl cursor-pointer"
             alt="Open"
           />
         )}
