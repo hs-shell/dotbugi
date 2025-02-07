@@ -7,9 +7,8 @@ import { ShadowRootContext } from '@/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const footer = document.getElementById('page-footer');
-// const address = footer ? (footer.getElementsByClassName('address')[0] as HTMLDivElement) : null;
-
-if (footer) {
+const url = window.location.href;
+if (footer && url === 'https://learn.hansung.ac.kr/') {
   footer.style.paddingBottom = '24px';
   const host = document.createElement('div');
   host.id = 'extension-content-root';

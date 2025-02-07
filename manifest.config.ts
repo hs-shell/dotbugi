@@ -2,7 +2,7 @@ import { ManifestV3Export } from '@crxjs/vite-plugin';
 
 const manifest = {
   manifest_version: 3,
-  name: 'dotbugi',
+  name: '돋부기',
   version: '2.0.0',
   description: 'dotbugi',
   action: {},
@@ -28,7 +28,7 @@ const manifest = {
     },
   ],
   options_page: '/option.html',
-  permissions: ['scripting', 'storage', 'activeTab', 'notifications', 'alarms'],
+  permissions: ['storage', 'notifications', 'alarms'],
   host_permissions: ['https://*/*', 'http://*/*'],
 } as ManifestV3Export;
 
