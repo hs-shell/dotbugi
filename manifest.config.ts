@@ -3,7 +3,7 @@ import { ManifestV3Export } from '@crxjs/vite-plugin';
 const manifest = {
   manifest_version: 3,
   name: '돋부기',
-  version: '2.0.0',
+  version: '2.1.0',
   description: 'dotbugi',
   action: {},
   icons: {
