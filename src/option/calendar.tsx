@@ -161,15 +161,15 @@ export function Calendar() {
 
           if (rangePosition === 'single') {
             return (
-              <div key={event.id} className="flex items-center px-1">
-                <span className="px-0.5">
+              <div key={event.id} className="flex items-center px-1 w-full">
+                <span className="px-0.5 flex-shrink-0">
                   {event.type === 'assign' ? (
                     <NotebookText className={`w-3 h-3 ${isCurrent ? 'text-violet-900' : ''}`} />
                   ) : (
                     <Zap className={`w-3 h-3 ${isCurrent ? 'text-amber-500' : ''}`} />
                   )}
                 </span>
-                <span className="text-xs text-ellipsis line-clamp-1 overflow-hidden">
+                <span className="flex-1 text-xs whitespace-nowrap overflow-hidden text-ellipsis">
                   {event.title} - {event.subject}
                 </span>
               </div>
@@ -312,10 +312,12 @@ export function Calendar() {
               <div
                 className={cn(
                   'absolute top-0 rounded-md left-1 right-1',
-                  isTodayDate ? 'border-t-1 border-blue-500' : 'border-t-1 border-zinc-200'
+                  isTodayDate ? 'border-t-1.5 border-blue-600' : 'border-t-1.5 border-zinc-200'
                 )}
               />
-              <div className={`text-sm px-4 justify-self-end ${isCurrent && sunday ? 'text-red-700' : ''}`}>
+              <div
+                className={`text-sm px-4 justify-self-end ${!isTodayDate && isCurrent && sunday ? 'text-red-700' : ''}`}
+              >
                 {format(dayItem, 'd')}
               </div>
               {renderEvents(dayItem, isCurrent)}

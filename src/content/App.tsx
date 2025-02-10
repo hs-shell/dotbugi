@@ -1,7 +1,7 @@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useEffect, useMemo, useState } from 'react';
-import Bugi from '@/assets/bugi.png';
-import Close from '@/assets/close.png';
+import icon from '@/assets/icon.png';
+import exit from '@/assets/exit.png';
 import { Assign, Filters, Quiz, TAB_TYPE, Vod } from './types';
 import { ListFilter, RefreshCw, Search } from 'lucide-react';
 import filter from '@/assets/filter.svg';
@@ -153,16 +153,24 @@ export default function App() {
       <PopoverTrigger asChild className="transition-all duration-1000 justify-self-end">
         {isOpen ? (
           <img
-            src={Close}
-            onClick={() => setIsOpen(!isOpen)}
-            className="rounded-2xl w-32 h-32 bg-white border-zinc-500 shadow-xl cursor-pointer"
+            src={exit}
+            onClick={(e) => {
+              setIsOpen(!isOpen);
+              e.preventDefault();
+            }}
+            draggable={false}
+            className="rounded-2xl w-32 h-32 shadow-xl cursor-pointer"
             alt="Close"
           />
         ) : (
           <img
-            src={Bugi}
-            onClick={() => setIsOpen(!isOpen)}
-            className="rounded-2xl w-32 h-32 bg-white border-zinc-500 shadow-xl cursor-pointer"
+            src={icon}
+            onClick={(e) => {
+              setIsOpen(!isOpen);
+              e.preventDefault();
+            }}
+            draggable={false}
+            className="rounded-2xl w-32 h-32 shadow-xl cursor-pointer"
             alt="Open"
           />
         )}
