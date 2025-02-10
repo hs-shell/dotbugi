@@ -1,20 +1,25 @@
 import { Home, LayoutDashboard, NotebookText, NotepadText, Video, Zap } from 'lucide-react';
 import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import bugi from '@/assets/bugi.png';
+import icon from '@/assets/icon.png';
 
 const Sidebar: React.FC = () => {
   return (
-    <aside className="hidden lg:block w-60 bg-slate-50 text-gray-800 h-screen shadow-lg border-r border-slate-100">
+    <aside className="hidden lg:block w-60 min-w-60 bg-slate-50 text-gray-800 h-screen shadow-lg border-r border-slate-100">
       <div className="flex flex-col h-full py-6 px-4">
         <div className="flex items-center mb-8">
           <div className="shrink-0">
-            <a
-              className="flex items-center justify-center w-14 h-14 text-white text-2xl font-bold rounded-full"
-              href="/"
+            <div
+              className="flex items-center justify-center w-14 h-14 text-white text-2xl font-bold rounded-full cursor-pointer"
+              onClick={() => {
+                window.open('https://learn.hansung.ac.kr/', '_blank');
+              }}
             >
-              <img src={bugi} className="rounded-full" />
-            </a>
+              <img
+                src={icon}
+                className="rounded-full hover:shadow-lg hover:shadow-zinc-400 transition-all duration-500"
+              />
+            </div>
           </div>
           <div className="ml-4">
             <div className="text-xl font-bold text-gray-900">한성대학교</div>

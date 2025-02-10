@@ -11,21 +11,24 @@ export default function Header({ location }: { location: string }) {
     });
   }, []);
 
-  console.log(location);
   let title = '안녕하세요';
 
   switch (location) {
     case '/vod':
       title = '동영상 강의 목록';
+      window.document.title = '돋부기 | 강의 목록';
       break;
     case '/assignment':
       title = '과제 목록';
+      window.document.title = '돋부기 | 과제 목록';
       break;
     case '/quiz':
       title = '퀴즈 목록';
+      window.document.title = '돋부기 | 퀴즈 목록';
       break;
     default:
       title = '대시보드 🚀';
+      window.document.title = '돋부기 | 대시보드';
       break;
   }
   return (
