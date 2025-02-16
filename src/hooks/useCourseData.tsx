@@ -142,10 +142,5 @@ export function useCourseData(courses: any[]) {
       });
     }
   }, [courses, updateData]);
-
-  useEffect(() => {
-    console.log(vods);
-  }, [vods]);
-
-  return { vods, assigns, quizes, isPending, remainingTime, refreshTime, updateData, setIsPending };
+    return { vods, assigns, quizes, isPending, remainingTime, refreshTime, updateData, setIsPending };
 }
