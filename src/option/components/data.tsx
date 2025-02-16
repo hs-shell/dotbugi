@@ -2,11 +2,6 @@ import { TYPES } from '@/content/types';
 import { Home, NotebookText, Settings, Video, Zap } from 'lucide-react';
 
 export const data = [
-  // {
-  //   title: 'Home',
-  //   icon: <Home />,
-  //   type: TYPES.vod,
-  // },
   {
     title: '강의',
     icon: <Video />,
@@ -22,9 +17,4 @@ export const data = [
     icon: <Zap />,
     type: TYPES.quiz,
   },
-  // {
-  //   title: 'Settings',
-  //   icon: <Settings />,
-  //   type: TYPES.,
-  // },
 ];

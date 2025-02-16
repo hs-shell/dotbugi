@@ -31,7 +31,7 @@ export function useCourseData(courses: any[]) {
           const result = await requestData(course.courseId);
 
           result.vodDataArray.forEach((vodData) => {
-            // if (isCurrentDateInRange(vodData.range)) {
+            if (isCurrentDateInRange(vodData.range)) {
             result.vodAttendanceArray.forEach((vodAttendanceData) => {
               if (vodAttendanceData.title === vodData.title && vodAttendanceData.week === vodData.week) {
                 tempVods.push({
@@ -49,11 +49,11 @@ export function useCourseData(courses: any[]) {
                 });
               }
             });
-            // }
+            }
           });
 
           result.assignDataArray.forEach((assignData) => {
-            // if (isCurrentDateByDate(assignData.dueDate)) {
+            if (isCurrentDateByDate(assignData.dueDate)) {
             tempAssigns.push({
               courseId: course.courseId,
               prof: course.prof,
@@ -64,11 +64,11 @@ export function useCourseData(courses: any[]) {
               isSubmit: assignData.isSubmit,
               url: assignData.url,
             });
-            // }
+            }
           });
 
           result.quizDataArray.forEach((quizData) => {
-            // if (isCurrentDateByDate(quizData.dueDate)) {
+            if (isCurrentDateByDate(quizData.dueDate)) {
             tempQuizes.push({
               courseId: course.courseId,
               prof: course.prof,
@@ -78,7 +78,7 @@ export function useCourseData(courses: any[]) {
               dueDate: quizData.dueDate,
               url: quizData.url,
             });
-            // }
+            }
           });
         })
       );
