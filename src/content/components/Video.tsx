@@ -83,7 +83,6 @@ export default function Video({ courseData }: Props) {
               className={`cursor-pointer flex flex-row items-center justify-between px-5 pt-5 pb-3  hover:bg-zinc-100  transition-all duration-100 ${isExpanded && 'shadow-2xl shadow-zinc-950'}`}
               onClick={() => toggleCard(`${item.title}-${index}`)}
             >
-              {/* subject 같은 애들끼리 묶기 */}
               <div className="grid grid-cols-1">
                 <div className="font-semibold text-2xl mb-1">{item.courseTitle}</div>
                 <div className="font-light text-lg">{item.subject}</div>
@@ -99,10 +98,10 @@ export default function Video({ courseData }: Props) {
                       className="w-full px-4 py-3 bg-[rgb(246,250,255)] hover:bg-[rgb(238,246,255)] cursor-pointer transition-colors duration-300"
                       onClick={() => window.open(`${vod.url.replace('view', 'viewer')}`, '_blank', 'VodContentWindow')}
                     >
-                      <div className="font-medium" style={{ fontWeight: 550 }}>
+                      <div className="font-medium text-ellipsis line-clamp-1" style={{ fontWeight: 550 }}>
                         {vod.title}
                       </div>
-                      <div className="font-light text-zinc-500" style={{ fontSize: 10 }}>
+                      <div className="font-light text-zinc-500 text-ellipsis line-clamp-1" style={{ fontSize: 10 }}>
                         {formatDateString(vod.range)}, <span className="font-medium text-amber-500">{vod.length}</span>
                       </div>
                     </div>

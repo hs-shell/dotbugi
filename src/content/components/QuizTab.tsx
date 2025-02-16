@@ -37,8 +37,8 @@ export default function QuizTab({ courseData }: Props) {
           >
             <CardHeader className={`flex flex-row items-center justify-between p-5 pb-3`}>
               <div className="grid grid-cols-1">
-                <div className="font-semibold text-2xl mb-1">{course.courseTitle}</div>
-                <div className="font-light text-lg">{course.title}</div>
+                <div className="font-semibold text-2xl mb-1 text-ellipsis line-clamp-1">{course.courseTitle}</div>
+                <div className="font-light text-lg text-ellipsis line-clamp-1">{course.title}</div>
               </div>
             </CardHeader>
             <CardFooter className="flex justify-between items-center px-4 py-2 bg-zinc-50 font-medium">

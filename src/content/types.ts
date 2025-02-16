@@ -59,8 +59,8 @@ export interface Item {
 
 export interface Filters {
   courseTitles: string[];
-  attendanceStatuses?: string[]; // Vods용
-  submitStatuses?: boolean[]; // Assigns용
+  attendanceStatuses?: string[]; 
+  submitStatuses?: boolean[]; 
 }
 
 export enum TAB_TYPE {
