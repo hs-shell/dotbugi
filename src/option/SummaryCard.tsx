@@ -33,12 +33,12 @@ export default function SummaryCard() {
 
     return (
       <Link to={link}>
-        <Card className="w-full shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 pt-0">
+        <Card className="w-full h-full shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 pt-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <h3 className="font-semibold text-sm text-muted-foreground">{title}</h3>
             {icon}
           </CardHeader>
-          <CardContent>
+          <CardContent className='h-full'>
             {title.includes('퀴즈') ? (
               <div className="text-2xl font-bold">{data.length > 0 ? `${total} 개` : '0 개'}</div>
             ) : (
@@ -49,8 +49,8 @@ export default function SummaryCard() {
             ) : (
               <Progress value={percentage} className={clsx('h-2 mt-2')} indicatorColor={bgColorClass} />
             )}
-            <p className="text-xs text-muted-foreground mt-2">
-              {title.includes('퀴즈') ? '직접 확인' : percentage + '% 완료'}
+            <p className={`text-xs text-muted-foreground mt-2`}>
+              {title.includes('퀴즈') ? '직접 확인' : isNaN(percentage) ? 0 + '% 완료' : percentage + '% 완료'}
             </p>
           </CardContent>
         </Card>

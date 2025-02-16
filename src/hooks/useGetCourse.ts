@@ -14,7 +14,7 @@ export const useGetCourses = (): UseCouresResult => {
     const data = courseData
     .map((div) => {
       const label = div.querySelector('.label .label-course')?.textContent?.trim() || null;
-      if (label && label !== '커뮤니티') return null;
+      if (!label || label === '커뮤니티') return null;
       const a = div.querySelector('a');
       const url = new URL((a as HTMLAnchorElement).href);
       const urlParams = new URLSearchParams(url.search);
