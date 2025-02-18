@@ -13,7 +13,7 @@ export const useGetCourses = (): UseCouresResult => {
     const courseData = Array.from(document.querySelectorAll('.course_box'));
     const data = courseData
     .map((div) => {
-      const label = div.querySelector('.label .label-course')?.textContent?.trim() || null;
+      const label = div.querySelector('.course_link .course-name .course-label')?.textContent?.trim() || null;
       if (!label || label === '커뮤니티') return null;
       const a = div.querySelector('a');
       const url = new URL((a as HTMLAnchorElement).href);

@@ -9,6 +9,9 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 const footer = document.getElementById('page-footer');
 const url = window.location.href;
 if (footer && url === 'https://learn.hansung.ac.kr/') {
+  const backtop = document.getElementById('back-top') as HTMLDivElement;
+  if (backtop) backtop.remove();
+
   footer.style.paddingBottom = '24px';
   const host = document.createElement('div');
   host.id = 'extension-content-root';
