@@ -17,6 +17,7 @@ import FilterBadge from './components/FilterBadge';
 import FilterPanel from './components/FilterPanel';
 import { useCourseData } from '@/hooks/useCourseData';
 import { filterVods, filterAssigns, filterQuizes } from '@/lib/filterData';
+import PendingDialogWithBeforeUnload from './components/pending-dialog';
 
 // 리팩토링: 필터 옵션 추출
 const attendanceOptions = ['출석', '결석']; // string[]
@@ -149,6 +150,14 @@ export default function App() {
   };
 
   return (
+    <>
+    <PendingDialogWithBeforeUnload
+      isPending={isPending} 
+      onClose={() => {
+        // 필요한 경우 강제 종료 처리
+        console.log("사용자가 다이얼로그를 닫았습니다")
+      }} 
+    />
     <Popover open={isOpen}>
       <PopoverTrigger asChild className="transition-all duration-1000 justify-self-end">
         {isOpen ? (
@@ -318,5 +327,6 @@ export default function App() {
         <PopoverFooter activeTab={activeTab} setActiveTab={setActiveTab} />
       </PopoverContent>
     </Popover>
+    </>
   );
 }
