@@ -149,184 +149,192 @@ export default function App() {
     }));
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   return (
     <>
-    <PendingDialogWithBeforeUnload
-      isPending={isPending} 
-      onClose={() => {
-        // 필요한 경우 강제 종료 처리
-        console.log("사용자가 다이얼로그를 닫았습니다")
-      }} 
-    />
-    <Popover open={isOpen}>
-      <PopoverTrigger asChild className="transition-all duration-1000 justify-self-end">
-        {isOpen ? (
-          <img
-            src={exit}
-            onClick={(e) => {
-              setIsOpen(!isOpen);
-              e.preventDefault();
-            }}
-            draggable={false}
-            className="rounded-2xl w-32 h-32 shadow-xl cursor-pointer"
-            alt="Close"
-          />
-        ) : (
-          <img
-            src={icon}
-            onClick={(e) => {
-              setIsOpen(!isOpen);
-              e.preventDefault();
-            }}
-            draggable={false}
-            className="rounded-2xl w-32 h-32 shadow-xl cursor-pointer"
-            alt="Open"
-          />
-        )}
-      </PopoverTrigger>
-      <PopoverContent
-        className="bg-white opacity-100 rounded-3xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[350px] h-[550px]"
-        side="top"
-      >
-        <div className="bg-white w-full rounded-3xl z-10">
-          <div className="w-full flex items-center justify-between px-5 pt-8 pb-6">
-            <div className="items-center justify-center font-bold text-3xl">
-              {activeTab === 'VIDEO'
-                ? '온라인 강의 목록'
-                : activeTab === 'ASSIGN'
-                  ? '과제 목록'
-                  : activeTab === 'QUIZ'
-                    ? '퀴즈 목록'
-                    : '오류'}
-            </div>
-            <div className="flex justify-center items-center">
-              {/* refreshTime 대신 남은 시간을 표시 */}
-              <span
-                className={`text-sm px-1 ${
-                  // 필요에 따라 색상 조건은 수정 가능 (예시로 30분 기준)
-                  remainingTime < 60
-                    ? Math.round(remainingTime) >= 30
-                      ? 'text-amber-500 font-semibold'
-                      : 'text-zinc-400'
-                    : Math.floor(remainingTime / 60) >= 1
-                      ? 'text-amber-500 font-semibold'
-                      : 'text-zinc-400'
-                }`}
-              >
-                {remainingTime < 60 ? `${Math.round(remainingTime)}분 전` : `${Math.floor(remainingTime / 60)}시간 전`}
-              </span>
-              <button
-                className={`flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1 ${(isPending || remainingTime <= 15) && 'cursor-not-allowed'}`}
-                disabled={isPending || remainingTime <= 15}
-                onClick={() => {
-                  if (isPending || remainingTime <= 15) return;
-                  setIsPending(true);
-                  updateData();
-                }}
-              >
-                <RefreshCw className="w-8 h-8 p-0" />
-              </button>
-            </div>
-          </div>
-          <div className="mb-2 flex px-5 relative py-0">
-            <Search className="absolute left-9 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder={`검색`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              autoFocus={true}
-              className="bg-zinc-50 rounded-xl border border-zinc-300 w-full text-lg h-12 pl-12 pr-4 placeholder-gray-400 font-medium py-0 outline-none focus:ring-0 focus:border-zinc-300 focus:bg-slate-50 transition-all duration-200"
+      <PendingDialogWithBeforeUnload isPending={isPending} onClose={() => {}} />
+      <Popover open={isOpen}>
+        <PopoverTrigger asChild className="transition-all duration-1000 justify-self-end">
+          {isOpen ? (
+            <img
+              src={exit}
+              onClick={(e) => {
+                setIsOpen(!isOpen);
+                e.preventDefault();
+              }}
+              draggable={false}
+              className="rounded-2xl w-32 h-32 shadow-xl cursor-pointer"
+              alt="Close"
             />
-          </div>
-          <div className="flex w-full items-center pl-5 my-1">
-            <div className="whitespace-nowrap space-x-2 overflow-x-auto flex-1 min-w-0 flex overscroll-none">
-              {filters[activeTab].courseTitles.map((title) => (
-                <FilterBadge key={`course-${title}`} label={title} onRemove={() => handleCourseTitleChange(title)} />
-              ))}
-              {activeTab === 'VIDEO' &&
-                filters[activeTab].attendanceStatuses &&
-                filters[activeTab].attendanceStatuses.map((status) => (
-                  <FilterBadge
-                    key={`attendance-${status}`}
-                    label={status}
-                    onRemove={() => handleAttendanceFilterChange(status)}
-                  />
-                ))}
-              {activeTab === 'ASSIGN' &&
-                filters[activeTab].submitStatuses &&
-                filters[activeTab].submitStatuses.map((status) => (
-                  <FilterBadge
-                    key={`submit-${status}`}
-                    label={status ? '제출완료' : '제출필요'}
-                    onRemove={() => handleSubmitFilterChange(status)}
-                  />
-                ))}
-            </div>
-
-            {/* 고정된 필터 아이콘 영역 */}
-            <div className="flex flex-shrink-0 ml-2">
-              <Popover open={isFilterOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    onClick={() => setIsFilterOpen((prev) => !prev)}
-                    className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mb-2 mr-5 ml-2 p-2"
-                  >
-                    {isFilterSet ? (
-                      <img src={filter} className="w-9 h-9 p-0" alt="필터 설정됨" />
-                    ) : (
-                      <ListFilter className="w-9 h-9 p-0" />
-                    )}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 shadow-md rounded-xl p-4 space-y-2">
-                  <FilterPanel
-                    filters={filters}
-                    activeTab={activeTab}
-                    courseTitlesMap={courseTitlesMap}
-                    handleCourseTitleChange={handleCourseTitleChange}
-                    handleAttendanceFilterChange={handleAttendanceFilterChange}
-                    handleSubmitFilterChange={handleSubmitFilterChange}
-                    attendanceOptions={attendanceOptions}
-                    submitOptions={submitOptions}
-                  />
-                  <Button
-                    className="w-full text-xl h-12 font-semibold"
-                    variant={'outline'}
-                    onClick={() => {
-                      clearFilters();
-                    }}
-                  >
-                    모두 지우기
-                  </Button>
-                  <Button
-                    className="w-full text-xl h-12 font-semibold"
-                    variant={'default'}
-                    onClick={() => setIsFilterOpen(false)}
-                  >
-                    닫기
-                  </Button>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full px-5 py-4 overflow-y-scroll overscroll-none h-[480px]">
-          {isPending ? (
-            <div className="flex justify-center items-center h-full">
-              <Spinner className="h-8 w-8" />
-            </div>
           ) : (
-            <>
-              {activeTab === 'VIDEO' && <Video courseData={filteredVods} />}
-              {activeTab === 'ASSIGN' && <Assignment courseData={filteredAssigns} />}
-              {activeTab === 'QUIZ' && <QuizTab courseData={filteredQuizes} />}
-            </>
+            <img
+              src={icon}
+              onClick={(e) => {
+                setIsOpen(!isOpen);
+                e.preventDefault();
+              }}
+              draggable={false}
+              className="rounded-2xl w-32 h-32 shadow-xl cursor-pointer"
+              alt="Open"
+            />
           )}
-        </div>
-        <PopoverFooter activeTab={activeTab} setActiveTab={setActiveTab} />
-      </PopoverContent>
-    </Popover>
+        </PopoverTrigger>
+        <PopoverContent
+          className="bg-white opacity-100 rounded-3xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[350px] h-[550px]"
+          side="top"
+        >
+          <div className="bg-white w-full rounded-3xl z-10">
+            <div className="w-full flex items-center justify-between px-5 pt-8 pb-6">
+              <div className="items-center justify-center font-bold text-3xl">
+                {activeTab === 'VIDEO'
+                  ? '온라인 강의 목록'
+                  : activeTab === 'ASSIGN'
+                    ? '과제 목록'
+                    : activeTab === 'QUIZ'
+                      ? '퀴즈 목록'
+                      : '오류'}
+              </div>
+              <div className="flex justify-center items-center">
+                {/* refreshTime 대신 남은 시간을 표시 */}
+                <span
+                  className={`text-sm px-1 ${
+                    // 필요에 따라 색상 조건은 수정 가능 (예시로 30분 기준)
+                    remainingTime < 60
+                      ? Math.round(remainingTime) >= 30
+                        ? 'text-amber-500 font-semibold'
+                        : 'text-zinc-400'
+                      : Math.floor(remainingTime / 60) >= 1
+                        ? 'text-amber-500 font-semibold'
+                        : 'text-zinc-400'
+                  }`}
+                >
+                  {remainingTime < 60
+                    ? `${Math.round(remainingTime)}분 전`
+                    : `${Math.floor(remainingTime / 60)}시간 전`}
+                </span>
+                <button
+                  className={`flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1 ${(isPending || remainingTime <= 5) && 'cursor-not-allowed'}`}
+                  disabled={isPending || remainingTime <= 5}
+                  onClick={() => {
+                    if (isPending || remainingTime <= 5) return;
+                    setIsPending(true);
+                    updateData();
+                  }}
+                >
+                  <RefreshCw className="w-8 h-8 p-0" />
+                </button>
+              </div>
+            </div>
+            <div className="mb-2 flex px-5 relative py-0">
+              <Search className="absolute left-9 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder={`검색`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                autoFocus={true}
+                className="bg-zinc-50 rounded-xl border border-zinc-300 w-full text-lg h-12 pl-12 pr-4 placeholder-gray-400 font-medium py-0 outline-none focus:ring-0 focus:border-zinc-300 focus:bg-slate-50 transition-all duration-200"
+              />
+            </div>
+            <div className="flex w-full items-center pl-5 my-1">
+              <div className="whitespace-nowrap space-x-2 overflow-x-auto flex-1 min-w-0 flex overscroll-none">
+                {filters[activeTab].courseTitles.map((title) => (
+                  <FilterBadge key={`course-${title}`} label={title} onRemove={() => handleCourseTitleChange(title)} />
+                ))}
+                {activeTab === 'VIDEO' &&
+                  filters[activeTab].attendanceStatuses &&
+                  filters[activeTab].attendanceStatuses.map((status) => (
+                    <FilterBadge
+                      key={`attendance-${status}`}
+                      label={status}
+                      onRemove={() => handleAttendanceFilterChange(status)}
+                    />
+                  ))}
+                {activeTab === 'ASSIGN' &&
+                  filters[activeTab].submitStatuses &&
+                  filters[activeTab].submitStatuses.map((status) => (
+                    <FilterBadge
+                      key={`submit-${status}`}
+                      label={status ? '제출완료' : '제출필요'}
+                      onRemove={() => handleSubmitFilterChange(status)}
+                    />
+                  ))}
+              </div>
+
+              {/* 고정된 필터 아이콘 영역 */}
+              <div className="flex flex-shrink-0 ml-2">
+                <Popover open={isFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      onClick={() => setIsFilterOpen((prev) => !prev)}
+                      className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mb-2 mr-5 ml-2 p-2"
+                    >
+                      {isFilterSet ? (
+                        <img src={filter} className="w-9 h-9 p-0" alt="필터 설정됨" />
+                      ) : (
+                        <ListFilter className="w-9 h-9 p-0" />
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 shadow-md rounded-xl p-4 space-y-2">
+                    <FilterPanel
+                      filters={filters}
+                      activeTab={activeTab}
+                      courseTitlesMap={courseTitlesMap}
+                      handleCourseTitleChange={handleCourseTitleChange}
+                      handleAttendanceFilterChange={handleAttendanceFilterChange}
+                      handleSubmitFilterChange={handleSubmitFilterChange}
+                      attendanceOptions={attendanceOptions}
+                      submitOptions={submitOptions}
+                    />
+                    <Button
+                      className="w-full text-xl h-12 font-semibold"
+                      variant={'outline'}
+                      onClick={() => {
+                        clearFilters();
+                      }}
+                    >
+                      모두 지우기
+                    </Button>
+                    <Button
+                      className="w-full text-xl h-12 font-semibold"
+                      variant={'default'}
+                      onClick={() => setIsFilterOpen(false)}
+                    >
+                      닫기
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full px-5 py-4 overflow-y-scroll overscroll-none h-[480px]">
+            {isPending ? (
+              <div className="flex justify-center items-center h-full">
+                <Spinner className="h-8 w-8" />
+              </div>
+            ) : (
+              <>
+                {activeTab === 'VIDEO' && <Video courseData={filteredVods} />}
+                {activeTab === 'ASSIGN' && <Assignment courseData={filteredAssigns} />}
+                {activeTab === 'QUIZ' && <QuizTab courseData={filteredQuizes} />}
+              </>
+            )}
+          </div>
+          <PopoverFooter activeTab={activeTab} setActiveTab={setActiveTab} />
+        </PopoverContent>
+      </Popover>
     </>
   );
 }

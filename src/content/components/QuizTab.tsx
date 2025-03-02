@@ -61,6 +61,7 @@ export default function QuizTab({ courseData }: Props) {
                     paddingBottom: '1px',
                     paddingLeft: '4px',
                     paddingRight: '4px',
+                    zIndex: '9999',
                   }}
                 >
                   {calculateRemainingTime(course.dueDate)}

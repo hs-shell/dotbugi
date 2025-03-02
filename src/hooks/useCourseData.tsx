@@ -32,52 +32,52 @@ export function useCourseData(courses: any[]) {
 
           result.vodDataArray.forEach((vodData) => {
             if (isCurrentDateInRange(vodData.range)) {
-            result.vodAttendanceArray.forEach((vodAttendanceData) => {
-              if (vodAttendanceData.title === vodData.title && vodAttendanceData.week === vodData.week) {
-                tempVods.push({
-                  courseId: course.courseId,
-                  prof: course.prof,
-                  courseTitle: course.courseTitle,
-                  week: vodAttendanceData.week,
-                  title: vodAttendanceData.title,
-                  isAttendance: vodAttendanceData.isAttendance,
-                  weeklyAttendance: vodAttendanceData.weeklyAttendance,
-                  length: vodData.length,
-                  range: vodData.range,
-                  subject: vodData.subject,
-                  url: vodData.url,
-                });
-              }
-            });
+              result.vodAttendanceArray.forEach((vodAttendanceData) => {
+                if (vodAttendanceData.title === vodData.title && vodAttendanceData.week === vodData.week) {
+                  tempVods.push({
+                    courseId: course.courseId,
+                    prof: course.prof,
+                    courseTitle: course.courseTitle,
+                    week: vodAttendanceData.week,
+                    title: vodAttendanceData.title,
+                    isAttendance: vodAttendanceData.isAttendance,
+                    weeklyAttendance: vodAttendanceData.weeklyAttendance,
+                    length: vodData.length,
+                    range: vodData.range,
+                    subject: vodData.subject,
+                    url: vodData.url,
+                  });
+                }
+              });
             }
           });
 
           result.assignDataArray.forEach((assignData) => {
             if (isCurrentDateByDate(assignData.dueDate)) {
-            tempAssigns.push({
-              courseId: course.courseId,
-              prof: course.prof,
-              courseTitle: course.courseTitle,
-              subject: assignData.subject,
-              title: assignData.title,
-              dueDate: assignData.dueDate,
-              isSubmit: assignData.isSubmit,
-              url: assignData.url,
-            });
+              tempAssigns.push({
+                courseId: course.courseId,
+                prof: course.prof,
+                courseTitle: course.courseTitle,
+                subject: assignData.subject,
+                title: assignData.title,
+                dueDate: assignData.dueDate,
+                isSubmit: assignData.isSubmit,
+                url: assignData.url,
+              });
             }
           });
 
           result.quizDataArray.forEach((quizData) => {
             if (isCurrentDateByDate(quizData.dueDate)) {
-            tempQuizes.push({
-              courseId: course.courseId,
-              prof: course.prof,
-              courseTitle: course.courseTitle,
-              subject: quizData.subject,
-              title: quizData.title,
-              dueDate: quizData.dueDate,
-              url: quizData.url,
-            });
+              tempQuizes.push({
+                courseId: course.courseId,
+                prof: course.prof,
+                courseTitle: course.courseTitle,
+                subject: quizData.subject,
+                title: quizData.title,
+                dueDate: quizData.dueDate,
+                url: quizData.url,
+              });
             }
           });
         })
@@ -142,5 +142,5 @@ export function useCourseData(courses: any[]) {
       });
     }
   }, [courses, updateData]);
-    return { vods, assigns, quizes, isPending, remainingTime, refreshTime, updateData, setIsPending };
+  return { vods, assigns, quizes, isPending, remainingTime, refreshTime, updateData, setIsPending };
 }
