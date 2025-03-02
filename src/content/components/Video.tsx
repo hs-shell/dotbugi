@@ -128,6 +128,7 @@ export default function Video({ courseData }: Props) {
                     paddingBottom: '1px',
                     paddingLeft: '4px',
                     paddingRight: '4px',
+                    zIndex: '9999',
                   }}
                 >
                   {calculateRemainingTimeByRange(vods[0].range)}

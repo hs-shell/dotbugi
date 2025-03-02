@@ -62,6 +62,7 @@ export default function Assignment({ courseData }: Props) {
                     paddingLeft: '4px',
                     paddingRight: '4px',
                     clipPath: 'inset(0 0 0 0);',
+                    zIndex: '9999',
                   }}
                 >
                   {calculateRemainingTime(course.dueDate)}
