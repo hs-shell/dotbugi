@@ -46,16 +46,6 @@ function getRangePosition(day: Date, event: CalendarEvent): 'single' | 'start' |
   return 'middle';
 }
 
-// const colorClasses = [
-//   'bg-red-100 text-red-700',
-//   'bg-orange-100 text-orange-700',
-//   'bg-yellow-100 text-yellow-700',
-//   'bg-green-100 text-green-700',
-//   'bg-blue-100 text-blue-700',
-//   'bg-indigo-100 text-indigo-700',
-//   'bg-purple-100 text-purple-700',
-//   'bg-pink-100 text-pink-700',
-// ];
 const colorClasses = [
   'bg-rose-100 text-rose-800',
   'bg-amber-100 text-amber-800',
@@ -133,6 +123,20 @@ export function Calendar() {
     }
   };
 
+  // 모든 이벤트에서 고유한 과목(여기서는 event.title)을 추출해 고정 순서와 색상을 부여
+  const subjectList = useMemo(() => {
+    return Array.from(new Set(events.map((event) => event.title)));
+  }, [events]);
+
+  const subjectColorMap = useMemo(() => {
+    const map: { [key: string]: string } = {};
+    subjectList.forEach((subject, index) => {
+      map[subject] = colorClasses[index % colorClasses.length];
+    });
+    return map;
+  }, [subjectList]);
+
+  // 날짜에 해당하는 이벤트들을 필터
   const renderEvents = (day: Date, isCurrent: boolean) => {
     const typeFilterValues = typeFilters.map((f) => f.value);
     const selectedTypeFilters = selectedFilters.filter((f) => typeFilterValues.includes(f));
@@ -140,7 +144,6 @@ export function Calendar() {
 
     const eventsOfTheDay = events.filter((event) => {
       if (!isInEventRange(day, event)) return false;
-
       if (selectedTypeFilters.length > 0 && selectedTitleFilters.length > 0) {
         return selectedTypeFilters.includes(event.type) && selectedTitleFilters.includes(event.title);
       } else if (selectedTypeFilters.length > 0) {
@@ -151,60 +154,62 @@ export function Calendar() {
       return true;
     });
 
-    if (eventsOfTheDay.length === 0) return null;
-
+    // 렌더링할 행의 수는 subjectList의 개수로 고정
     return (
       <div className="flex flex-col gap-1 mt-1 w-full">
-        {eventsOfTheDay.map((event, index) => {
-          const rangePosition = getRangePosition(day, event);
-          if (!rangePosition) return null;
-
-          if (rangePosition === 'single') {
+        {subjectList.map((subject) => {
+          // 해당 과목의 이벤트가 오늘 포함되는지 체크 (여러 이벤트가 있다면 첫 번째만 사용)
+          const event = eventsOfTheDay.find((e) => e.title === subject);
+          if (event) {
+            const rangePosition = getRangePosition(day, event);
+            if (!rangePosition) return <div key={subject} className="h-4" />;
+            if (rangePosition === 'single') {
+              return (
+                <div key={subject} className="flex items-center px-1 w-full">
+                  <span className="px-0.5 flex-shrink-0">
+                    {event.type === 'assign' ? (
+                      <NotebookText className={`w-3 h-3 ${isCurrent ? 'text-violet-900' : ''}`} />
+                    ) : (
+                      <Zap className={`w-3 h-3 ${isCurrent ? 'text-amber-500' : ''}`} />
+                    )}
+                  </span>
+                  <span className="flex-1 text-xs whitespace-nowrap overflow-hidden text-ellipsis">
+                    {event.title} - {event.subject}
+                  </span>
+                </div>
+              );
+            }
+            const isStart = rangePosition === 'start';
+            const isEnd = rangePosition === 'end';
+            const showTitle = isStart;
             return (
-              <div key={event.id} className="flex items-center px-1 w-full">
-                <span className="px-0.5 flex-shrink-0">
-                  {event.type === 'assign' ? (
-                    <NotebookText className={`w-3 h-3 ${isCurrent ? 'text-violet-900' : ''}`} />
-                  ) : (
-                    <Zap className={`w-3 h-3 ${isCurrent ? 'text-amber-500' : ''}`} />
-                  )}
-                </span>
-                <span className="flex-1 text-xs whitespace-nowrap overflow-hidden text-ellipsis">
-                  {event.title} - {event.subject}
-                </span>
+              <div
+                key={subject}
+                className={cn(
+                  isCurrent ? `${subjectColorMap[subject]} text-zinc-700` : 'bg-zinc-100 text-zinc-300',
+                  'relative h-4 flex items-center justify-start z-10',
+                  isStart && 'rounded-l-sm ml-1',
+                  isEnd && 'rounded-r-sm mr-1'
+                )}
+              >
+                {showTitle && (
+                  <span className="ml-1 text-xs font-medium line-clamp-1 text-ellipsis px-1 overflow-hidden">
+                    {event.title} - {event.subject}
+                  </span>
+                )}
               </div>
             );
+          } else {
+            // 해당 과목의 이벤트가 없으면 빈 자리로 남겨 고정된 높이를 유지
+            return <div key={subject} className="h-4" />;
           }
-
-          const isStart = rangePosition === 'start';
-          const isEnd = rangePosition === 'end';
-          const showTitle = isStart;
-
-          return (
-            <div
-              key={event.id}
-              className={cn(
-                isCurrent ? `${colorClasses[index % 8]} text-zinc-700` : 'bg-zinc-100 text-zinc-300',
-                'relative h-4 flex items-center justify-start z-10',
-                isStart && 'rounded-l-sm ml-1',
-                isEnd && 'rounded-r-sm mr-1'
-              )}
-            >
-              {showTitle && (
-                <span className="ml-1 text-xs font-medium line-clamp-1 text-ellipsis px-1 overflow-hidden">
-                  {event.title} - {event.subject}
-                </span>
-              )}
-            </div>
-          );
         })}
       </div>
     );
   };
 
   return (
-    <Card className="p-0 w-full max-w-7xl border-none shadow-none">
-      {/* 상단 네비게이션 및 필터 Popover */}
+    <Card className="px-4 p-0 w-full border-none shadow-none">
       <div className="flex items-center justify-between my-8 gap-4">
         <div />
         <div className="flex items-center gap-4">
@@ -225,7 +230,6 @@ export function Calendar() {
                 className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mt-2 mb-2 mr-5 ml-2 py-3 px-5"
               >
                 {isFilterSet ? (
-                  // 필터가 설정되었을 때 (필요한 경우 이미지 경로를 수정)
                   <img src={filter} className="w-5 h-5 p-0" alt="필터 설정됨" />
                 ) : (
                   <ListFilter className="w-5 h-5 p-0" />
@@ -235,7 +239,7 @@ export function Calendar() {
             <PopoverContent className="w-64 shadow-md rounded-xl p-4 space-y-2">
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {filterOptions.map((option) => (
-                  <div className="flex items-center space-x-3">
+                  <div key={option.value} className="flex items-center space-x-3">
                     <div className="relative flex items-center justify-center">
                       <input
                         type="checkbox"
