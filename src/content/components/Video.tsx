@@ -102,7 +102,12 @@ export default function Video({ courseData }: Props) {
                         {vod.title}
                       </div>
                       <div className="font-light text-zinc-500 text-ellipsis line-clamp-1" style={{ fontSize: 10 }}>
-                        {formatDateString(vod.range)}, <span className="font-medium text-amber-500">{vod.length}</span>
+                        {formatDateString(vod.range)},{' '}
+                        <span
+                          className={`font-medium ${vod.isAttendance.toLowerCase() === 'o' ? 'text-green-500' : 'text-amber-500'} `}
+                        >
+                          {vod.length}
+                        </span>
                       </div>
                     </div>
                   );
