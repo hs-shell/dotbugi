@@ -18,6 +18,7 @@ import FilterPanel from './components/FilterPanel';
 import { useCourseData } from '@/hooks/useCourseData';
 import { filterVods, filterAssigns, filterQuizes } from '@/lib/filterData';
 import PendingDialogWithBeforeUnload from './components/PendingDialog';
+import StickyPopoverTrigger from './StickyPopoverTrigger';
 
 // 리팩토링: 필터 옵션 추출
 const attendanceOptions = ['출석', '결석']; // string[]
@@ -165,34 +166,37 @@ export default function App() {
     <>
       <PendingDialogWithBeforeUnload isPending={isPending} onClose={() => {}} />
       <Popover open={isOpen}>
-        <PopoverTrigger asChild className="transition-all duration-1000 justify-self-end">
-          {isOpen ? (
-            <img
-              src={exit}
-              onClick={(e) => {
-                setIsOpen(!isOpen);
-                e.preventDefault();
-              }}
-              draggable={false}
-              className="rounded-2xl w-32 h-32 shadow-xl cursor-pointer"
-              alt="Close"
-            />
-          ) : (
-            <img
-              src={icon}
-              onClick={(e) => {
-                setIsOpen(!isOpen);
-                e.preventDefault();
-              }}
-              draggable={false}
-              className="rounded-2xl w-32 h-32 shadow-xl cursor-pointer"
-              alt="Open"
-            />
-          )}
-        </PopoverTrigger>
+        <StickyPopoverTrigger>
+          <PopoverTrigger asChild className="transition-all duration-1000 justify-self-end">
+            {isOpen ? (
+              <img
+                src={exit}
+                onClick={(e) => {
+                  setIsOpen(!isOpen);
+                  e.preventDefault();
+                }}
+                draggable={false}
+                className="rounded-2xl w-32 h-32 shadow-2xl shadow-zinc-900 cursor-pointer"
+                alt="Close"
+              />
+            ) : (
+              <img
+                src={icon}
+                onClick={(e) => {
+                  setIsOpen(!isOpen);
+                  e.preventDefault();
+                }}
+                draggable={false}
+                className="rounded-2xl w-32 h-32 shadow-2xl shadow-zinc-900 cursor-pointer"
+                alt="Open"
+              />
+            )}
+          </PopoverTrigger>
+        </StickyPopoverTrigger>
         <PopoverContent
-          className="bg-white opacity-100 rounded-3xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[350px] h-[550px]"
+          className="bg-white opacity-100 rounded-3xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[350px] h-[550px] translate-x-[-8px]"
           side="top"
+          sideOffset={8}
         >
           <div className="bg-white w-full rounded-3xl z-10">
             <div className="w-full flex items-center justify-between px-5 pt-8 pb-6">
