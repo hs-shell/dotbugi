@@ -69,6 +69,26 @@ export default function Video({ courseData }: Props) {
     <div className="space-y-4">
       {sortedVodGroups.map((vods, index) => {
         if (!vods || vods.length === 0) return null;
+
+        const sortedVods = vods.slice().sort((a, b) => {
+          const isAX = a.isAttendance.toUpperCase().startsWith('X');
+          const isBX = b.isAttendance.toUpperCase().startsWith('X');
+          if (isAX && !isBX) return -1;
+          if (!isAX && isBX) return 1;
+
+          const rangeStartA = a.range.split(' ~ ')[0];
+          const rangeStartB = b.range.split(' ~ ')[0];
+          const dateA = new Date(rangeStartA);
+          const dateB = new Date(rangeStartB);
+          if (dateA < dateB) return -1;
+          if (dateA > dateB) return 1;
+
+          if (a.courseTitle < b.courseTitle) return -1;
+          if (a.courseTitle > b.courseTitle) return 1;
+
+          return 0;
+        });
+
         const item = vods[0];
         let isDueDateSame = true;
         const timeDifference = calculateTimeDifference(item.range);
@@ -91,7 +111,7 @@ export default function Video({ courseData }: Props) {
             </CardHeader>
             {isExpanded && (
               <CardContent className="p-0">
-                {vods.map((vod, vodIndex) => {
+                {sortedVods.map((vod, vodIndex) => {
                   return (
                     <div
                       key={vodIndex}
