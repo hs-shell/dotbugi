@@ -1,3 +1,5 @@
+@import url('./fonts.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,7 +12,6 @@
 @layer base {
   /* ====== 전역 스타일이었던 부분을 모두 :host로 치환 ====== */
   :host {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
 
