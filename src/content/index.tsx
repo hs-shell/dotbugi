@@ -13,6 +13,17 @@ if (footer && url === 'https://learn.hansung.ac.kr/') {
   if (backtop) backtop.remove();
 
   footer.style.paddingBottom = '24px';
+
+  const placeholder = document.createElement('div');
+  placeholder.id = 'footer-placeholder';
+  placeholder.style.display = 'block';
+  placeholder.style.position = 'relative';
+  placeholder.style.bottom = '8px';
+  placeholder.style.zIndex = '10';
+  placeholder.style.height = '80px';
+  placeholder.style.backgroundColor = 'transparent';
+  footer.prepend(placeholder);
+
   const host = document.createElement('div');
   host.id = 'extension-content-root';
   host.style.display = 'block';
@@ -20,7 +31,7 @@ if (footer && url === 'https://learn.hansung.ac.kr/') {
   host.style.bottom = '8px';
   host.style.zIndex = '100';
   host.style.backgroundColor = 'transparent';
-  footer.prepend(host);
+  placeholder.append(host);
 
   const shadowRoot = createShadowRoot(host, [styles]);
 
