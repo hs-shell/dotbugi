@@ -28,8 +28,12 @@ const manifest = {
     },
   ],
   options_page: '/option.html',
-  permissions: ['storage', 'notifications', 'alarms'],
+  permissions: ['storage', 'notifications', 'alarms', 'identity'],
   host_permissions: ['https://*/*', 'http://*/*'],
+  oauth2: {
+    client_id: '804067218183-3pev3tppten6i94lrfvmk729hmbdejqb.apps.googleusercontent.com',
+    scopes: ['https://www.googleapis.com/auth/calendar.events'],
+  },
 } as ManifestV3Export;
 
 export default manifest;

@@ -15,13 +15,22 @@ import {
   addDays,
   isSunday,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, NotebookText, Zap, ListFilter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, NotebookText, Zap, ListFilter, CalendarArrowUp } from 'lucide-react';
 import useCalendarEvents, { CalendarEvent } from '@/hooks/useCalendarEvents';
 import filter from '@/assets/filter.svg';
-import FilterItem from '@/content/components/FilterItem';
 import { Label } from '@/components/ui/label';
 
-// 날짜가 동일한지 비교
+// 새 이벤트 동기화 관련 유틸리티 함수 (각자 환경에 맞게 구현)
+import {
+  getOAuthToken,
+  addCalendarEvent,
+  getCalendarEvents,
+  convertCalendarEventsToGoogleEvents,
+  GoogleCalendarEvent,
+} from '@/lib/calendarUtils';
+import { toast } from '@/hooks/use-toast';
+
+// 날짜 비교
 function isSameDate(d1: Date, d2: Date) {
   return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 }
@@ -44,6 +53,16 @@ function getRangePosition(day: Date, event: CalendarEvent): 'single' | 'start' |
   if (isSameDate(day, event.start)) return 'start';
   if (isSameDate(day, event.end)) return 'end';
   return 'middle';
+}
+
+// 이벤트 간 겹침 여부 (두 이벤트의 기간이 겹치면 true)
+function eventsOverlap(a: CalendarEvent, b: CalendarEvent) {
+  return a.start <= b.end && b.start <= a.end;
+}
+
+// row 배정을 위해 CalendarEvent에 row 속성을 추가한 타입 정의
+interface CalendarEventWithRow extends CalendarEvent {
+  row: number;
 }
 
 const colorClasses = [
@@ -123,7 +142,23 @@ export function Calendar() {
     }
   };
 
-  // 모든 이벤트에서 고유한 과목(여기서는 event.title)을 추출해 고정 순서와 색상을 부여
+  // ── 이벤트에 row 번호를 할당 (겹치는 이벤트는 다른 row에 배치) ──
+  const eventsWithRow = useMemo(() => {
+    // 날짜 기준 오름차순 정렬
+    const sorted = [...events].sort((a, b) => a.start.getTime() - b.start.getTime());
+    const assigned: CalendarEventWithRow[] = [];
+    for (const event of sorted) {
+      let row = 0;
+      // 이미 배정된 이벤트 중 같은 row에 있으며 겹치는 이벤트가 있으면 row 증가
+      while (assigned.some((e) => e.row === row && eventsOverlap(e, event))) {
+        row++;
+      }
+      assigned.push({ ...event, row });
+    }
+    return assigned;
+  }, [events]);
+
+  // subject 별 색상 매핑 (이전과 동일하게 event.title 기준)
   const subjectList = useMemo(() => {
     return Array.from(new Set(events.map((event) => event.title)));
   }, [events]);
@@ -136,13 +171,14 @@ export function Calendar() {
     return map;
   }, [subjectList]);
 
-  // 날짜에 해당하는 이벤트들을 필터
+  // 날짜에 해당하는 이벤트들을 row 번호 기준으로 렌더링
   const renderEvents = (day: Date, isCurrent: boolean) => {
     const typeFilterValues = typeFilters.map((f) => f.value);
     const selectedTypeFilters = selectedFilters.filter((f) => typeFilterValues.includes(f));
     const selectedTitleFilters = selectedFilters.filter((f) => !typeFilterValues.includes(f));
 
-    const eventsOfTheDay = events.filter((event) => {
+    // 필터 적용
+    const eventsOfTheDay = eventsWithRow.filter((event) => {
       if (!isInEventRange(day, event)) return false;
       if (selectedTypeFilters.length > 0 && selectedTitleFilters.length > 0) {
         return selectedTypeFilters.includes(event.type) && selectedTitleFilters.includes(event.title);
@@ -154,24 +190,27 @@ export function Calendar() {
       return true;
     });
 
-    // 렌더링할 행의 수는 subjectList의 개수로 고정
+    // 해당 날짜에서 할당된 row 최대값 (없으면 최소 0행)
+    const maxRow = eventsOfTheDay.length > 0 ? Math.max(...eventsOfTheDay.map((e) => e.row)) : -1;
+    const numRows = maxRow + 1;
+
     return (
       <div className="flex flex-col gap-1 mt-1 w-full">
-        {subjectList.map((subject) => {
-          // 해당 과목의 이벤트가 오늘 포함되는지 체크 (여러 이벤트가 있다면 첫 번째만 사용)
-          const event = eventsOfTheDay.find((e) => e.title === subject);
+        {Array.from({ length: numRows }, (_, rowIndex) => {
+          // 해당 row에 있는 이벤트 찾기
+          const event = eventsOfTheDay.find((e) => e.row === rowIndex);
           if (event) {
             const rangePosition = getRangePosition(day, event);
-            if (!rangePosition) return <div key={subject} className="h-4" />;
+            if (!rangePosition) return <div key={rowIndex} className="h-4" />;
             if (rangePosition === 'single') {
               return (
-                <div key={subject} className="flex items-center px-1 w-full">
+                <div key={rowIndex} className="flex items-center px-1 w-full">
                   <span className="px-0.5 flex-shrink-0">
                     {event.type === 'assign' ? (
                       <NotebookText className={`w-3 h-3 ${isCurrent ? 'text-violet-900' : ''}`} />
-                    ) : (
+                    ) : event.type === 'quiz' ? (
                       <Zap className={`w-3 h-3 ${isCurrent ? 'text-amber-500' : ''}`} />
-                    )}
+                    ) : null}
                   </span>
                   <span className="flex-1 text-xs whitespace-nowrap overflow-hidden text-ellipsis">
                     {event.title} - {event.subject}
@@ -184,9 +223,9 @@ export function Calendar() {
             const showTitle = isStart;
             return (
               <div
-                key={subject}
+                key={rowIndex}
                 className={cn(
-                  isCurrent ? `${subjectColorMap[subject]} text-zinc-700` : 'bg-zinc-100 text-zinc-300',
+                  isCurrent ? `${subjectColorMap[event.title]} text-zinc-700` : 'bg-zinc-100 text-zinc-300',
                   'relative h-4 flex items-center justify-start z-10',
                   isStart && 'rounded-l-sm ml-1',
                   isEnd && 'rounded-r-sm mr-1'
@@ -200,12 +239,54 @@ export function Calendar() {
               </div>
             );
           } else {
-            // 해당 과목의 이벤트가 없으면 빈 자리로 남겨 고정된 높이를 유지
-            return <div key={subject} className="h-4" />;
+            // 해당 row에 이벤트가 없으면 빈 자리
+            return <div key={rowIndex} className="h-4" />;
           }
         })}
       </div>
     );
+  };
+
+  const handleCalendarSync = async () => {
+    const token = await getOAuthToken();
+    if (!token) {
+      toast({
+        title: '동기화 실패 🚨',
+        description: '구글 캘린더 연동 상태를 확인해주세요',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const existingEvents: GoogleCalendarEvent[] = await getCalendarEvents(token);
+
+      const newEventsData: GoogleCalendarEvent[] = convertCalendarEventsToGoogleEvents(events);
+
+      const uniqueNewEvents = newEventsData.filter(
+        (newEvent) =>
+          !existingEvents.some(
+            (event) => event.summary === newEvent.summary && event.description === newEvent.description
+          )
+      );
+
+      for (const event of uniqueNewEvents) {
+        await addCalendarEvent(event, token);
+      }
+
+      toast({
+        title: '동기화 성공 🚀',
+        description: `${uniqueNewEvents.length}개의 이벤트가 추가되었습니다.`,
+        variant: 'default',
+      });
+    } catch (error) {
+      toast({
+        title: '동기화 오류 🚨',
+        description: '이벤트 동기화 중 오류가 발생했습니다.',
+        variant: 'destructive',
+      });
+      console.error(error);
+    }
   };
 
   return (
@@ -222,66 +303,77 @@ export function Calendar() {
           </Button>
         </div>
 
-        <div className="flex flex-shrink-0 ml-2 items-center">
-          <Popover open={isFilterOpen}>
-            <PopoverTrigger asChild>
-              <button
-                onClick={() => setIsFilterOpen((prev) => !prev)}
-                className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mt-2 mb-2 mr-5 ml-2 py-3 px-5"
-              >
-                {isFilterSet ? (
-                  <img src={filter} className="w-5 h-5 p-0" alt="필터 설정됨" />
-                ) : (
-                  <ListFilter className="w-5 h-5 p-0" />
-                )}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 shadow-md rounded-xl p-4 space-y-2">
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {filterOptions.map((option) => (
-                  <div key={option.value} className="flex items-center space-x-3">
-                    <div className="relative flex items-center justify-center">
-                      <input
-                        type="checkbox"
+        <div className="flex justify-between">
+          <div>
+            {/* 캘린더 동기화 버튼 (클릭 시 OAuth 토큰 체크 후, 새 이벤트 추가) */}
+            <button
+              className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mt-2 mb-2 ml-2 py-3 px-5"
+              onClick={handleCalendarSync}
+            >
+              <CalendarArrowUp className="w-5 h-5 p-0" />
+            </button>
+          </div>
+          <div className="flex flex-shrink-0 items-center">
+            <Popover open={isFilterOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  onClick={() => setIsFilterOpen((prev) => !prev)}
+                  className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mt-2 mb-2 mr-5 ml-2 py-3 px-5"
+                >
+                  {isFilterSet ? (
+                    <img src={filter} className="w-5 h-5 p-0" alt="필터 설정됨" />
+                  ) : (
+                    <ListFilter className="w-5 h-5 p-0" />
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 shadow-md rounded-xl p-4 space-y-2">
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {filterOptions.map((option) => (
+                    <div key={option.value} className="flex items-center space-x-3">
+                      <div className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          id={`filter-${option.value}`}
+                          checked={selectedFilters.includes(option.value)}
+                          onChange={() => toggleFilter(option.value)}
+                          className="shadow-md rounded-sm peer h-5 w-5 cursor-pointer appearance-none border border-zinc-800 bg-white checked:border-primary checked:bg-primary focus:outline-none focus:ring-primary focus:ring-offset-0"
+                        />
+                        <svg
+                          className="pointer-events-none absolute h-3 w-3 text-white opacity-0 peer-checked:opacity-100"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </div>
+                      <Label
                         id={`filter-${option.value}`}
-                        checked={selectedFilters.includes(option.value)}
-                        onChange={() => toggleFilter(option.value)}
-                        className="shadow-md rounded-sm peer h-5 w-5 cursor-pointer appearance-none border border-zinc-800 bg-white checked:border-primary checked:bg-primary focus:outline-none focus:ring-primary focus:ring-offset-0"
-                      />
-                      <svg
-                        className="pointer-events-none absolute h-3 w-3 text-white opacity-0 peer-checked:opacity-100"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        className="text-base font-normal text-black cursor-pointer transition-colors line-clamp-1 text-ellipsis"
                       >
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
+                        {option.label}
+                      </Label>
                     </div>
-                    <Label
-                      id={`filter-${option.value}`}
-                      className="text-base font-normal text-black cursor-pointer transition-colors line-clamp-1 text-ellipsis"
-                    >
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-              <Button className="w-full text-base h-8 font-semibold mt-1" variant="outline" onClick={clearFilters}>
-                모두 지우기
-              </Button>
-              <Button
-                className="w-full text-base h-8 font-semibold"
-                variant="default"
-                onClick={() => setIsFilterOpen(false)}
-              >
-                닫기
-              </Button>
-            </PopoverContent>
-          </Popover>
+                  ))}
+                </div>
+                <Button className="w-full text-base h-8 font-semibold mt-1" variant="outline" onClick={clearFilters}>
+                  모두 지우기
+                </Button>
+                <Button
+                  className="w-full text-base h-8 font-semibold"
+                  variant="default"
+                  onClick={() => setIsFilterOpen(false)}
+                >
+                  닫기
+                </Button>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
 

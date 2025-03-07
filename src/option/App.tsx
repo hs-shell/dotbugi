@@ -8,6 +8,7 @@ import AssignmentPage from 'src/pages/AssignmentPage';
 import DashboardPage from '@/pages/DashboardPage';
 import QuizPage from '@/pages/QuizPage';
 import Header from './Header';
+import Labo from './Labo';
 
 const pageVariants = {
   initial: {
@@ -48,6 +49,7 @@ const AnimatedRoutes = () => {
           <Route path="/vod" element={<VodPage />} />
           <Route path="/assignment" element={<AssignmentPage />} />
           <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/labo" element={<Labo />} />
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
       </motion.div>
