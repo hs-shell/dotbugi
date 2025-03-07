@@ -36,7 +36,6 @@ export const getOAuthToken = async (): Promise<string | null> => {
  * @param token OAuth 토큰
  */
 export async function addCalendarEvent(event: GoogleCalendarEvent, token: string): Promise<void> {
-  console.log(event);
   try {
     fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
       method: 'POST',

@@ -24,7 +24,7 @@ const Labo: React.FC = () => {
   useEffect(() => {
     chrome.identity.getAuthToken({ interactive: false }, (cachedToken) => {
       if (chrome.runtime.lastError || !cachedToken) {
-        console.log('자동 로그인 실패:', chrome.runtime.lastError?.message);
+        console.error('자동 로그인 실패:', chrome.runtime.lastError?.message);
       } else {
         setToken(cachedToken);
         fetchCalendarEvents(cachedToken);

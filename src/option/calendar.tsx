@@ -274,11 +274,19 @@ export function Calendar() {
         await addCalendarEvent(event, token);
       }
 
-      toast({
-        title: '동기화 성공 🚀',
-        description: `${uniqueNewEvents.length}개의 이벤트가 추가되었습니다.`,
-        variant: 'default',
-      });
+      if (uniqueNewEvents.length === 0) {
+        toast({
+          title: '캘린더가 최신 상태입니다 🤩',
+          description: '이미 최신 정보로 동기화되었습니다.',
+          variant: 'default',
+        });
+      } else {
+        toast({
+          title: '동기화 성공 🚀',
+          description: `${uniqueNewEvents.length}개의 이벤트가 추가되었습니다.`,
+          variant: 'default',
+        });
+      }
     } catch (error) {
       toast({
         title: '동기화 오류 🚨',
