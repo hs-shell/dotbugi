@@ -1,4 +1,4 @@
-import { Calendar } from '@/option/calendar';
+import { Calendar } from '@/option/Calendar';
 import SummaryCard from '@/option/SummaryCard';
 export default function DashboardPage() {
   return (

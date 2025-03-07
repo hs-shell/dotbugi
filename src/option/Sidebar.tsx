@@ -1,4 +1,4 @@
-import { Home, LayoutDashboard, NotebookText, NotepadText, Video, Zap } from 'lucide-react';
+import { Calendar, Home, LayoutDashboard, NotebookText, NotepadText, Video, Zap } from 'lucide-react';
 import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import icon from '@/assets/icon.png';
@@ -28,16 +28,30 @@ const Sidebar: React.FC = () => {
         </div>
 
         <nav className="flex flex-col flex-grow">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">메인</div>
+          <div className="flex items-center mt-6 mb-2">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider pr-2">메인</div>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
           <ul className="space-y-2">
             <SidebarItem to="/" icon={<LayoutDashboard size={20} />} label="대시보드" />
           </ul>
 
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-8 mb-4">항목</div>
+          <div className="flex items-center mt-6 mb-2">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider pr-2">할 일</div>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
           <ul className="space-y-2">
             <SidebarItem to="/vod" icon={<Video size={20} />} label="강의" />
             <SidebarItem to="/assignment" icon={<NotebookText size={20} />} label="과제" />
             <SidebarItem to="/quiz" icon={<Zap size={20} />} label="퀴즈" />
+          </ul>
+          <div className="flex items-center mt-6 mb-2">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider pr-2">실험실</div>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+
+          <ul className="space-y-2">
+            <SidebarItem to="/labo" icon={<Calendar size={20} />} label="캘린더 연동" />
           </ul>
         </nav>
       </div>
