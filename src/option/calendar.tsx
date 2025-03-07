@@ -263,16 +263,32 @@ export function Calendar() {
 
       const newEventsData: GoogleCalendarEvent[] = convertCalendarEventsToGoogleEvents(events);
 
-      const uniqueNewEvents = newEventsData.filter(
-        (newEvent) =>
-          !existingEvents.some(
-            (event) => event.summary === newEvent.summary && event.description === newEvent.description
-          )
-      );
+      const normalizeEvent = (event: {
+        summary: string;
+        description?: string;
+        start: { dateTime: string };
+        end: { dateTime: string };
+      }) => ({
+        summary: event.summary.trim().toLowerCase(),
+        description: (event.description || '').trim().toLowerCase(),
+        startTime: new Date(event.start.dateTime).getTime(),
+        endTime: new Date(event.end.dateTime).getTime(),
+      });
 
-      for (const event of uniqueNewEvents) {
-        await addCalendarEvent(event, token);
-      }
+      const uniqueNewEvents = newEventsData.filter((newEvent) => {
+        const normNew = normalizeEvent(newEvent);
+        return !existingEvents.some((existingEvent) => {
+          const normExisting = normalizeEvent(existingEvent);
+          return (
+            normExisting.summary === normNew.summary &&
+            normExisting.description === normNew.description &&
+            normExisting.startTime === normNew.startTime &&
+            normExisting.endTime === normNew.endTime
+          );
+        });
+      });
+
+      console.log(existingEvents, uniqueNewEvents);
 
       if (uniqueNewEvents.length === 0) {
         toast({
@@ -281,6 +297,9 @@ export function Calendar() {
           variant: 'default',
         });
       } else {
+        for (const event of uniqueNewEvents) {
+          await addCalendarEvent(event, token);
+        }
         toast({
           title: '동기화 성공 🚀',
           description: `${uniqueNewEvents.length}개의 이벤트가 추가되었습니다.`,
@@ -313,7 +332,6 @@ export function Calendar() {
 
         <div className="flex justify-between">
           <div>
-            {/* 캘린더 동기화 버튼 (클릭 시 OAuth 토큰 체크 후, 새 이벤트 추가) */}
             <button
               className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mt-2 mb-2 ml-2 py-3 px-5"
               onClick={handleCalendarSync}

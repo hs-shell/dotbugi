@@ -60,8 +60,10 @@ export async function addCalendarEvent(event: GoogleCalendarEvent, token: string
  */
 export async function getCalendarEvents(token: string): Promise<GoogleCalendarEvent[]> {
   try {
+    const pastDate = new Date();
+    pastDate.setMonth(pastDate.getMonth() - 3);
     const response = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${new Date().toISOString()}&orderBy=startTime&singleEvents=true`,
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${pastDate.toISOString()}&orderBy=startTime&singleEvents=true`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
