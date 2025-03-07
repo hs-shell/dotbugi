@@ -288,8 +288,6 @@ export function Calendar() {
         });
       });
 
-      console.log(existingEvents, uniqueNewEvents);
-
       if (uniqueNewEvents.length === 0) {
         toast({
           title: '캘린더가 최신 상태입니다 🤩',
