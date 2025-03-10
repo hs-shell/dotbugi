@@ -1,4 +1,14 @@
-import { Calendar, Home, LayoutDashboard, NotebookText, NotepadText, Video, Zap } from 'lucide-react';
+import {
+  Calendar,
+  Home,
+  LayoutDashboard,
+  NotebookText,
+  NotepadText,
+  Palette,
+  Settings,
+  Video,
+  Zap,
+} from 'lucide-react';
 import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import icon from '@/assets/icon.png';
@@ -52,6 +62,7 @@ const Sidebar: React.FC = () => {
 
           <ul className="space-y-2">
             <SidebarItem to="/labo" icon={<Calendar size={20} />} label="캘린더 연동" />
+            <SidebarItem to="/color" icon={<Palette size={20} />} label="색상 변경" />
           </ul>
         </nav>
       </div>

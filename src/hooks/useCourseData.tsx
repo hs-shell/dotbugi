@@ -12,10 +12,12 @@ export function useCourseData(courses: any[]) {
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [remainingTime, setRemainingTime] = useState(0);
+  const [isError, setIsError] = useState(false);
 
   // updateData 함수를 useCallback으로 선언하여 useEffect 등에서 재사용
   const updateData = useCallback(async () => {
     try {
+      setIsError(false);
       setIsPending(true);
       const currentTime = new Date().getTime();
       setVods([]);
@@ -98,7 +100,8 @@ export function useCourseData(courses: any[]) {
       saveDataToStorage('lastRequestTime', currentTime.toString());
       setIsPending(false);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      localStorage.removeItem('lastRequestTime');
+      setIsError(true);
       setIsPending(false);
     }
   }, [courses]);
@@ -142,5 +145,5 @@ export function useCourseData(courses: any[]) {
       });
     }
   }, [courses, updateData]);
-  return { vods, assigns, quizes, isPending, remainingTime, refreshTime, updateData, setIsPending };
+  return { vods, assigns, quizes, isPending, remainingTime, refreshTime, isError, updateData, setIsPending };
 }

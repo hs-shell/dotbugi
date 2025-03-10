@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import icon from '@/assets/icon.png';
 import exit from '@/assets/exit.png';
 import { Assign, Filters, Quiz, TAB_TYPE, Vod } from './types';
-import { ListFilter, RefreshCw, Search } from 'lucide-react';
+import { ListFilter, OctagonAlert, RefreshCw, Search } from 'lucide-react';
 import filter from '@/assets/filter.svg';
 import PopoverFooter from './components/PopoverFooter';
 import { Spinner } from '@/components/ui/spinner';
@@ -31,7 +31,7 @@ export default function App() {
   const { courses } = useGetCourses();
 
   // 데이터 관련 상태를 useCourseData 커스텀 훅으로 관리
-  const { vods, assigns, quizes, isPending, remainingTime, refreshTime, updateData, setIsPending } =
+  const { vods, assigns, quizes, isPending, remainingTime, refreshTime, isError, updateData, setIsPending } =
     useCourseData(courses);
 
   // activeTab의 타입을 TAB_TYPE으로 지정
@@ -198,10 +198,8 @@ export default function App() {
                       : '오류'}
               </div>
               <div className="flex justify-center items-center">
-                {/* refreshTime 대신 남은 시간을 표시 */}
                 <span
                   className={`text-sm px-1 ${
-                    // 필요에 따라 색상 조건은 수정 가능 (예시로 30분 기준)
                     remainingTime < 60
                       ? Math.round(remainingTime) >= 30
                         ? 'text-amber-500 font-semibold'
@@ -216,10 +214,12 @@ export default function App() {
                     : `${Math.floor(remainingTime / 60)}시간 전`}
                 </span>
                 <button
-                  className={`flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1 ${(isPending || remainingTime <= 5) && 'cursor-not-allowed'}`}
-                  disabled={isPending || remainingTime <= 5}
+                  className={`flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1 ${(isPending || remainingTime <= 1) && 'cursor-not-allowed'}`}
+                  disabled={isPending || remainingTime <= 1}
                   onClick={() => {
-                    if (isPending || remainingTime <= 5) return;
+                    if (isPending || remainingTime <= 1) {
+                      return;
+                    }
                     setIsPending(true);
                     updateData();
                   }}
@@ -318,9 +318,26 @@ export default function App() {
               </div>
             ) : (
               <>
-                {activeTab === 'VIDEO' && <Video courseData={filteredVods} />}
-                {activeTab === 'ASSIGN' && <Assignment courseData={filteredAssigns} />}
-                {activeTab === 'QUIZ' && <QuizTab courseData={filteredQuizes} />}
+                {isError ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                    <OctagonAlert className="w-12 h-12 text-red-800" />
+                    <p className="py-4 text-2xl font-semibold text-red-800">오류가 발생했습니다.</p>
+                    <p
+                      onClick={() => {
+                        location.reload();
+                      }}
+                      className="py-4 text-xl font-medium underline text-zinc-500 hover:text-zinc-950 hover:cursor-pointer transition-all duration-200"
+                    >
+                      페이지 새로고침
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {activeTab === 'VIDEO' && <Video courseData={filteredVods} />}
+                    {activeTab === 'ASSIGN' && <Assignment courseData={filteredAssigns} />}
+                    {activeTab === 'QUIZ' && <QuizTab courseData={filteredQuizes} />}
+                  </>
+                )}
               </>
             )}
           </div>

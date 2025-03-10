@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -19,8 +19,6 @@ import { ChevronLeft, ChevronRight, NotebookText, Zap, ListFilter, CalendarArrow
 import useCalendarEvents, { CalendarEvent } from '@/hooks/useCalendarEvents';
 import filter from '@/assets/filter.svg';
 import { Label } from '@/components/ui/label';
-
-// 새 이벤트 동기화 관련 유틸리티 함수 (각자 환경에 맞게 구현)
 import {
   getOAuthToken,
   addCalendarEvent,
@@ -29,23 +27,21 @@ import {
   GoogleCalendarEvent,
 } from '@/lib/calendarUtils';
 import { toast } from '@/hooks/use-toast';
+import { loadDataFromStorage } from '@/lib/storage';
 
-// 날짜 비교
+// 헬퍼 함수들
 function isSameDate(d1: Date, d2: Date) {
   return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 }
 
-// day가 이벤트 구간에 포함되는지 검사
 function isInEventRange(day: Date, event: CalendarEvent) {
   return day >= event.start && day <= event.end;
 }
 
-// 이벤트가 단일 날짜인지
 function isSingleDayEvent(event: CalendarEvent) {
   return isSameDate(event.start, event.end);
 }
 
-// 범위 이벤트에서 현재 day의 위치 판별
 function getRangePosition(day: Date, event: CalendarEvent): 'single' | 'start' | 'middle' | 'end' | 'after' | null {
   if (!isInEventRange(day, event)) return null;
   if (isSingleDayEvent(event)) return 'single';
@@ -55,12 +51,19 @@ function getRangePosition(day: Date, event: CalendarEvent): 'single' | 'start' |
   return 'middle';
 }
 
-// 이벤트 간 겹침 여부 (두 이벤트의 기간이 겹치면 true)
 function eventsOverlap(a: CalendarEvent, b: CalendarEvent) {
   return a.start <= b.end && b.start <= a.end;
 }
 
-// row 배정을 위해 CalendarEvent에 row 속성을 추가한 타입 정의
+// 헬퍼: hex 색상을 rgba 문자열로 변환 (투명도 적용)
+function hexToRgba(hex: string, opacity: number): string {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
+
 interface CalendarEventWithRow extends CalendarEvent {
   row: number;
 }
@@ -81,28 +84,23 @@ export function Calendar() {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  // 필터 state 관리 (체크된 필터는 문자열 배열로 관리)
+  // 필터 state 관리
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  // Popover 열림/닫힘 상태
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // type별 기본 필터 항목
   const typeFilters = [
     { value: 'vod', label: '동영상 강의' },
     { value: 'assign', label: '과제' },
     { value: 'quiz', label: '퀴즈' },
   ];
 
-  // 이벤트의 title들을 중복 없이 필터 항목에 추가
   const titleFilters = Array.from(new Set(events.map((event) => event.title))).map((title) => ({
     value: title,
     label: title,
   }));
 
-  // type 필터와 title 필터를 합치기 (중복 없이)
   const filterOptions = [...typeFilters, ...titleFilters];
 
-  // 토글 함수: 선택한 필터가 있으면 제거, 없으면 추가
   const toggleFilter = (filter: string) => {
     setSelectedFilters((prev) => (prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter]));
   };
@@ -111,10 +109,8 @@ export function Calendar() {
     setSelectedFilters([]);
   };
 
-  // 필터가 하나라도 설정되어 있는지 (아이콘 표시 용도)
   const isFilterSet = selectedFilters.length > 0;
 
-  // 달력 관련 계산
   const firstDayOfMonth = startOfMonth(currentMonth);
   const startDate = startOfWeek(firstDayOfMonth, { weekStartsOn: 0 });
   const dayList = useMemo(() => {
@@ -142,14 +138,11 @@ export function Calendar() {
     }
   };
 
-  // ── 이벤트에 row 번호를 할당 (겹치는 이벤트는 다른 row에 배치) ──
   const eventsWithRow = useMemo(() => {
-    // 날짜 기준 오름차순 정렬
     const sorted = [...events].sort((a, b) => a.start.getTime() - b.start.getTime());
     const assigned: CalendarEventWithRow[] = [];
     for (const event of sorted) {
       let row = 0;
-      // 이미 배정된 이벤트 중 같은 row에 있으며 겹치는 이벤트가 있으면 row 증가
       while (assigned.some((e) => e.row === row && eventsOverlap(e, event))) {
         row++;
       }
@@ -158,7 +151,6 @@ export function Calendar() {
     return assigned;
   }, [events]);
 
-  // subject 별 색상 매핑 (이전과 동일하게 event.title 기준)
   const subjectList = useMemo(() => {
     return Array.from(new Set(events.map((event) => event.title)));
   }, [events]);
@@ -171,13 +163,38 @@ export function Calendar() {
     return map;
   }, [subjectList]);
 
-  // 날짜에 해당하는 이벤트들을 row 번호 기준으로 렌더링
+  // 저장소에서 강의 색상 데이터 불러오기 (vod 데이터에 적용)
+  const [courseColors, setCourseColors] = useState<{
+    [courseId: string]: { color: string; colorType: string; gradient?: string; opacity: number };
+  } | null>(null);
+
+  useEffect(() => {
+    loadDataFromStorage('courseColors', (data: string | null) => {
+      if (data) {
+        try {
+          const parsedData = JSON.parse(data);
+          const map = Array.isArray(parsedData)
+            ? parsedData.reduce(
+                (acc, cur) => {
+                  acc[cur.courseId] = cur;
+                  return acc;
+                },
+                {} as { [courseId: string]: { color: string; colorType: string; gradient?: string; opacity: number } }
+              )
+            : {};
+          setCourseColors(map);
+        } catch (error) {
+          console.error('courseColors 파싱 에러:', error);
+        }
+      }
+    });
+  }, []);
+
   const renderEvents = (day: Date, isCurrent: boolean) => {
     const typeFilterValues = typeFilters.map((f) => f.value);
     const selectedTypeFilters = selectedFilters.filter((f) => typeFilterValues.includes(f));
     const selectedTitleFilters = selectedFilters.filter((f) => !typeFilterValues.includes(f));
 
-    // 필터 적용
     const eventsOfTheDay = eventsWithRow.filter((event) => {
       if (!isInEventRange(day, event)) return false;
       if (selectedTypeFilters.length > 0 && selectedTitleFilters.length > 0) {
@@ -190,18 +207,45 @@ export function Calendar() {
       return true;
     });
 
-    // 해당 날짜에서 할당된 row 최대값 (없으면 최소 0행)
     const maxRow = eventsOfTheDay.length > 0 ? Math.max(...eventsOfTheDay.map((e) => e.row)) : -1;
     const numRows = maxRow + 1;
 
     return (
       <div className="flex flex-col gap-1 mt-1 w-full">
         {Array.from({ length: numRows }, (_, rowIndex) => {
-          // 해당 row에 있는 이벤트 찾기
           const event = eventsOfTheDay.find((e) => e.row === rowIndex);
           if (event) {
             const rangePosition = getRangePosition(day, event);
-            if (!rangePosition) return <div key={rowIndex} className="h-4" />;
+            if (!rangePosition) return <div key={rowIndex} className="h-6" />;
+
+            const eventId = event.id.split('-')[0];
+            const isVodCustom = event.type === 'vod' && courseColors && eventId && courseColors[eventId];
+            let customStyle = {};
+
+            if (isVodCustom) {
+              const courseData = courseColors![eventId];
+              const totalDays = Math.floor((event.end.getTime() - event.start.getTime()) / (1000 * 3600 * 24)) + 1;
+              if (courseData.colorType === 'gradient' && courseData.gradient && totalDays > 1) {
+                const dayIndex = Math.floor((day.getTime() - event.start.getTime()) / (1000 * 3600 * 24));
+                const regex = /linear-gradient\(to right, (#[0-9a-fA-F]+), (#[0-9a-fA-F]+)\)/;
+                const match = courseData.gradient.match(regex);
+                if (match) {
+                  const rgba1 = hexToRgba(match[1], courseData.opacity);
+                  const rgba2 = hexToRgba(match[2], courseData.opacity);
+                  customStyle = {
+                    backgroundImage: `linear-gradient(to right, ${rgba1}, ${rgba2})`,
+                    backgroundSize: `${totalDays * 100}% 100%`,
+                    backgroundPosition: `${-(dayIndex * 100)}% 0`,
+                  };
+                } else {
+                  customStyle = { backgroundImage: courseData.gradient, opacity: courseData.opacity };
+                }
+              } else {
+                // solid인 경우: hex 색상에 opacity 반영
+                customStyle = { background: hexToRgba(courseData.color, courseData.opacity) };
+              }
+            }
+
             if (rangePosition === 'single') {
               return (
                 <div key={rowIndex} className="flex items-center px-1 w-full">
@@ -218,18 +262,24 @@ export function Calendar() {
                 </div>
               );
             }
+
             const isStart = rangePosition === 'start';
             const isEnd = rangePosition === 'end';
             const showTitle = isStart;
+
+            const additionalClasses = cn(isStart && 'rounded-l-sm ml-1', isEnd && 'rounded-r-sm mr-1');
+
+            const defaultClass = isVodCustom
+              ? ''
+              : isCurrent
+                ? `${subjectColorMap[event.title]} text-zinc-700`
+                : 'bg-zinc-100 text-zinc-300';
+
             return (
               <div
                 key={rowIndex}
-                className={cn(
-                  isCurrent ? `${subjectColorMap[event.title]} text-zinc-700` : 'bg-zinc-100 text-zinc-300',
-                  'relative h-4 flex items-center justify-start z-10',
-                  isStart && 'rounded-l-sm ml-1',
-                  isEnd && 'rounded-r-sm mr-1'
-                )}
+                style={customStyle}
+                className={cn(defaultClass, 'relative h-6 flex items-center justify-start z-10', additionalClasses)}
               >
                 {showTitle && (
                   <span className="ml-1 text-xs font-medium line-clamp-1 text-ellipsis px-1 overflow-hidden">
@@ -239,8 +289,7 @@ export function Calendar() {
               </div>
             );
           } else {
-            // 해당 row에 이벤트가 없으면 빈 자리
-            return <div key={rowIndex} className="h-4" />;
+            return <div key={rowIndex} className="h-6" />;
           }
         })}
       </div>
@@ -260,7 +309,6 @@ export function Calendar() {
 
     try {
       const existingEvents: GoogleCalendarEvent[] = await getCalendarEvents(token);
-
       const newEventsData: GoogleCalendarEvent[] = convertCalendarEventsToGoogleEvents(events);
 
       const normalizeEvent = (event: {
@@ -424,7 +472,6 @@ export function Calendar() {
               className={cn(
                 'relative cursor-pointer w-full min-h-[120px] py-2 rounded-lg',
                 isCurrent ? 'bg-white' : 'text-gray-300',
-                isTodayDate && 'text-blue-600 font-semibold',
                 isSelected && 'bg-zinc-50',
                 'hover:bg-zinc-50 transition-all duration-300'
               )}
@@ -436,7 +483,13 @@ export function Calendar() {
                 )}
               />
               <div
-                className={`text-sm px-4 justify-self-end ${!isTodayDate && isCurrent && sunday ? 'text-red-700' : ''}`}
+                className={`text-sm px-4 justify-self-end ${
+                  isTodayDate
+                    ? 'text-blue-600 font-semibold'
+                    : !isTodayDate && isCurrent && sunday
+                      ? 'text-red-700'
+                      : ''
+                }`}
               >
                 {format(dayItem, 'd')}
               </div>
