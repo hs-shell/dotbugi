@@ -1,17 +1,10 @@
-import {
-  Calendar,
-  Home,
-  LayoutDashboard,
-  NotebookText,
-  NotepadText,
-  Palette,
-  Settings,
-  Video,
-  Zap,
-} from 'lucide-react';
+'use client';
+
+import { Calendar, Github, LayoutDashboard, NotebookText, Palette, Star, Video, Zap } from 'lucide-react';
 import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import icon from '@/assets/icon.png';
+import GitHubStarBanner from './GithubStarBanner';
 
 const Sidebar: React.FC = () => {
   return (
@@ -26,7 +19,7 @@ const Sidebar: React.FC = () => {
               }}
             >
               <img
-                src={icon}
+                src={icon || '/placeholder.svg'}
                 className="rounded-full hover:shadow-lg hover:shadow-zinc-400 transition-all duration-500"
               />
             </div>
@@ -37,7 +30,7 @@ const Sidebar: React.FC = () => {
           </div>
         </div>
 
-        <nav className="flex flex-col flex-grow">
+        <nav className="flex flex-col flex-1">
           <div className="flex items-center mt-6 mb-2">
             <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider pr-2">메인</div>
             <div className="flex-grow border-t border-gray-300"></div>
@@ -64,6 +57,10 @@ const Sidebar: React.FC = () => {
             <SidebarItem to="/labo" icon={<Calendar size={20} />} label="캘린더 연동" />
             <SidebarItem to="/color" icon={<Palette size={20} />} label="색상 변경" />
           </ul>
+
+          <div className="flex-1"></div>
+
+          <GitHubStarBanner />
         </nav>
       </div>
     </aside>
