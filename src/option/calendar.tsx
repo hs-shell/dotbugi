@@ -191,21 +191,52 @@ export function Calendar() {
   }, []);
 
   const renderEvents = (day: Date, isCurrent: boolean) => {
+    const weekStart = startOfWeek(day, { weekStartsOn: 0 });
+    const weekEnd = addDays(weekStart, 6);
+
+    const weekEvents = eventsWithRow.filter((event) => event.end >= weekStart && event.start <= weekEnd);
+
+    const weekStack: { [eventId: string]: number } = {};
+    weekEvents
+      .sort((a, b) => a.start.getTime() - b.start.getTime())
+      .forEach((event) => {
+        let row = 0;
+        while (
+          Object.entries(weekStack).some(([id, assignedRow]) => {
+            if (id === event.id) return false;
+            const assignedEvent = weekEvents.find((e) => e.id === id);
+            if (!assignedEvent) return false;
+            const eventStartInWeek = event.start < weekStart ? weekStart : event.start;
+            const eventEndInWeek = event.end > weekEnd ? weekEnd : event.end;
+            const assignedStartInWeek = assignedEvent.start < weekStart ? weekStart : assignedEvent.start;
+            const assignedEndInWeek = assignedEvent.end > weekEnd ? weekEnd : assignedEvent.end;
+            return (
+              assignedRow === row && eventStartInWeek <= assignedEndInWeek && assignedStartInWeek <= eventEndInWeek
+            );
+          })
+        ) {
+          row++;
+        }
+        weekStack[event.id] = row;
+      });
+
     const typeFilterValues = typeFilters.map((f) => f.value);
     const selectedTypeFilters = selectedFilters.filter((f) => typeFilterValues.includes(f));
     const selectedTitleFilters = selectedFilters.filter((f) => !typeFilterValues.includes(f));
 
-    const eventsOfTheDay = eventsWithRow.filter((event) => {
-      if (!isInEventRange(day, event)) return false;
-      if (selectedTypeFilters.length > 0 && selectedTitleFilters.length > 0) {
-        return selectedTypeFilters.includes(event.type) && selectedTitleFilters.includes(event.title);
-      } else if (selectedTypeFilters.length > 0) {
-        return selectedTypeFilters.includes(event.type);
-      } else if (selectedTitleFilters.length > 0) {
-        return selectedTitleFilters.includes(event.title);
-      }
-      return true;
-    });
+    const eventsOfTheDay = eventsWithRow
+      .filter((event) => {
+        if (!isInEventRange(day, event)) return false;
+        if (selectedTypeFilters.length > 0 && selectedTitleFilters.length > 0) {
+          return selectedTypeFilters.includes(event.type) && selectedTitleFilters.includes(event.title);
+        } else if (selectedTypeFilters.length > 0) {
+          return selectedTypeFilters.includes(event.type);
+        } else if (selectedTitleFilters.length > 0) {
+          return selectedTitleFilters.includes(event.title);
+        }
+        return true;
+      })
+      .map((event) => ({ ...event, row: weekStack[event.id] ?? 0 }));
 
     const maxRow = eventsOfTheDay.length > 0 ? Math.max(...eventsOfTheDay.map((e) => e.row)) : -1;
     const numRows = maxRow + 1;
