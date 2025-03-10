@@ -47,9 +47,23 @@ const Labo: React.FC = () => {
     if (!token) return;
 
     chrome.identity.removeCachedAuthToken({ token }, () => {
-      setToken(null);
-      setEvents([]); // 이벤트 목록 초기화
-      console.log('Google 계정 연동 해제 완료');
+      fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded',
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            setToken(null);
+            setEvents([]);
+          } else {
+            console.error('토큰 폐기 요청에 실패했습니다.');
+          }
+        })
+        .catch((error) => {
+          console.error('에러 발생:', error);
+        });
     });
   };
 

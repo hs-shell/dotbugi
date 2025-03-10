@@ -28,8 +28,7 @@ import {
 } from '@/lib/calendarUtils';
 import { toast } from '@/hooks/use-toast';
 import { loadDataFromStorage } from '@/lib/storage';
-
-// 헬퍼 함수들
+import GoogleCalendar from '@/assets/calendar.png';
 function isSameDate(d1: Date, d2: Date) {
   return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 }
@@ -327,6 +326,19 @@ export function Calendar() {
     );
   };
 
+  const handleRedirectToCalendar = async () => {
+    const token = await getOAuthToken();
+    if (!token) {
+      toast({
+        title: '동기화 실패 🚨',
+        description: '구글 캘린더 연동 상태를 확인해주세요',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    window.open('https://calendar.google.com/calendar', '_blank');
+  };
   const handleCalendarSync = async () => {
     const token = await getOAuthToken();
     if (!token) {
@@ -395,9 +407,16 @@ export function Calendar() {
 
   return (
     <Card className="px-4 p-0 w-full border-none shadow-none">
-      <div className="flex items-center justify-between my-8 gap-4">
-        <div />
-        <div className="flex items-center gap-4">
+      <div className="grid grid-cols-3 items-center  my-8 gap-4">
+        <div className="flex justify-start">
+          <button
+            className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mt-2 mb-2 ml-2 py-3 px-5"
+            onClick={handleRedirectToCalendar}
+          >
+            <img src={GoogleCalendar} className="w-6 h-6 p-0" />
+          </button>
+        </div>
+        <div className="flex justify-center items-center gap-4">
           <Button variant="ghost" onClick={handlePrevMonth}>
             <ChevronLeft />
           </Button>
@@ -407,7 +426,7 @@ export function Calendar() {
           </Button>
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-end">
           <div>
             <button
               className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mt-2 mb-2 ml-2 py-3 px-5"
