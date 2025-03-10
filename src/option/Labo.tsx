@@ -43,6 +43,16 @@ const Labo: React.FC = () => {
     });
   };
 
+  const handleLogout = () => {
+    if (!token) return;
+
+    chrome.identity.removeCachedAuthToken({ token }, () => {
+      setToken(null);
+      setEvents([]); // 이벤트 목록 초기화
+      console.log('Google 계정 연동 해제 완료');
+    });
+  };
+
   const addCalendarEvent = () => {
     if (!token) return;
 
@@ -70,7 +80,7 @@ const Labo: React.FC = () => {
       .then((response) => response.json())
       .then(() => {
         alert('새로운 이벤트가 추가되었습니다!');
-        fetchCalendarEvents(token); // 이벤트 추가 후 다시 조회
+        fetchCalendarEvents(token);
       })
       .catch((error) => console.error('이벤트 추가 실패:', error));
   };
@@ -82,6 +92,9 @@ const Labo: React.FC = () => {
         <div>
           <Button className="mt-4 mr-2" onClick={addCalendarEvent}>
             새 이벤트 추가
+          </Button>
+          <Button className="mt-4 bg-red-500 hover:bg-red-600" onClick={handleLogout}>
+            연동 해제
           </Button>
           <h2 className="text-lg font-semibold mt-6">내 캘린더 일정</h2>
           <ul className="mt-2">

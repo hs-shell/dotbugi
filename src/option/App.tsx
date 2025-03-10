@@ -9,6 +9,7 @@ import DashboardPage from '@/pages/DashboardPage';
 import QuizPage from '@/pages/QuizPage';
 import Header from './Header';
 import Labo from './Labo';
+import ColorSetting from './ColorSetting';
 
 const pageVariants = {
   initial: {
@@ -50,6 +51,7 @@ const AnimatedRoutes = () => {
           <Route path="/assignment" element={<AssignmentPage />} />
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/labo" element={<Labo />} />
+          <Route path="/color" element={<ColorSetting />} />
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
       </motion.div>

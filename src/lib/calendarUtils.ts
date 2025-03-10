@@ -13,10 +13,6 @@ export type GoogleCalendarEvent = {
   };
 };
 
-/**
- * OAuth 토큰을 localStorage에서 가져옵니다.
- * 실제 구현에서는 OAuth 플로우에 따라 토큰을 갱신하거나, Context/API를 통해 관리할 수 있습니다.
- */
 export const getOAuthToken = async (): Promise<string | null> => {
   return new Promise((resolve) => {
     chrome.identity.getAuthToken({ interactive: false }, (cachedToken) => {
