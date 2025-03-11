@@ -278,7 +278,7 @@ export function Calendar() {
 
             if (rangePosition === 'single') {
               return (
-                <div key={rowIndex} className="flex items-center px-1 w-full">
+                <div key={rowIndex} className="flex items-center px-1 h-6 w-full">
                   <span className="px-0.5 flex-shrink-0">
                     {event.type === 'assign' ? (
                       <NotebookText className={`w-3 h-3 ${isCurrent ? 'text-violet-900' : ''}`} />
