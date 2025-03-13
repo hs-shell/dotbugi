@@ -6,8 +6,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function isCurrentDateInRange(dateRange: string) {
+export function isCurrentDateInRange(dateRange: string | null) {
+  if (!dateRange || !dateRange.includes(' ~ ')) {
+    return false;
+  }
+
   const [startStr, endStr] = dateRange.split(' ~ ');
+
+  if (!startStr || !endStr) {
+    return false;
+  }
 
   const startDate = new Date(startStr.replace(/-/g, '/'));
   const endDate = new Date(endStr.replace(/-/g, '/'));
@@ -16,7 +24,9 @@ export function isCurrentDateInRange(dateRange: string) {
 
   return currentDate >= startDate && currentDate <= endDate;
 }
-export function isCurrentDateByDate(date: string) {
+
+export function isCurrentDateByDate(date: string | null) {
+  if (!date || date.length <= 1) return false;
   const endDate = new Date(date);
   const currentDate = new Date();
   return currentDate <= endDate;
