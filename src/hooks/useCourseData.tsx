@@ -101,7 +101,7 @@ export function useCourseData(courses: any[]) {
       setIsPending(false);
     } catch (error) {
       localStorage.removeItem('lastRequestTime');
-      setIsError(true);
+      // setIsError(true);
       setIsPending(false);
     }
   }, [courses]);
