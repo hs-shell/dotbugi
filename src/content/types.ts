@@ -13,7 +13,7 @@ export type VodData = {
   subject: string;
   title: string;
   url: string;
-  range: string;
+  range: string | null;
   length: string;
 };
 
@@ -31,7 +31,7 @@ export type AssignData = {
   title: string;
   url: string;
   isSubmit: boolean;
-  dueDate: string;
+  dueDate: string | null;
 };
 
 export type Quiz = CourseBase & QuizData;
@@ -40,7 +40,7 @@ export type QuizData = {
   subject: string;
   title: string;
   url: string;
-  dueDate: string;
+  dueDate: string | null;
 };
 
 export type TimeDifferenceResult = {
@@ -59,8 +59,8 @@ export interface Item {
 
 export interface Filters {
   courseTitles: string[];
-  attendanceStatuses?: string[]; 
-  submitStatuses?: boolean[]; 
+  attendanceStatuses?: string[];
+  submitStatuses?: boolean[];
 }
 
 export enum TAB_TYPE {
