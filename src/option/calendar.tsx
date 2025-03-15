@@ -34,14 +34,18 @@ function isSameDate(d1: Date, d2: Date) {
 }
 
 function isInEventRange(day: Date, event: CalendarEvent) {
+  if (!event.start || !event.end) return false;
   return day >= event.start && day <= event.end;
 }
 
 function isSingleDayEvent(event: CalendarEvent) {
+  if (!event.start || !event.end) return false;
   return isSameDate(event.start, event.end);
 }
 
 function getRangePosition(day: Date, event: CalendarEvent): 'single' | 'start' | 'middle' | 'end' | 'after' | null {
+  if (!event.start || !event.end) return null;
+
   if (!isInEventRange(day, event)) return null;
   if (isSingleDayEvent(event)) return 'single';
   if (isSameDate(day, addDays(event.start, 1))) return 'after';
@@ -51,9 +55,11 @@ function getRangePosition(day: Date, event: CalendarEvent): 'single' | 'start' |
 }
 
 function eventsOverlap(a: CalendarEvent, b: CalendarEvent) {
+  if (a.start === null || a.end === null || b.start === null || b.end === null) {
+    return false;
+  }
   return a.start <= b.end && b.start <= a.end;
 }
-
 // 헬퍼: hex 색상을 rgba 문자열로 변환 (투명도 적용)
 function hexToRgba(hex: string, opacity: number): string {
   hex = hex.replace('#', '');
@@ -138,7 +144,12 @@ export function Calendar() {
   };
 
   const eventsWithRow = useMemo(() => {
-    const sorted = [...events].sort((a, b) => a.start.getTime() - b.start.getTime());
+    const sorted = [...events].sort((a, b) => {
+      const aTime = a.start ? a.start.getTime() : Number.MIN_SAFE_INTEGER;
+      const bTime = b.start ? b.start.getTime() : Number.MIN_SAFE_INTEGER;
+      return aTime - bTime;
+    });
+
     const assigned: CalendarEventWithRow[] = [];
     for (const event of sorted) {
       let row = 0;
@@ -193,11 +204,17 @@ export function Calendar() {
     const weekStart = startOfWeek(day, { weekStartsOn: 0 });
     const weekEnd = addDays(weekStart, 6);
 
-    const weekEvents = eventsWithRow.filter((event) => event.end >= weekStart && event.start <= weekEnd);
+    const weekEvents = eventsWithRow.filter(
+      (event) => event.end !== null && event.start !== null && event.end >= weekStart && event.start <= weekEnd
+    );
 
     const weekStack: { [eventId: string]: number } = {};
     weekEvents
-      .sort((a, b) => a.start.getTime() - b.start.getTime())
+      .sort((a, b) => {
+        const aTime = a.start ? a.start.getTime() : Number.MIN_SAFE_INTEGER;
+        const bTime = b.start ? b.start.getTime() : Number.MIN_SAFE_INTEGER;
+        return aTime - bTime;
+      })
       .forEach((event) => {
         let row = 0;
         while (
@@ -205,10 +222,19 @@ export function Calendar() {
             if (id === event.id) return false;
             const assignedEvent = weekEvents.find((e) => e.id === id);
             if (!assignedEvent) return false;
-            const eventStartInWeek = event.start < weekStart ? weekStart : event.start;
-            const eventEndInWeek = event.end > weekEnd ? weekEnd : event.end;
-            const assignedStartInWeek = assignedEvent.start < weekStart ? weekStart : assignedEvent.start;
-            const assignedEndInWeek = assignedEvent.end > weekEnd ? weekEnd : assignedEvent.end;
+            const eventStartInWeek = event.start ? (event.start < weekStart ? weekStart : event.start) : weekStart;
+            const eventEndInWeek = event.end ? (event.end > weekEnd ? weekEnd : event.end) : weekEnd;
+            const assignedStartInWeek = assignedEvent.start
+              ? assignedEvent.start < weekStart
+                ? weekStart
+                : assignedEvent.start
+              : weekStart;
+            const assignedEndInWeek = assignedEvent.end
+              ? assignedEvent.end > weekEnd
+                ? weekEnd
+                : assignedEvent.end
+              : weekEnd;
+
             return (
               assignedRow === row && eventStartInWeek <= assignedEndInWeek && assignedStartInWeek <= eventEndInWeek
             );
@@ -253,12 +279,19 @@ export function Calendar() {
             let customStyle = {};
 
             if (isVodCustom) {
-              const courseData = courseColors![eventId];
-              const totalDays = Math.floor((event.end.getTime() - event.start.getTime()) / (1000 * 3600 * 24)) + 1;
-              if (courseData.colorType === 'gradient' && courseData.gradient && totalDays > 1) {
-                const dayIndex = Math.floor((day.getTime() - event.start.getTime()) / (1000 * 3600 * 24));
+              const courseData = courseColors?.[eventId];
+
+              const eventStart = event.start ?? new Date(0);
+              const eventEnd = event.end ?? new Date(0);
+
+              const totalDays = Math.floor((eventEnd.getTime() - eventStart.getTime()) / (1000 * 3600 * 24)) + 1;
+
+              if (courseData?.colorType === 'gradient' && courseData.gradient && totalDays > 1) {
+                const dayIndex = Math.floor((day.getTime() - eventStart.getTime()) / (1000 * 3600 * 24));
+
                 const regex = /linear-gradient\(to right, (#[0-9a-fA-F]+), (#[0-9a-fA-F]+)\)/;
                 const match = courseData.gradient.match(regex);
+
                 if (match) {
                   const rgba1 = hexToRgba(match[1], courseData.opacity);
                   const rgba2 = hexToRgba(match[2], courseData.opacity);
@@ -271,8 +304,8 @@ export function Calendar() {
                   customStyle = { backgroundImage: courseData.gradient, opacity: courseData.opacity };
                 }
               } else {
-                // solid인 경우: hex 색상에 opacity 반영
-                customStyle = { background: hexToRgba(courseData.color, courseData.opacity) };
+                // 단색(hex)인 경우: null 값 방지 후 rgba 변환
+                customStyle = { background: hexToRgba(courseData?.color ?? '#000000', courseData?.opacity ?? 1) };
               }
             }
 

@@ -9,8 +9,8 @@ export type CalendarEvent = {
   type: 'vod' | 'assign' | 'quiz';
   title: string;
   subject: string;
-  start: Date;
-  end: Date;
+  start: Date | null;
+  end: Date | null;
 };
 
 function useCalendarEvents() {
@@ -52,12 +52,13 @@ function useCalendarEvents() {
       );
 
       return Object.entries(groupedData).map(([key, vodItems]) => {
-        const [start, end] = vodItems[0].range.split(' ~ ');
+        const range = vodItems[0].range;
+        const [start, end] = range ? range.split(' ~ ') : [null, null];
         return {
           id: key,
           type: 'vod',
-          start: new Date(start.replace(/-/g, '/')),
-          end: new Date(end.replace(/-/g, '/')),
+          start: start ? new Date(start.replace(/-/g, '/')) : null,
+          end: end ? new Date(end.replace(/-/g, '/')) : null,
           title: removeSquareBrackets(vodItems[0].courseTitle),
           subject: removeSquareBrackets(vodItems[0].subject),
         };
@@ -67,7 +68,8 @@ function useCalendarEvents() {
     // assign 데이터 로딩 및 변환
     loadEvents<Assign>('assign', (assigns) =>
       assigns.map((assign) => {
-        const normalizedDate = startOfDay(new Date(assign.dueDate));
+        const dueDate = assign.dueDate;
+        const normalizedDate = dueDate ? startOfDay(new Date(dueDate)) : null;
         return {
           id: assign.courseId + assign.title + assign.dueDate,
           type: 'assign',
@@ -82,7 +84,8 @@ function useCalendarEvents() {
     // quiz 데이터 로딩 및 변환
     loadEvents<Quiz>('quiz', (quizzes) =>
       quizzes.map((quiz) => {
-        const normalizedDate = startOfDay(new Date(quiz.dueDate));
+        const dueDate = quiz.dueDate;
+        const normalizedDate = dueDate ? startOfDay(new Date(dueDate)) : null;
         return {
           id: quiz.courseId + quiz.title + quiz.dueDate,
           type: 'quiz',

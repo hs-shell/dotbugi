@@ -29,6 +29,7 @@ export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, so
   return data.sort((a, b) => {
     const attendanceA = a.isAttendance.toLowerCase().trim() === 'o';
     const attendanceB = b.isAttendance.toLowerCase().trim() === 'o';
+
     if (attendanceA !== attendanceB) {
       return attendanceA ? -1 : 1;
     }
@@ -37,7 +38,10 @@ export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, so
       case 'title':
         return a.title.localeCompare(b.title);
       default:
-        return a.range.localeCompare(b.range);
+        if (a.range === null && b.range !== null) return attendanceA ? -1 : 1;
+        if (a.range !== null && b.range === null) return attendanceA ? 1 : -1;
+        if (a.range === null && b.range === null) return 0;
+        return (a.range ?? '').localeCompare(b.range ?? '');
     }
   });
 }
@@ -74,7 +78,10 @@ export function filterAssigns(assigns: Assign[], filters: Filters, searchTerm: s
       case 'title':
         return a.title.localeCompare(b.title);
       default:
-        return a.dueDate.localeCompare(b.dueDate);
+        if (a.dueDate === null && b.dueDate !== null) return a.isSubmit ? -1 : 1;
+        if (a.dueDate !== null && b.dueDate === null) return a.isSubmit ? 1 : -1;
+        if (a.dueDate === null && b.dueDate === null) return 0;
+        return (a.dueDate ?? '').localeCompare(b.dueDate ?? '');
     }
   });
 }
@@ -103,7 +110,10 @@ export function filterQuizes(quizes: Quiz[], filters: Filters, searchTerm: strin
       case 'title':
         return a.title.localeCompare(b.title);
       default:
-        return a.dueDate.localeCompare(b.dueDate);
+        if (a.dueDate === null && b.dueDate !== null) return 1;
+        if (a.dueDate !== null && b.dueDate === null) return -1;
+        if (a.dueDate === null && b.dueDate === null) return 0;
+        return (a.dueDate ?? '').localeCompare(b.dueDate ?? '');
     }
   });
 }
