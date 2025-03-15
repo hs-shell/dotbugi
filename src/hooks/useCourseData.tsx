@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { Vod, Assign, Quiz, TAB_TYPE } from '@/content/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { requestData } from '@/lib/fetchCourseData';
-import { isCurrentDateInRange, isCurrentDateByDate } from '@/lib/utils';
 
 // courses 배열을 받아 vod, assign, quiz 데이터를 관리하는 커스텀 훅
 export function useCourseData(courses: any[]) {
@@ -143,13 +142,16 @@ export function useCourseData(courses: any[]) {
       const minutes = (currentTime - parseInt(lastRequestTime, 10)) / (60 * 1000);
       setRemainingTime(minutes);
       loadDataFromStorage('vod', (data) => {
-        setVods((data as Vod[]).filter((vod) => isCurrentDateInRange(vod.range)));
+        // setVods((data as Vod[]).filter((vod) => isCurrentDateInRange(vod.range)));
+        setVods((data as Vod[]) || []);
       });
       loadDataFromStorage('assign', (data) => {
-        setAssigns((data as Assign[]).filter((assign) => isCurrentDateByDate(assign.dueDate)));
+        // setAssigns((data as Assign[]).filter((assign) => isCurrentDateByDate(assign.dueDate)));
+        setAssigns((data as Assign[]) || []);
       });
       loadDataFromStorage('quiz', (data) => {
-        setQuizes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
+        // setQuizes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
+        setQuizes((data as Quiz[]) || []);
       });
     }
   }, [courses, updateData]);

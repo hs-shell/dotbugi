@@ -81,16 +81,18 @@ export async function getCalendarEvents(token: string): Promise<GoogleCalendarEv
  * @returns GoogleCalendarEvent 배열
  */
 export function convertCalendarEventsToGoogleEvents(events: CalendarEvent[]): GoogleCalendarEvent[] {
-  return events.map((event) => ({
-    summary: `${event.title}`,
-    description: `${event.subject}`,
-    start: {
-      dateTime: event.start.toISOString(),
-      timeZone: 'Asia/Seoul',
-    },
-    end: {
-      dateTime: event.end.toISOString(),
-      timeZone: 'Asia/Seoul',
-    },
-  }));
+  return events
+    .filter((event) => event.start !== null && event.end !== null)
+    .map((event) => ({
+      summary: `${event.title}`,
+      description: `${event.subject}`,
+      start: {
+        dateTime: event.start!.toISOString(),
+        timeZone: 'Asia/Seoul',
+      },
+      end: {
+        dateTime: event.end!.toISOString(),
+        timeZone: 'Asia/Seoul',
+      },
+    }));
 }
