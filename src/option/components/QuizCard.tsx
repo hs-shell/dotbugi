@@ -3,67 +3,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Quiz } from '@/content/types';
 
-import NotificationSwitch from '@/components/ui/notification-switch';
-import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
-import { useToast } from '@/hooks/use-toast';
 import { calculateDueDate, calculateRemainingTime, calculateTimeDifference, removeSquareBrackets } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TaskStatusCardProps {
-  notification: boolean;
   quiz: Quiz;
 }
 
-const QuizCard: React.FC<TaskStatusCardProps> = ({ notification, quiz }) => {
+const QuizCard: React.FC<TaskStatusCardProps> = ({ quiz }) => {
   if (!quiz) return <></>;
-
-  const [toggle, setToggle] = useState(notification);
-
-  const [userInitiatedToggle, setUserInitiatedToggle] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    setToggle(notification);
-  }, [notification]);
-
-  useEffect(() => {
-    loadDataFromStorage('quiz-notification', (data: string | null) => {
-      try {
-        let parsedData: Record<string, any> = {};
-        if (data) {
-          try {
-            parsedData = JSON.parse(data);
-          } catch (error) {
-            console.error('저장된 데이터를 파싱하는 중 오류가 발생했습니다.', error);
-          }
-        }
-        const key = `${quiz.courseId}-${quiz.title}-${quiz.dueDate}`;
-
-        if (toggle) {
-          parsedData[key] = true;
-        } else {
-          if (key in parsedData) {
-            delete parsedData[key];
-          }
-        }
-        saveDataToStorage('quiz-notification', JSON.stringify(parsedData));
-
-        if (userInitiatedToggle) {
-          toast({
-            title: toggle ? '알림 설정 🔔' : '알림 취소 🔕',
-            description: removeSquareBrackets(`${quiz.courseTitle} - ${quiz.title}`),
-            variant: 'default',
-          });
-          setUserInitiatedToggle(false);
-        }
-      } catch (error) {
-        toast({
-          title: '오류가 발생 했습니다. 🚨',
-          variant: 'destructive',
-        });
-      }
-    });
-  }, [toggle, userInitiatedToggle, toast, quiz]);
 
   const [showRemainingTime, setShowRemainingTime] = useState(false);
 
@@ -92,35 +40,6 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ notification, quiz }) => {
         <div>
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold truncate flex-1 mr-2">{quiz.courseTitle}</h2>
-            <p>
-              <NotificationSwitch
-                isSelected={toggle}
-                onChange={() => {
-                  if (!toggle) {
-                    chrome.runtime.sendMessage(
-                      {
-                        action: 'scheduleAlarm',
-                        alarmId: `${quiz.courseId}-${quiz.title}-${quiz.dueDate}`,
-                        dateTime: quiz.dueDate,
-                        title: '하루 뒤 퀴즈 마감!',
-                        message: removeSquareBrackets(quiz.courseTitle) + '-' + quiz.title,
-                      },
-                      (response) => {}
-                    );
-                  } else {
-                    chrome.runtime.sendMessage(
-                      {
-                        action: 'cancelAlarm',
-                        alarmId: `${quiz.courseId}-${quiz.title}-${quiz.dueDate}`,
-                      },
-                      (response) => {}
-                    );
-                  }
-                  setToggle((prev) => !prev);
-                  setUserInitiatedToggle(true);
-                }}
-              />
-            </p>
           </div>
           <div className="font-medium text-slate-400 text-sm line-clamp-1 text-ellipsis">{quiz.title}</div>
         </div>

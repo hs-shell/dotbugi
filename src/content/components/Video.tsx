@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Vod } from '../types';
-import { calculateRemainingTimeByRange, calculateTimeDifference, cn, formatDateString } from '@/lib/utils';
+import {
+  calculateRemainingTimeByRange,
+  calculateTimeDifference,
+  cn,
+  formatDateString,
+  isCurrentDateInRange,
+} from '@/lib/utils';
 import { AlarmClock, BadgeCheck, ChevronDown, ChevronUp, Clock, Siren, TriangleAlert } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -48,17 +54,45 @@ export default function Video({ courseData }: Props) {
     const isAX = firstA.weeklyAttendance.toUpperCase().startsWith('X');
     const isBX = firstB.weeklyAttendance.toUpperCase().startsWith('X');
 
+    // X가 있는 항목을 먼저 정렬
     if (isAX && !isBX) return -1;
     if (!isAX && isBX) return 1;
 
-    const rangeStartA = firstA.range.split(' ~ ')[0];
-    const rangeStartB = firstB.range.split(' ~ ')[0];
-    const dateA = new Date(rangeStartA);
-    const dateB = new Date(rangeStartB);
+    const rangeA = firstA.range;
+    const rangeB = firstB.range;
+    const isRangeANull = rangeA === null;
+    const isRangeBNull = rangeB === null;
 
-    if (dateA < dateB) return -1;
-    if (dateA > dateB) return 1;
+    // isCurrentDateInRange가 true인 항목을 먼저 정렬 (X와 O 모두)
+    const isCurrentDateInRangeA = isCurrentDateInRange(firstA.range);
+    const isCurrentDateInRangeB = isCurrentDateInRange(firstB.range);
 
+    if (isAX) {
+      // X일 때는 isCurrentDateInRange가 true인 항목을 먼저 배치, 그 다음 null
+      if (isCurrentDateInRangeA && !isCurrentDateInRangeB) return -1;
+      if (!isCurrentDateInRangeA && isCurrentDateInRangeB) return 1;
+      if (isRangeANull && !isRangeBNull) return 1;
+      if (!isRangeANull && isRangeBNull) return -1;
+    } else {
+      // O일 때는 isCurrentDateInRange가 true인 항목을 먼저 배치, 그 다음 null, 그 다음 시간순 정렬
+      if (isCurrentDateInRangeA && !isCurrentDateInRangeB) return -1;
+      if (!isCurrentDateInRangeA && isCurrentDateInRangeB) return 1;
+      if (isRangeANull && !isRangeBNull) return 1;
+      if (!isRangeANull && isRangeBNull) return -1;
+
+      // rangeStart 날짜 기준으로 시간순으로 정렬
+      if (!isRangeANull && !isRangeBNull) {
+        const rangeStartA = rangeA.split(' ~ ')[0];
+        const rangeStartB = rangeB.split(' ~ ')[0];
+        const dateA = new Date(rangeStartA);
+        const dateB = new Date(rangeStartB);
+
+        if (dateA < dateB) return -1;
+        if (dateA > dateB) return 1;
+      }
+    }
+
+    // courseTitle로 기본 정렬
     if (firstA.courseTitle < firstB.courseTitle) return -1;
     if (firstA.courseTitle > firstB.courseTitle) return 1;
 
@@ -76,12 +110,14 @@ export default function Video({ courseData }: Props) {
           if (isAX && !isBX) return -1;
           if (!isAX && isBX) return 1;
 
-          const rangeStartA = a.range.split(' ~ ')[0];
-          const rangeStartB = b.range.split(' ~ ')[0];
-          const dateA = new Date(rangeStartA);
-          const dateB = new Date(rangeStartB);
-          if (dateA < dateB) return -1;
-          if (dateA > dateB) return 1;
+          if (a.range && b.range) {
+            const rangeStartA = a.range.split(' ~ ')[0];
+            const rangeStartB = b.range.split(' ~ ')[0];
+            const dateA = new Date(rangeStartA);
+            const dateB = new Date(rangeStartB);
+            if (dateA < dateB) return -1;
+            if (dateA > dateB) return 1;
+          }
 
           if (a.courseTitle < b.courseTitle) return -1;
           if (a.courseTitle > b.courseTitle) return 1;
