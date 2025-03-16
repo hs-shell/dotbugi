@@ -5,6 +5,7 @@ import { loadDataFromStorage } from '@/lib/storage';
 import AssignCard from './AssignCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import thung from '@/assets/thung.png';
+import { isCurrentDateByDate } from '@/lib/utils';
 
 export function AssignContent() {
   const date = new Date();
@@ -15,7 +16,6 @@ export function AssignContent() {
   });
 
   const [assignArray, setAssignArray] = useState<Assign[]>([]);
-  const [notificationMap, setNotificationMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     loadDataFromStorage('assign', (data: string | null) => {
@@ -37,15 +37,41 @@ export function AssignContent() {
         const isAX = a.isSubmit;
         const isBX = b.isSubmit;
 
-        if (isAX && !isBX) return -1;
-        if (!isAX && isBX) return 1;
+        // isSubmit이 false인 항목을 우선 배치
+        if (!isAX && isBX) return -1;
+        if (isAX && !isBX) return 1;
 
-        const dateA = new Date(a.dueDate);
-        const dateB = new Date(b.dueDate);
+        const isCurrentDateByDateA = isCurrentDateByDate(a.dueDate); // isCurrentDateByDate 적용
+        const isCurrentDateByDateB = isCurrentDateByDate(b.dueDate);
+
+        // isSubmit이 false일 때는 isCurrentDateByDate가 true인 항목을 먼저 배치, 그 다음 dueDate가 null인 항목
+        if (!isAX) {
+          if (isCurrentDateByDateA && !isCurrentDateByDateB) return -1;
+          if (!isCurrentDateByDateA && isCurrentDateByDateB) return 1;
+          const isANull = a.dueDate === null;
+          const isBNull = b.dueDate === null;
+          if (isANull && !isBNull) return 1;
+          if (!isANull && isBNull) return -1;
+        }
+
+        // isSubmit이 true일 때는 isCurrentDateByDate가 true인 항목을 먼저 배치, 그 다음 dueDate가 null인 항목
+        if (isAX) {
+          if (isCurrentDateByDateA && !isCurrentDateByDateB) return -1;
+          if (!isCurrentDateByDateA && isCurrentDateByDateB) return 1;
+          const isANull = a.dueDate === null;
+          const isBNull = b.dueDate === null;
+          if (isANull && !isBNull) return -1;
+          if (!isANull && isBNull) return 1;
+        }
+
+        // dueDate 기준으로 날짜 순으로 정렬
+        const dateA = a.dueDate === null ? Number.MAX_SAFE_INTEGER : new Date(a.dueDate!).getTime();
+        const dateB = b.dueDate === null ? Number.MAX_SAFE_INTEGER : new Date(b.dueDate!).getTime();
 
         if (dateA < dateB) return -1;
         if (dateA > dateB) return 1;
 
+        // courseTitle로 기본 정렬
         if (a.courseTitle < b.courseTitle) return -1;
         if (a.courseTitle > b.courseTitle) return 1;
 
@@ -53,14 +79,6 @@ export function AssignContent() {
       });
 
       setAssignArray(sortedAssignArray);
-    });
-  }, []);
-
-  useEffect(() => {
-    loadDataFromStorage('assign-notification', (data: string | null) => {
-      if (!data) return;
-      const parsedData = JSON.parse(data);
-      setNotificationMap(parsedData);
     });
   }, []);
 
@@ -77,9 +95,7 @@ export function AssignContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {assignArray.map((assign, index) => {
                   const key = `${assign.courseId}-${assign.title}-${assign.dueDate}`;
-                  const notification =
-                    notificationMap[key] === null || notificationMap[key] === undefined ? false : true;
-                  return <AssignCard key={key} notification={notification} assign={assign} />;
+                  return <AssignCard key={key} assign={assign} />;
                 })}
               </div>
             </CardContent>

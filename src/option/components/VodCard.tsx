@@ -1,28 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Check, Play, Clock } from 'lucide-react';
 import { Vod } from '@/content/types';
 
-import NotificationSwitch from '@/components/ui/notification-switch';
-import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
-import { toast, useToast } from '@/hooks/use-toast';
-import {
-  calculateRemainingTimeByRange,
-  calculateTimeDifference,
-  formatDateString,
-  removeSquareBrackets,
-} from '@/lib/utils';
+import { calculateRemainingTimeByRange, formatDateString, removeSquareBrackets } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CourseDetailModal from './CourseDetailModal';
 
 interface TaskStatusCardProps {
-  notification: boolean;
   vodList: Vod[];
 }
 
-const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
+const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
   if (vodList.length === 0) return <></>;
 
   let value = 0;
@@ -32,53 +22,6 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
   const total = (value * 100) / vodList.length;
 
   const [isVisible, setIsVisible] = useState(false);
-  const [toggle, setToggle] = useState(notification);
-  const [userInitiatedToggle, setUserInitiatedToggle] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    setToggle(notification);
-  }, [notification]);
-
-  useEffect(() => {
-    loadDataFromStorage('vod-notification', (data: string | null) => {
-      try {
-        let parsedData: Record<string, any> = {};
-        if (data) {
-          try {
-            parsedData = JSON.parse(data);
-          } catch (error) {
-            console.error('저장된 데이터를 파싱하는 중 오류가 발생했습니다.', error);
-          }
-        }
-        const item = vodList[0];
-        const key = `${item.courseId}-${item.subject}-${item.range}`;
-
-        if (toggle) {
-          parsedData[key] = true;
-        } else {
-          if (key in parsedData) {
-            delete parsedData[key];
-          }
-        }
-        saveDataToStorage('vod-notification', JSON.stringify(parsedData));
-
-        if (userInitiatedToggle) {
-          toast({
-            title: toggle ? '알림 설정 🔔' : '알림 취소 🔕',
-            description: removeSquareBrackets(`${vodList[0].courseTitle} - ${vodList[0].subject}`),
-            variant: 'default',
-          });
-          setUserInitiatedToggle(false);
-        }
-      } catch (error) {
-        toast({
-          title: '오류가 발생 했습니다. 🚨',
-          variant: 'destructive',
-        });
-      }
-    });
-  }, [toggle, userInitiatedToggle, toast, vodList]);
 
   return (
     <>
@@ -104,38 +47,6 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ notification, vodList }) => {
               <h2 className="text-lg font-semibold truncate flex-1 mr-2">
                 {removeSquareBrackets(vodList[0].courseTitle)}
               </h2>
-              <p>
-                <NotificationSwitch
-                  isSelected={toggle}
-                  onChange={() => {
-                    if (!toggle) {
-                      chrome.runtime.sendMessage(
-                        {
-                          action: 'scheduleAlarm',
-                          alarmId: `${vodList[0].courseId}-${vodList[0].subject}-${vodList[0].range.split(' ~ ')[1]}`,
-                          dateTime: vodList[0].range.split(' ~ ')[1],
-                          title: '하루 뒤 출석 마감!',
-                          message:
-                            removeSquareBrackets(vodList[0].courseTitle) +
-                            '-' +
-                            removeSquareBrackets(vodList[0].subject),
-                        },
-                        (response) => {}
-                      );
-                    } else {
-                      chrome.runtime.sendMessage(
-                        {
-                          action: 'cancelAlarm',
-                          alarmId: `${vodList[0].courseId}-${vodList[0].subject}-${vodList[0].range.split(' ~ ')[1]}`,
-                        },
-                        (response) => {}
-                      );
-                    }
-                    setToggle((prev) => !prev);
-                    setUserInitiatedToggle(true);
-                  }}
-                />
-              </p>
             </div>
             <div className="font-medium text-slate-400 text-sm line-clamp-1 text-ellipsis">{vodList[0].subject}</div>
           </div>
