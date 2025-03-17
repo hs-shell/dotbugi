@@ -10,60 +10,11 @@ import { calculateDueDate, calculateRemainingTime, calculateTimeDifference, remo
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TaskStatusCardProps {
-  notification: boolean;
   assign: Assign;
 }
 
-const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => {
+const AssignCard: React.FC<TaskStatusCardProps> = ({ assign }) => {
   if (!assign) return <></>;
-
-  const [toggle, setToggle] = useState(notification);
-
-  const [userInitiatedToggle, setUserInitiatedToggle] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    setToggle(notification);
-  }, [notification]);
-
-  useEffect(() => {
-    loadDataFromStorage('assign-notification', (data: string | null) => {
-      try {
-        let parsedData: Record<string, any> = {};
-        if (data) {
-          try {
-            parsedData = JSON.parse(data);
-          } catch (error) {
-            console.error('저장된 데이터를 파싱하는 중 오류가 발생했습니다.', error);
-          }
-        }
-        const key = `${assign.courseId}-${assign.title}-${assign.dueDate}`;
-
-        if (toggle) {
-          parsedData[key] = true;
-        } else {
-          if (key in parsedData) {
-            delete parsedData[key];
-          }
-        }
-        saveDataToStorage('assign-notification', JSON.stringify(parsedData));
-
-        if (userInitiatedToggle) {
-          toast({
-            title: toggle ? '알림 설정 🔔' : '알림 취소 🔕',
-            description: removeSquareBrackets(`${assign.courseTitle} - ${assign.title}`),
-            variant: 'default',
-          });
-          setUserInitiatedToggle(false);
-        }
-      } catch (error) {
-        toast({
-          title: '오류가 발생 했습니다. 🚨',
-          variant: 'destructive',
-        });
-      }
-    });
-  }, [toggle, userInitiatedToggle, toast, assign]);
 
   const [showRemainingTime, setShowRemainingTime] = useState(false);
 
@@ -92,35 +43,6 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ notification, assign }) => 
         <div>
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold truncate flex-1 mr-2">{assign.courseTitle}</h2>
-            <p>
-              <NotificationSwitch
-                isSelected={toggle}
-                onChange={() => {
-                  if (!toggle) {
-                    chrome.runtime.sendMessage(
-                      {
-                        action: 'scheduleAlarm',
-                        alarmId: `${assign.courseId}-${assign.title}-${assign.dueDate}`,
-                        dateTime: assign.dueDate,
-                        title: '하루 뒤 과제 마감!',
-                        message: removeSquareBrackets(assign.courseTitle) + '-' + assign.title,
-                      },
-                      (response) => {}
-                    );
-                  } else {
-                    chrome.runtime.sendMessage(
-                      {
-                        action: 'cancelAlarm',
-                        alarmId: `${assign.courseId}-${assign.title}-${assign.dueDate}`,
-                      },
-                      (response) => {}
-                    );
-                  }
-                  setToggle((prev) => !prev);
-                  setUserInitiatedToggle(true);
-                }}
-              />
-            </p>
           </div>
           <div className="font-medium text-slate-400 text-sm line-clamp-1 text-ellipsis">{assign.title}</div>
         </div>

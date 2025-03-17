@@ -40,7 +40,16 @@ export function isWithinSevenDays(date: string) {
   return diffDays <= 7 && diffDays >= 0;
 }
 
-export const calculateTimeDifference = (timeRange: string): TimeDifferenceResult => {
+export const calculateTimeDifference = (timeRange: string | null): TimeDifferenceResult => {
+  if (!timeRange) {
+    return {
+      message: `정보없음`,
+      borderColor: 'border-amber-500',
+      borderLeftColor: 'border-l-amber-500',
+      textColor: 'text-amber-500',
+    };
+  }
+
   const now = new Date();
   const [startString, endString] = timeRange.split(' ~ ');
   const startDate = new Date(startString);
@@ -81,7 +90,16 @@ export const calculateTimeDifference = (timeRange: string): TimeDifferenceResult
   }
 };
 
-export const calculateDueDate = (dueDate: string): TimeDifferenceResult => {
+export const calculateDueDate = (dueDate: string | null): TimeDifferenceResult => {
+  if (!dueDate) {
+    return {
+      message: `정보없음`,
+      borderColor: 'border-amber-500',
+      borderLeftColor: 'border-l-amber-500',
+      textColor: 'text-amber-500',
+    };
+  }
+
   const now = new Date();
   const endDate = new Date(dueDate);
 
@@ -120,7 +138,8 @@ export const calculateDueDate = (dueDate: string): TimeDifferenceResult => {
   }
 };
 
-export const formatDateString = (input: string) => {
+export const formatDateString = (input: string | null) => {
+  if (!input) return '기한없음';
   const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}):\d{2} ~ (\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}):\d{2}/;
 
   const formatted = input.replace(
@@ -132,7 +151,8 @@ export const formatDateString = (input: string) => {
   return formatted;
 };
 
-export const calculateRemainingTimeByRange = (range: string) => {
+export const calculateRemainingTimeByRange = (range: string | null) => {
+  if (!range) return '정보없음';
   const [startDateStr, endDateStr] = range.split(' ~ ');
   const endDate = new Date(endDateStr);
 
@@ -147,7 +167,8 @@ export const calculateRemainingTimeByRange = (range: string) => {
   return `${daysLeft === 0 ? '' : daysLeft + '일'} ${hoursLeft === 0 ? '' : hoursLeft + '시간'} ${minutesLeft}분 남음`;
 };
 
-export const calculateRemainingTime = (endTime: string) => {
+export const calculateRemainingTime = (endTime: string | null) => {
+  if (!endTime) return '정보없음';
   const endDate = new Date(endTime);
 
   const now = new Date();
