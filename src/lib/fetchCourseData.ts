@@ -18,6 +18,7 @@ export const requestData = async (id: string) => {
       fetchQuiz(QUIZ_LINK),
     ]);
 
+    console.info('[Dotbugi]', vodAttendanceArray, vodDataArray, assignDataArray, quizDataArray);
     return { vodAttendanceArray, vodDataArray, assignDataArray, quizDataArray };
   } catch (error) {
     console.error('Error while fetching data:', error);

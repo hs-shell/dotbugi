@@ -14,7 +14,6 @@ const StickyPopoverTrigger: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!placeholder) return;
 
     const fixedBottom = 20;
-    const collapsedBottom = 8;
     const transitionRange = 20;
 
     const handleScroll = () => {
