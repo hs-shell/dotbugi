@@ -47,7 +47,7 @@ export function useCourseData(courses: any[]) {
                     prof: course.prof,
                     courseTitle: course.courseTitle,
                     week: vodAttendanceData.week,
-                    title: vodAttendanceData.title,
+                    title: vodData.title,
                     isAttendance: vodAttendanceData.isAttendance,
                     weeklyAttendance: vodAttendanceData.weeklyAttendance,
                     length: vodData.length,
