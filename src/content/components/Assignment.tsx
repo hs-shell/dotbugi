@@ -1,5 +1,5 @@
-import { calculateDueDate, calculateRemainingTime, cn, isWithinSevenDays } from '@/lib/utils';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { calculateDueDate, calculateRemainingTime } from '@/lib/utils';
+import { Card, CardFooter, CardHeader } from '@/components/ui/card';
 import { BadgeCheck, Clock, Siren, TriangleAlert } from 'lucide-react';
 import { Tooltip } from '@radix-ui/react-tooltip';
 import { TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -26,7 +26,7 @@ export default function Assignment({ courseData }: Props) {
       {courseData.map((course, index) => {
         if (!course) return null;
 
-        let isDueDateSame = true;
+        const isDueDateSame = true;
         const timeDifference = calculateDueDate(course.dueDate!);
 
         return (

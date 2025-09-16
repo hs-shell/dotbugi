@@ -30,8 +30,10 @@ export const useGetCourses = (): UseCouresResult => {
         (item): item is { courseId: string; courseTitle: string; prof: string } =>
           item !== null && item.courseId !== '' && item.courseTitle !== '' && item.prof !== ''
       );
+
     setCourses(data);
     saveDataToStorage('courses', JSON.stringify(data));
+    console.info('[Dotbugi] 강의 목록:', data);
   }, []);
 
   return { courses };

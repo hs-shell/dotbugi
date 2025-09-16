@@ -4,11 +4,10 @@ import { Vod } from '../types';
 import {
   calculateRemainingTimeByRange,
   calculateTimeDifference,
-  cn,
   formatDateString,
   isCurrentDateInRange,
 } from '@/lib/utils';
-import { AlarmClock, BadgeCheck, ChevronDown, ChevronUp, Clock, Siren, TriangleAlert } from 'lucide-react';
+import { BadgeCheck, ChevronDown, ChevronUp, Clock, Siren, TriangleAlert } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -126,7 +125,7 @@ export default function Video({ courseData }: Props) {
         });
 
         const item = vods[0];
-        let isDueDateSame = true;
+        const isDueDateSame = true;
         const timeDifference = calculateTimeDifference(item.range);
         const isExpanded = expandedCards[`${item.title}-${index}`] || false;
 

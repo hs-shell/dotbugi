@@ -1,9 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Vod, Assign, Quiz, TAB_TYPE } from '@/content/types';
+import { Vod, Assign, Quiz } from '@/content/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { requestData } from '@/lib/fetchCourseData';
+import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
 
-// courses 배열을 받아 vod, assign, quiz 데이터를 관리하는 커스텀 훅
+const makeVodKey = (courseId: string, title: string, week: number) => `${courseId}-${title}-${week}`;
+const makeAssignKey = (courseId: string, title: string, dueDate: string) => `${courseId}-${title}-${dueDate}`;
+const makeQuizKey = (courseId: string, title: string, dueDate: string) => `${courseId}-${title}-${dueDate}`;
+
 export function useCourseData(courses: any[]) {
   const [vods, setVods] = useState<Vod[]>([]);
   const [assigns, setAssigns] = useState<Assign[]>([]);
@@ -24,12 +28,9 @@ export function useCourseData(courses: any[]) {
       const tempAssigns: Assign[] = [...assigns];
       const tempQuizes: Quiz[] = [...quizes];
 
-      // Set을 사용하여 중복 방지 (각 데이터 유형별로 title을 기준으로)
-      const vodSet = new Set(tempVods.map((vod) => `${vod.courseId}-${vod.title}-${vod.range}-vod`));
-      const assignSet = new Set(
-        tempAssigns.map((assign) => `${assign.courseId}-${assign.title}-${assign.dueDate}-assign`)
-      );
-      const quizSet = new Set(tempQuizes.map((quiz) => `${quiz.courseId}-${quiz.title}-${quiz.dueDate}-quiz`));
+      const vodSet = new Set<string>();
+      const assignSet = new Set<string>();
+      const quizSet = new Set<string>();
 
       await Promise.all(
         courses.map(async (course) => {
@@ -37,8 +38,8 @@ export function useCourseData(courses: any[]) {
 
           result.vodDataArray.forEach((vodData) => {
             result.vodAttendanceArray.forEach((vodAttendanceData) => {
-              const vodKey = `${vodAttendanceData.title}-${vodAttendanceData.week}`;
-              if (vodAttendanceData.title === vodData.title && vodAttendanceData.week === vodData.week) {
+              const vodKey = makeVodKey(course.courseId, vodData.title, vodData.week);
+              if (vodAttendanceData.week === vodData.week) {
                 if (!vodSet.has(vodKey)) {
                   vodSet.add(vodKey);
                   tempVods.push({
@@ -60,8 +61,9 @@ export function useCourseData(courses: any[]) {
           });
 
           result.assignDataArray.forEach((assignData) => {
-            if (!assignSet.has(assignData.title)) {
-              assignSet.add(assignData.title);
+            const assignKey = makeAssignKey(course.courseId, assignData.title, assignData.dueDate);
+            if (!assignSet.has(assignKey)) {
+              assignSet.add(assignKey);
               tempAssigns.push({
                 courseId: course.courseId,
                 prof: course.prof,
@@ -76,8 +78,9 @@ export function useCourseData(courses: any[]) {
           });
 
           result.quizDataArray.forEach((quizData) => {
-            if (!quizSet.has(quizData.title)) {
-              quizSet.add(quizData.title);
+            const quizKey = makeQuizKey(course.courseId, quizData.title, quizData.dueDate);
+            if (!quizSet.has(quizKey)) {
+              quizSet.add(quizKey);
               tempQuizes.push({
                 courseId: course.courseId,
                 prof: course.prof,
@@ -142,16 +145,19 @@ export function useCourseData(courses: any[]) {
       const minutes = (currentTime - parseInt(lastRequestTime, 10)) / (60 * 1000);
       setRemainingTime(minutes);
       loadDataFromStorage('vod', (data) => {
-        // setVods((data as Vod[]).filter((vod) => isCurrentDateInRange(vod.range)));
-        setVods((data as Vod[]) || []);
+        if (!data) return;
+        setVods((data as Vod[]).filter((vod) => isCurrentDateInRange(vod.range)));
+        // setVods((data as Vod[]) || []);
       });
       loadDataFromStorage('assign', (data) => {
-        // setAssigns((data as Assign[]).filter((assign) => isCurrentDateByDate(assign.dueDate)));
-        setAssigns((data as Assign[]) || []);
+        if (!data) return;
+        setAssigns((data as Assign[]).filter((assign) => isCurrentDateByDate(assign.dueDate)));
+        // setAssigns((data as Assign[]) || []);
       });
       loadDataFromStorage('quiz', (data) => {
-        // setQuizes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
-        setQuizes((data as Quiz[]) || []);
+        if (!data) return;
+        setQuizes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
+        // setQuizes((data as Quiz[]) || []);
       });
     }
   }, [courses, updateData]);

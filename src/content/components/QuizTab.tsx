@@ -26,7 +26,7 @@ export default function QuizTab({ courseData }: Props) {
       {courseData.map((course, index) => {
         if (!course) return null;
 
-        let isDueDateSame = true;
+        const isDueDateSame = true;
         const timeDifference = calculateDueDate(course.dueDate!);
 
         return (
