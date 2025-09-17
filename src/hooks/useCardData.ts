@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { startOfDay } from 'date-fns';
 import { loadDataFromStorage } from '@/lib/storage';
-import { removeSquareBrackets } from '@/lib/utils';
 import { Vod, Assign, Quiz } from '@/content/types';
 
 export type CardData = {
@@ -57,7 +55,7 @@ function useCardData() {
         );
 
         let done = 0;
-        Object.entries(groupedData).forEach(([_, vodItems]) => {
+        Object.values(groupedData).forEach((vodItems) => {
           if (vodItems[0].weeklyAttendance.toLowerCase() === 'o') {
             done += 1;
           }
@@ -97,8 +95,7 @@ function useCardData() {
       'quiz',
       (quizzes) => {
         const total = quizzes.length;
-        let done = 0;
-        // quiz에 대한 done 로직이 있다면 여기에 추가합니다.
+        const done = 0;
         return [
           {
             type: 'quiz',

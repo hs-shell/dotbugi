@@ -153,7 +153,7 @@ export const formatDateString = (input: string | null) => {
 
 export const calculateRemainingTimeByRange = (range: string | null) => {
   if (!range) return '정보없음';
-  const [startDateStr, endDateStr] = range.split(' ~ ');
+  const [, endDateStr] = range.split(' ~ ');
   const endDate = new Date(endDateStr);
 
   const now = new Date();

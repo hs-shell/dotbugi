@@ -13,10 +13,6 @@ export const fetchIndexPage = async (link: string) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    const isAttendances = Array.from(
-      doc.querySelectorAll('#region-main > div > div > div.user_attendance.course_box > div > ul > li')
-    );
-
     const weeks = Array.from(doc.querySelectorAll('#region-main > div > div > div.total_sections > div > ul > li'));
 
     const vods = weeks

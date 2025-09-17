@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Github, LayoutDashboard, NotebookText, Palette, Star, Video, Zap } from 'lucide-react';
+import { Calendar, LayoutDashboard, NotebookText, Palette, Video, Zap } from 'lucide-react';
 import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import icon from '@/assets/icon.png';
