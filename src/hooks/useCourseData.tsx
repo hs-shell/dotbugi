@@ -28,9 +28,9 @@ export function useCourseData(courses: any[]) {
       const tempAssigns: Assign[] = [...assigns];
       const tempQuizes: Quiz[] = [...quizes];
 
-      const vodSet = new Set<string>();
-      const assignSet = new Set<string>();
-      const quizSet = new Set<string>();
+      const vodSet = new Set(tempVods.map((v) => makeVodKey(v.courseId, v.title, v.week)));
+      const assignSet = new Set(tempAssigns.map((a) => makeAssignKey(a.courseId, a.title, a.dueDate)));
+      const quizSet = new Set(tempQuizes.map((q) => makeQuizKey(q.courseId, q.title, q.dueDate)));
 
       await Promise.all(
         courses.map(async (course) => {
@@ -63,6 +63,7 @@ export function useCourseData(courses: any[]) {
           result.assignDataArray.forEach((assignData) => {
             const assignKey = makeAssignKey(course.courseId, assignData.title, assignData.dueDate);
             if (!assignSet.has(assignKey)) {
+              console.info(assignKey);
               assignSet.add(assignKey);
               tempAssigns.push({
                 courseId: course.courseId,
@@ -80,6 +81,7 @@ export function useCourseData(courses: any[]) {
           result.quizDataArray.forEach((quizData) => {
             const quizKey = makeQuizKey(course.courseId, quizData.title, quizData.dueDate);
             if (!quizSet.has(quizKey)) {
+              console.info(quizKey);
               quizSet.add(quizKey);
               tempQuizes.push({
                 courseId: course.courseId,
