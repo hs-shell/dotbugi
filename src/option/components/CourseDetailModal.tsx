@@ -43,10 +43,6 @@ const CourseDetailModal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProp
     }, 300);
   };
 
-  const toggleRemainingTime = () => {
-    setShowRemainingTime((prev) => !prev);
-  };
-
   const timeDifference = calculateTimeDifference(vodList[0].range);
 
   const modalContent = (

@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
-import { Quiz, Vod } from '@/content/types';
+import { Quiz } from '@/content/types';
 import { loadDataFromStorage } from '@/lib/storage';
 import QuizCard from './QuizCard';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
@@ -8,13 +8,6 @@ import thung from '@/assets/thung.png';
 import { isCurrentDateByDate } from '@/lib/utils';
 
 export function QuizContent() {
-  const date = new Date();
-  const formattedDate = date.toLocaleDateString('ko-KR', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  });
-
   const [quizArray, setQuizArray] = useState<Quiz[]>([]);
 
   useEffect(() => {
@@ -30,7 +23,7 @@ export function QuizContent() {
           return;
         }
       } else {
-        parsedData = data as any;
+        parsedData = data as Quiz[];
       }
 
       const sortedQuizArray = parsedData.sort((a, b) => {
@@ -76,7 +69,7 @@ export function QuizContent() {
           <ScrollArea className="h-[calc(100vh-12rem)]">
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {quizArray.map((quiz, index) => {
+                {quizArray.map((quiz) => {
                   const key = `${quiz.courseId}-${quiz.title}-${quiz.dueDate}`;
                   return <QuizCard key={key} quiz={quiz} />;
                 })}

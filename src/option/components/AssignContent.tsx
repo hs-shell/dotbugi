@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { Assign } from '@/content/types';
 import { loadDataFromStorage } from '@/lib/storage';
@@ -8,13 +8,6 @@ import thung from '@/assets/thung.png';
 import { isCurrentDateByDate } from '@/lib/utils';
 
 export function AssignContent() {
-  const date = new Date();
-  const formattedDate = date.toLocaleDateString('ko-KR', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  });
-
   const [assignArray, setAssignArray] = useState<Assign[]>([]);
 
   useEffect(() => {
@@ -30,7 +23,7 @@ export function AssignContent() {
           return;
         }
       } else {
-        parsedData = data as any;
+        parsedData = data as Assign[];
       }
 
       const sortedAssignArray = parsedData.sort((a, b) => {
@@ -93,7 +86,7 @@ export function AssignContent() {
           <ScrollArea className="h-[calc(100vh-12rem)]">
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {assignArray.map((assign, index) => {
+                {assignArray.map((assign) => {
                   const key = `${assign.courseId}-${assign.title}-${assign.dueDate}`;
                   return <AssignCard key={key} assign={assign} />;
                 })}

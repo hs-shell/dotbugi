@@ -36,7 +36,7 @@ export const fetchAssign = async (link: string) => {
           row.querySelector(headerMap.title)?.textContent?.trim() ||
           row.querySelector(headerMap.assign)?.textContent?.trim() ||
           null;
-        let sbj = row.querySelector(headerMap.subject)?.textContent?.trim() || '';
+        const sbj = row.querySelector(headerMap.subject)?.textContent?.trim() || '';
         const url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || null;
         const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || null;
         const isSubmit = row.querySelector(headerMap.isSubmit)?.textContent?.trim() === '미제출' ? false : true;

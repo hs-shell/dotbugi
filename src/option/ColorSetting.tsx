@@ -93,7 +93,7 @@ export default function ColorSetting() {
       });
       setOriginalColors(originals);
     }
-  }, [courses]);
+  }, [courses, courseColors.length]);
 
   const handleColorChange = (
     courseId: string,
@@ -279,11 +279,6 @@ function CourseCard({ course, colorSetting, originalColor, onColorChange, onRese
   const handleCustomColorChange = (value: string) => {
     setCustomColor(value);
     onColorChange(course.courseId, value, 'solid', undefined, opacity);
-  };
-
-  const handleCustomGradientChange = (value: string) => {
-    setCustomGradient(value);
-    onColorChange(course.courseId, value, 'gradient', value, opacity);
   };
 
   const handleGradientColorChange = (startColor: string, endColor: string) => {

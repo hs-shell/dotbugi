@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Quiz } from '@/content/types';
 
-import { calculateDueDate, calculateRemainingTime, calculateTimeDifference, removeSquareBrackets } from '@/lib/utils';
+import { calculateDueDate, calculateRemainingTime } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TaskStatusCardProps {
@@ -11,8 +11,6 @@ interface TaskStatusCardProps {
 }
 
 const QuizCard: React.FC<TaskStatusCardProps> = ({ quiz }) => {
-  if (!quiz) return <></>;
-
   const [showRemainingTime, setShowRemainingTime] = useState(false);
 
   useEffect(() => {
@@ -24,6 +22,10 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ quiz }) => {
     }
     return () => clearTimeout(timer);
   }, [showRemainingTime]);
+
+  if (!quiz) {
+    return <></>;
+  }
 
   const timeDifference = calculateDueDate(quiz.dueDate);
 

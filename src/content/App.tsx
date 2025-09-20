@@ -2,7 +2,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { useEffect, useMemo, useState } from 'react';
 import icon from '@/assets/icon.png';
 import exit from '@/assets/exit.png';
-import { Assign, Filters, Quiz, TAB_TYPE, Vod } from './types';
+import { Assign, CourseBase, Filters, Quiz, TAB_TYPE, Vod } from './types';
 import { ListFilter, OctagonAlert, RefreshCw, Search } from 'lucide-react';
 import filter from '@/assets/filter.svg';
 import PopoverFooter from './components/PopoverFooter';
@@ -29,18 +29,19 @@ const submitOptions = [
 
 export default function App() {
   const { courses } = useGetCourses();
+  const typeCourses: CourseBase[] = courses;
 
   // 데이터 관련 상태를 useCourseData 커스텀 훅으로 관리
-  const { vods, assigns, quizes, isPending, remainingTime, refreshTime, isError, updateData, setIsPending } =
-    useCourseData(courses);
+  const { vods, assigns, quizes, isPending, remainingTime, isError, updateData, setIsPending } =
+    useCourseData(typeCourses);
 
   // activeTab의 타입을 TAB_TYPE으로 지정
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [vodSortBy, setVodSortBy] = useState<keyof Vod>('isAttendance');
-  const [assignSortBy, setAssignSortBy] = useState<keyof Assign>('isSubmit');
-  const [quizSortBy, setQuizSortBy] = useState<keyof Quiz>('dueDate');
+  const [vodSortBy] = useState<keyof Vod>('isAttendance');
+  const [assignSortBy] = useState<keyof Assign>('isSubmit');
+  const [quizSortBy] = useState<keyof Quiz>('dueDate');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // 필터 상태 관리 - Record을 사용하여 TAB_TYPE을 키로 지정

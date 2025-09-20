@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { Vod } from '@/content/types';
 import { loadDataFromStorage } from '@/lib/storage';
@@ -8,7 +8,6 @@ import thung from '@/assets/thung.png';
 import { isCurrentDateInRange } from '@/lib/utils';
 
 export function VodContent() {
-  const date = new Date();
   const [vodArray, setVodArray] = useState<Vod[][]>([]);
   useEffect(() => {
     loadDataFromStorage('vod', (data: string | null) => {
@@ -23,7 +22,7 @@ export function VodContent() {
           return;
         }
       } else {
-        parsedData = data as any;
+        parsedData = data as Vod[];
       }
 
       const groupedData = parsedData.reduce(
@@ -106,8 +105,6 @@ export function VodContent() {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {vodArray.map((vodGroup, index) => {
-                  const item = vodGroup[0];
-                  const key = `${item.courseId}-${item.subject}-${item.range}`;
                   return <VodCard key={index} vodList={vodGroup} />;
                 })}
               </div>

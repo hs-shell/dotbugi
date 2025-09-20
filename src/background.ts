@@ -79,7 +79,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 /**
  * 메시지를 통해 알람 예약 및 취소 요청을 처리하는 리스너
  */
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   if (message.action === 'scheduleAlarm') {
     const { alarmId, dateTime, title, message: alarmMessage } = message;
     schedulePreEventAlarm(alarmId, dateTime, title, alarmMessage);
