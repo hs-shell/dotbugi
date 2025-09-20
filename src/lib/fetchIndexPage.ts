@@ -23,7 +23,9 @@ export const fetchIndexPage = async (link: string) => {
           .filter((item) => !item.closest('.dimmed'))
           .map((item) => {
             const week = index + 1;
-            const title = item.querySelector('.instancename')?.textContent?.trim() || null;
+            const instancename = item.querySelector('.instancename');
+            instancename?.querySelector('.accesshide')?.remove();
+            const title = instancename?.textContent?.trim() || null;
             const url = item.querySelector('a')?.getAttribute('href') || null;
             const range = item.querySelector('.text-ubstrap')?.textContent?.trim() || '';
             const length = item.querySelector('.text-info')?.textContent?.replace(',', '').trim() || '';
