@@ -20,16 +20,6 @@ interface Props {
 export default function Video({ courseData }: Props) {
   const [expandedCards, setExpandedCards] = useState<{ [key: string]: boolean }>({});
 
-  if (!courseData || courseData.length === 0) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-        <img src={thung} width={100} height={100} />
-        <div>
-          <span className="py-3 text-2xl font-medium">강의가 없습니다</span>
-        </div>
-      </div>
-    );
-  }
   const toggleCard = (courseId: string) => {
     setExpandedCards((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
   };
@@ -45,6 +35,17 @@ export default function Video({ courseData }: Props) {
     },
     {} as Record<string, Vod[]>
   );
+
+  if (!courseData || courseData.length === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+        <img src={thung} width={100} height={100} />
+        <div>
+          <span className="py-3 text-2xl font-medium">강의가 없습니다</span>
+        </div>
+      </div>
+    );
+  }
 
   const sortedVodGroups = Object.values(groupedData).sort((groupA, groupB) => {
     const firstA = groupA[0];
@@ -158,13 +159,11 @@ export default function Video({ courseData }: Props) {
                       </div>
                       <div className="font-light text-zinc-500 text-ellipsis line-clamp-1" style={{ fontSize: 10 }}>
                         {formatDateString(vod.range)},{' '}
-                          <span
-                            className={`font-medium ${
-                              vod.isAttendance.toLowerCase().trim() === 'o'
-                                ? 'text-green-500'
-                                : 'text-amber-500'
-                            } !text-amber-500`}
-                          >
+                        <span
+                          className={`font-medium ${
+                            vod.isAttendance.toLowerCase().trim() === 'o' ? 'text-green-500' : 'text-amber-500'
+                          }`}
+                        >
                           {vod.length}
                         </span>
                       </div>
