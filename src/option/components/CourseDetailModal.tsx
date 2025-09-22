@@ -43,10 +43,6 @@ const CourseDetailModal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProp
     }, 300);
   };
 
-  const toggleRemainingTime = () => {
-    setShowRemainingTime((prev) => !prev);
-  };
-
   const timeDifference = calculateTimeDifference(vodList[0].range);
 
   const modalContent = (
@@ -74,7 +70,7 @@ const CourseDetailModal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProp
           <ScrollArea className="h-auto">
             <div className="space-y-3 py-2">
               {vodList.map((vod, index) => {
-                const isAttendance = vod.isAttendance.toLowerCase() === 'o';
+                const isAttendance = vod.isAttendance.toLowerCase().trim() === 'o';
                 return (
                   <Card
                     key={index}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Vod, Assign, Quiz } from '@/content/types';
+import { Vod, Assign, Quiz, CourseBase } from '@/content/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { requestData } from '@/lib/fetchCourseData';
 import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
@@ -8,7 +8,7 @@ const makeVodKey = (courseId: string, title: string, week: number) => `${courseI
 const makeAssignKey = (courseId: string, title: string, dueDate: string) => `${courseId}-${title}-${dueDate}`;
 const makeQuizKey = (courseId: string, title: string, dueDate: string) => `${courseId}-${title}-${dueDate}`;
 
-export function useCourseData(courses: any[]) {
+export function useCourseData(courses: CourseBase[]) {
   const [vods, setVods] = useState<Vod[]>([]);
   const [assigns, setAssigns] = useState<Assign[]>([]);
   const [quizes, setQuizes] = useState<Quiz[]>([]);
@@ -29,8 +29,8 @@ export function useCourseData(courses: any[]) {
       const tempQuizes: Quiz[] = [...quizes];
 
       const vodSet = new Set(tempVods.map((v) => makeVodKey(v.courseId, v.title, v.week)));
-      const assignSet = new Set(tempAssigns.map((a) => makeAssignKey(a.courseId, a.title, a.dueDate)));
-      const quizSet = new Set(tempQuizes.map((q) => makeQuizKey(q.courseId, q.title, q.dueDate)));
+      const assignSet = new Set(tempAssigns.map((a) => makeAssignKey(a.courseId, a.title, a.dueDate ? a.dueDate : '')));
+      const quizSet = new Set(tempQuizes.map((q) => makeQuizKey(q.courseId, q.title, q.dueDate ? q.dueDate : '')));
 
       await Promise.all(
         courses.map(async (course) => {
@@ -61,7 +61,11 @@ export function useCourseData(courses: any[]) {
           });
 
           result.assignDataArray.forEach((assignData) => {
-            const assignKey = makeAssignKey(course.courseId, assignData.title, assignData.dueDate);
+            const assignKey = makeAssignKey(
+              course.courseId,
+              assignData.title,
+              assignData.dueDate ? assignData.dueDate : ''
+            );
             if (!assignSet.has(assignKey)) {
               console.info(assignKey);
               assignSet.add(assignKey);
@@ -79,7 +83,7 @@ export function useCourseData(courses: any[]) {
           });
 
           result.quizDataArray.forEach((quizData) => {
-            const quizKey = makeQuizKey(course.courseId, quizData.title, quizData.dueDate);
+            const quizKey = makeQuizKey(course.courseId, quizData.title, quizData.dueDate ? quizData.dueDate : '');
             if (!quizSet.has(quizKey)) {
               console.info(quizKey);
               quizSet.add(quizKey);
@@ -112,6 +116,7 @@ export function useCourseData(courses: any[]) {
 
       setIsPending(false);
     } catch (error) {
+      console.warn(error);
       localStorage.removeItem('lastRequestTime');
       setIsError(true);
       setIsPending(false);

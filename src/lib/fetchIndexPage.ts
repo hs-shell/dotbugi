@@ -13,10 +13,6 @@ export const fetchIndexPage = async (link: string) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    const isAttendances = Array.from(
-      doc.querySelectorAll('#region-main > div > div > div.user_attendance.course_box > div > ul > li')
-    );
-
     const weeks = Array.from(doc.querySelectorAll('#region-main > div > div > div.total_sections > div > ul > li'));
 
     const vods = weeks
@@ -27,7 +23,9 @@ export const fetchIndexPage = async (link: string) => {
           .filter((item) => !item.closest('.dimmed'))
           .map((item) => {
             const week = index + 1;
-            const title = item.querySelector('.instancename')?.textContent?.trim() || null;
+            const instancename = item.querySelector('.instancename');
+            instancename?.querySelector('.accesshide')?.remove();
+            const title = instancename?.textContent?.trim() || null;
             const url = item.querySelector('a')?.getAttribute('href') || null;
             const range = item.querySelector('.text-ubstrap')?.textContent?.trim() || '';
             const length = item.querySelector('.text-info')?.textContent?.replace(',', '').trim() || '';

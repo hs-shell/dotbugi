@@ -31,7 +31,7 @@ export const fetchQuiz = async (link: string) => {
     const rows = Array.from(doc.querySelectorAll('table.generaltable tbody tr'));
     const quizzes = rows
       .map((row) => {
-        let sbj = row.querySelector(headerMap.subject)?.textContent?.trim() || '';
+        const sbj = row.querySelector(headerMap.subject)?.textContent?.trim() || '';
         const title = row.querySelector(headerMap.title)?.textContent?.trim() || null;
         let url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || null;
         const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || null;

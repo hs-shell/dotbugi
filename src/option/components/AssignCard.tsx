@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Assign, Vod } from '@/content/types';
+import { Assign } from '@/content/types';
 
-import NotificationSwitch from '@/components/ui/notification-switch';
-import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
-import { useToast } from '@/hooks/use-toast';
-import { calculateDueDate, calculateRemainingTime, calculateTimeDifference, removeSquareBrackets } from '@/lib/utils';
+import { calculateDueDate, calculateRemainingTime } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TaskStatusCardProps {
@@ -14,8 +11,6 @@ interface TaskStatusCardProps {
 }
 
 const AssignCard: React.FC<TaskStatusCardProps> = ({ assign }) => {
-  if (!assign) return <></>;
-
   const [showRemainingTime, setShowRemainingTime] = useState(false);
 
   useEffect(() => {
@@ -28,6 +23,9 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ assign }) => {
     return () => clearTimeout(timer);
   }, [showRemainingTime]);
 
+  if (!assign) {
+    return <></>;
+  }
   const timeDifference = calculateDueDate(assign.dueDate);
 
   return (

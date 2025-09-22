@@ -13,6 +13,8 @@ interface TaskStatusCardProps {
 }
 
 const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  
   if (vodList.length === 0) return <></>;
 
   let value = 0;
@@ -21,7 +23,6 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
   });
   const total = (value * 100) / vodList.length;
 
-  const [isVisible, setIsVisible] = useState(false);
 
   return (
     <>

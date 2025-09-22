@@ -3,11 +3,11 @@ import { saveDataToStorage } from '@/lib/storage';
 import { removeSquareBrackets } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 
-interface UseCouresResult {
+export interface UseCourseResult {
   courses: CourseBase[];
 }
 
-export const useGetCourses = (): UseCouresResult => {
+export const useGetCourses = (): UseCourseResult => {
   const [courses, setCourses] = useState<CourseBase[]>([]);
   useEffect(() => {
     if (!document) return;

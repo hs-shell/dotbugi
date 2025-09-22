@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { calendar_v3 } from 'googleapis';
+
+type CalendarEvent = calendar_v3.Schema$Event;
 
 const Labo: React.FC = () => {
   const [token, setToken] = useState<string | null>(null);
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   const fetchCalendarEvents = (token: string) => {
     fetch(

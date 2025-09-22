@@ -1,5 +1,5 @@
 import { TYPES } from '@/content/types';
-import { Home, NotebookText, Settings, Video, Zap } from 'lucide-react';
+import { NotebookText, Video, Zap } from 'lucide-react';
 
 export const data = [
   {
