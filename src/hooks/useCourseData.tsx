@@ -3,10 +3,7 @@ import { Vod, Assign, Quiz, CourseBase } from '@/content/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { requestData } from '@/lib/fetchCourseData';
 import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
-
-const makeVodKey = (courseId: string, title: string, week: number) => `${courseId}-${title}-${week}`;
-const makeAssignKey = (courseId: string, title: string, dueDate: string) => `${courseId}-${title}-${dueDate}`;
-const makeQuizKey = (courseId: string, title: string, dueDate: string) => `${courseId}-${title}-${dueDate}`;
+import { makeAssignKey, makeQuizKey, makeVodKey } from '@/utils/generate-key';
 
 export function useCourseData(courses: CourseBase[]) {
   const [vods, setVods] = useState<Vod[]>([]);
@@ -39,7 +36,7 @@ export function useCourseData(courses: CourseBase[]) {
           result.vodDataArray.forEach((vodData) => {
             result.vodAttendanceArray.forEach((vodAttendanceData) => {
               const vodKey = makeVodKey(course.courseId, vodData.title, vodData.week);
-              if (vodAttendanceData.week === vodData.week) {
+              if (vodAttendanceData.title === vodData.title && vodAttendanceData.week === vodData.week) {
                 if (!vodSet.has(vodKey)) {
                   vodSet.add(vodKey);
                   tempVods.push({
