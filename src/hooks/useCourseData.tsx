@@ -20,10 +20,9 @@ export function useCourseData(courses: CourseBase[]) {
       setIsPending(true);
       const currentTime = new Date().getTime();
 
-      // 기존 데이터를 유지하면서 새로운 데이터만 추가
-      const tempVods: Vod[] = [...vods];
-      const tempAssigns: Assign[] = [...assigns];
-      const tempQuizes: Quiz[] = [...quizes];
+      const tempVods: Vod[] = [];
+      const tempAssigns: Assign[] = [];
+      const tempQuizes: Quiz[] = [];
 
       const vodSet = new Set(tempVods.map((v) => makeVodKey(v.courseId, v.title, v.week)));
       const assignSet = new Set(tempAssigns.map((a) => makeAssignKey(a.courseId, a.title, a.dueDate ? a.dueDate : '')));
@@ -118,7 +117,7 @@ export function useCourseData(courses: CourseBase[]) {
       setIsError(true);
       setIsPending(false);
     }
-  }, [courses, vods, assigns, quizes]);
+  }, [courses]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
