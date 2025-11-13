@@ -150,17 +150,14 @@ export function useCourseData(courses: CourseBase[]) {
       loadDataFromStorage('vod', (data) => {
         if (!data) return;
         setVods((data as Vod[]).filter((vod) => isCurrentDateInRange(vod.range)));
-        // setVods((data as Vod[]) || []);
       });
       loadDataFromStorage('assign', (data) => {
         if (!data) return;
         setAssigns((data as Assign[]).filter((assign) => isCurrentDateByDate(assign.dueDate)));
-        // setAssigns((data as Assign[]) || []);
       });
       loadDataFromStorage('quiz', (data) => {
         if (!data) return;
         setQuizes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
-        // setQuizes((data as Quiz[]) || []);
       });
     }
   }, [courses, updateData]);

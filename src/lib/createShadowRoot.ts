@@ -1,8 +1,7 @@
-export function createShadowRoot(host: HTMLElement, styles: string[]): ShadowRoot {
+export function createShadowRoot(host: HTMLElement, styles: string[], shadowId: string): ShadowRoot {
   const shadowRoot = host.attachShadow({ mode: 'open' });
 
-  // host에 데이터 속성 추가
-  host.dataset.shadowId = 'extension-content-root';
+  host.dataset.shadowId = shadowId;
 
   const sheets = styles.map((styleString) => {
     const sheet = new CSSStyleSheet();

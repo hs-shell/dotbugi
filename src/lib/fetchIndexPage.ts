@@ -30,7 +30,7 @@ export const fetchIndexPage = async (link: string) => {
             const range = item.querySelector('.text-ubstrap')?.textContent?.trim() || '';
             const length = item.querySelector('.text-info')?.textContent?.replace(',', '').trim() || '';
 
-            if (!title || !url) return null;
+            if (!title || !url || !range) return null;
             return { week, subject, title, url, range, length };
           })
           .filter((item) => item !== null);

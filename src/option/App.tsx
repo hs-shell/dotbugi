@@ -42,6 +42,7 @@ const AnimatedRoutes = () => {
         animate="in"
         exit="out"
         variants={pageVariants}
+        //@ts-expect-error ignore
         transition={pageTransition}
       >
         <Header location={location.pathname} />

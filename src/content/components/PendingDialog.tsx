@@ -27,9 +27,11 @@ export default function PendingDialog({ isPending, onClose }: PendingDialogProps
       document.body.prepend(host);
     }
     setHostElement(host);
-    const newShadowRoot = createShadowRoot(host, [
-      styles,
-      `
+    const newShadowRoot = createShadowRoot(
+      host,
+      [
+        styles,
+        `
       :host {
         position: fixed;
         top: 0;
@@ -42,7 +44,9 @@ export default function PendingDialog({ isPending, onClose }: PendingDialogProps
         z-index: 9999;
       }
       `,
-    ]);
+      ],
+      'modal-container'
+    );
     setModalContainer(newShadowRoot);
   }, []);
 
