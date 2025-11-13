@@ -42,7 +42,7 @@ export const fetchAssign = async (link: string) => {
         const isSubmit = row.querySelector(headerMap.isSubmit)?.textContent?.trim() === '미제출' ? false : true;
 
         if (sbj.length !== 0) subject = sbj;
-        if (!title || !url) return null;
+        if (!title || !url || !dueDate) return null;
         return { subject, title, url, dueDate, isSubmit };
       })
       .filter((assign) => assign !== null);

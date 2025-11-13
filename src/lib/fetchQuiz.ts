@@ -43,7 +43,7 @@ export const fetchQuiz = async (link: string) => {
           url = url.slice(0, index) + 'mod/quiz/' + url.slice(index);
         }
 
-        if (title && url) {
+        if (title && url && dueDate) {
           return { title, subject, url, dueDate };
         }
         return null;

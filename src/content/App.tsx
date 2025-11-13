@@ -15,17 +15,16 @@ import { Button } from '@/components/ui/button';
 import FilterBadge from './components/FilterBadge';
 
 import FilterPanel from './components/FilterPanel';
-import { useCourseData } from '@/hooks/useCourseData';
 import { filterVods, filterAssigns, filterQuizes } from '@/lib/filterData';
 import PendingDialogWithBeforeUnload from './components/PendingDialog';
 import StickyPopoverTrigger from './StickyPopoverTrigger';
+import { useCourseData } from '@/hooks/useCourseData';
 
-// 리팩토링: 필터 옵션 추출
-const attendanceOptions = ['출석', '결석']; // string[]
+const attendanceOptions = ['출석', '결석'];
 const submitOptions = [
   { label: '제출완료', value: true },
   { label: '제출필요', value: false },
-]; // { label: string, value: boolean }[]
+];
 
 export default function App() {
   const { courses } = useGetCourses();

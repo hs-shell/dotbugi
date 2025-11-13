@@ -27,7 +27,7 @@ const manifest = {
       matches: ['*://*/*'],
     },
   ],
-  options_page: '/option.html',
+  options_page: 'option.html',
   permissions: ['storage', 'notifications', 'alarms', 'identity'],
   host_permissions: ['https://*/*', 'http://*/*'],
   oauth2: {
