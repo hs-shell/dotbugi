@@ -35,7 +35,11 @@ export function useCourseData(courses: CourseBase[]) {
           result.vodDataArray.forEach((vodData) => {
             result.vodAttendanceArray.forEach((vodAttendanceData) => {
               const vodKey = makeVodKey(course.courseId, vodData.title, vodData.week);
-              if (vodAttendanceData.title === vodData.title && vodAttendanceData.week === vodData.week) {
+              if (
+                vodAttendanceData.title === vodData.title &&
+                vodAttendanceData.week === vodData.week &&
+                isCurrentDateInRange(vodData.range)
+              ) {
                 if (!vodSet.has(vodKey)) {
                   vodSet.add(vodKey);
                   tempVods.push({
@@ -62,7 +66,7 @@ export function useCourseData(courses: CourseBase[]) {
               assignData.title,
               assignData.dueDate ? assignData.dueDate : ''
             );
-            if (!assignSet.has(assignKey)) {
+            if (!assignSet.has(assignKey) && isCurrentDateByDate(assignData.dueDate)) {
               console.info(assignKey);
               assignSet.add(assignKey);
               tempAssigns.push({
@@ -80,7 +84,7 @@ export function useCourseData(courses: CourseBase[]) {
 
           result.quizDataArray.forEach((quizData) => {
             const quizKey = makeQuizKey(course.courseId, quizData.title, quizData.dueDate ? quizData.dueDate : '');
-            if (!quizSet.has(quizKey)) {
+            if (!quizSet.has(quizKey) && isCurrentDateByDate(quizData.dueDate)) {
               console.info(quizKey);
               quizSet.add(quizKey);
               tempQuizes.push({
