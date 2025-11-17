@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableItem from './SortableItem';
-import { isCurrentDateInRange } from '@/lib/utils';
+// import { isCurrentDateInRange } from '@/lib/utils';
 
 interface PlayerPopoverContentProps {
   isPopoverOpen: boolean;
@@ -57,10 +57,34 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
   useEffect(() => {
     loadDataFromStorage('vod', (data) => {
       if (!data) return;
-      const filtered = (data as Vod[]).filter(
-        (vod) => isCurrentDateInRange(vod.range) && vod.isAttendance.toLowerCase() !== 'o'
-      );
-      setVods(filtered);
+      setVods([
+        {
+          courseId: '39689',
+          prof: '돋부기',
+          courseTitle: '크롬익스텐션',
+          week: 4,
+          title: '테스트 1',
+          isAttendance: 'x',
+          weeklyAttendance: 'x',
+          length: '10:10',
+          range: '2024-12-01 00:00:00 ~ 2028-12-30 23:59:00',
+          subject: '1',
+          url: 'https://learn.hansung.ac.kr/mod/vod/view.php?id=1086341',
+        },
+        {
+          courseId: '39689',
+          prof: '돋부기',
+          courseTitle: '크롬익스텐션',
+          week: 4,
+          title: '테스트 2',
+          isAttendance: 'x',
+          weeklyAttendance: 'x',
+          length: '05:10',
+          range: '2024-12-01 00:00:00 ~ 2028-12-30 23:59:00',
+          subject: '2',
+          url: 'https://learn.hansung.ac.kr/mod/vod/view.php?id=1086348',
+        },
+      ]);
     });
   }, []);
 
@@ -68,10 +92,35 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     if (isPopoverOpen && !isPlaying && vods.length === 0) {
       loadDataFromStorage('vod', (data) => {
         if (!data) return;
-        const filtered = (data as Vod[]).filter(
-          (vod) => isCurrentDateInRange(vod.range) && vod.isAttendance.toLowerCase() !== 'o'
-        );
-        setVods(filtered);
+
+        setVods([
+          {
+            courseId: '39689',
+            prof: '돋부기',
+            courseTitle: '크롬익스텐션',
+            week: 4,
+            title: '테스트 1',
+            isAttendance: 'x',
+            weeklyAttendance: 'x',
+            length: '10:10',
+            range: '2024-12-01 00:00:00 ~ 2028-12-30 23:59:00',
+            subject: '1',
+            url: 'https://learn.hansung.ac.kr/mod/vod/view.php?id=1086341',
+          },
+          {
+            courseId: '39689',
+            prof: '돋부기',
+            courseTitle: '크롬익스텐션',
+            week: 4,
+            title: '테스트 2',
+            isAttendance: 'x',
+            weeklyAttendance: 'x',
+            length: '05:10',
+            range: '2024-12-01 00:00:00 ~ 2028-12-30 23:59:00',
+            subject: '2',
+            url: 'https://learn.hansung.ac.kr/mod/vod/view.php?id=1086348',
+          },
+        ]);
       });
     }
   }, [isPlaying, vods, isPopoverOpen]);
