@@ -4,17 +4,15 @@ export type CourseBase = {
   prof: string;
 };
 
-export type Vod = CourseBase & VodDetail;
-
-export type VodDetail = VodData & VodAttendanceData;
-
-export type VodData = {
+export type Vod = CourseBase & {
   week: number;
   subject: string;
   title: string;
   url: string;
   range: string | null;
   length: string;
+  isAttendance: string;
+  weeklyAttendance: string;
 };
 
 export interface VodAttendanceData {
@@ -24,9 +22,7 @@ export interface VodAttendanceData {
   week: number;
 }
 
-export type Assign = CourseBase & AssignData;
-
-export type AssignData = {
+export type Assign = CourseBase & {
   subject: string;
   title: string;
   url: string;
@@ -34,9 +30,7 @@ export type AssignData = {
   dueDate: string | null;
 };
 
-export type Quiz = CourseBase & QuizData;
-
-export type QuizData = {
+export type Quiz = CourseBase & {
   subject: string;
   title: string;
   url: string;
