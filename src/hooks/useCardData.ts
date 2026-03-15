@@ -95,6 +95,7 @@ function useCardData() {
       'quiz',
       (quizzes) => {
         const total = quizzes.length;
+        // QuizData에 완료 여부 필드가 없어 항상 0
         const done = 0;
         return [
           {
