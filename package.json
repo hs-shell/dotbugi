@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:mock": "tsc -b && vite build --mode mock",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -10,6 +10,14 @@ export interface UseCourseResult {
 export const useGetCourses = (): UseCourseResult => {
   const [courses, setCourses] = useState<CourseBase[]>([]);
   useEffect(() => {
+    if (import.meta.env.VITE_MOCK) {
+      import('@/mocks/mockData').then(({ mockCourses }) => {
+        setCourses(mockCourses);
+        saveDataToStorage('courses', JSON.stringify(mockCourses));
+        console.info('[Dotbugi] DEV 모드: mock 강의 목록 사용');
+      });
+      return;
+    }
     if (!document) return;
     const courseData = Array.from(document.querySelectorAll('.course_box'));
     const data = courseData

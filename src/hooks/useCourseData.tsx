@@ -14,7 +14,34 @@ export function useCourseData(courses: CourseBase[]) {
   const [remainingTime, setRemainingTime] = useState(0);
   const [isError, setIsError] = useState(false);
 
+  // dev 모드: mock 데이터 로드
+  useEffect(() => {
+    if (!import.meta.env.VITE_MOCK) return;
+    let cancelled = false;
+    import('@/mocks/mockData').then(({ mockVods, mockAssigns, mockQuizes }) => {
+      if (cancelled) return;
+      setVods(mockVods);
+      setAssigns(mockAssigns);
+      setQuizes(mockQuizes);
+      setRefreshTime(new Date().toLocaleTimeString());
+      setRemainingTime(5);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // dev 모드에서는 실제 fetch를 하지 않음
   const updateData = useCallback(async () => {
+    if (import.meta.env.VITE_MOCK) {
+      const { mockVods, mockAssigns, mockQuizes } = await import('@/mocks/mockData');
+      setVods(mockVods);
+      setAssigns(mockAssigns);
+      setQuizes(mockQuizes);
+      setRefreshTime(new Date().toLocaleTimeString());
+      setRemainingTime(0);
+      return;
+    }
     try {
       setIsError(false);
       setIsPending(true);
