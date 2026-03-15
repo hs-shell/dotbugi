@@ -9,14 +9,20 @@ interface UseDashboardFiltersParams {
   activeTab: TAB_TYPE;
 }
 
+const INITIAL_FILTERS: Record<TAB_TYPE, Filters> = {
+  VIDEO: { courseTitles: [], attendanceStatuses: [] },
+  ASSIGN: { courseTitles: [], submitStatuses: [] },
+  QUIZ: { courseTitles: [] },
+};
+
+function uniqueTitles(items: { courseTitle: string }[]): string[] {
+  return [...new Set(items.map((item) => item.courseTitle))];
+}
+
 export function useDashboardFilters({ vods, assigns, quizzes, activeTab }: UseDashboardFiltersParams) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filters, setFilters] = useState<Record<TAB_TYPE, Filters>>({
-    VIDEO: { courseTitles: [], attendanceStatuses: [] },
-    ASSIGN: { courseTitles: [], submitStatuses: [] },
-    QUIZ: { courseTitles: [] },
-  });
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
 
   useEffect(() => {
     setSearchTerm('');
@@ -25,9 +31,9 @@ export function useDashboardFilters({ vods, assigns, quizzes, activeTab }: UseDa
 
   const courseTitlesMap = useMemo(
     () => ({
-      VIDEO: Array.from(new Set(vods.map((vod) => vod.courseTitle))),
-      ASSIGN: Array.from(new Set(assigns.map((assign) => assign.courseTitle))),
-      QUIZ: Array.from(new Set(quizzes.map((quiz) => quiz.courseTitle))),
+      VIDEO: uniqueTitles(vods),
+      ASSIGN: uniqueTitles(assigns),
+      QUIZ: uniqueTitles(quizzes),
     }),
     [vods, assigns, quizzes]
   );
@@ -52,10 +58,7 @@ export function useDashboardFilters({ vods, assigns, quizzes, activeTab }: UseDa
       setFilters((prev) => {
         const current = (prev[activeTab][field] as (typeof value)[]) || [];
         const updated = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
-        return {
-          ...prev,
-          [activeTab]: { ...prev[activeTab], [field]: updated },
-        };
+        return { ...prev, [activeTab]: { ...prev[activeTab], [field]: updated } };
       });
     },
     [activeTab]
@@ -75,14 +78,7 @@ export function useDashboardFilters({ vods, assigns, quizzes, activeTab }: UseDa
   );
 
   const clearFilters = useCallback(() => {
-    setFilters((prev) => ({
-      ...prev,
-      [activeTab]: {
-        courseTitles: [],
-        ...(activeTab === 'VIDEO' ? { attendanceStatuses: [] } : {}),
-        ...(activeTab === 'ASSIGN' ? { submitStatuses: [] } : {}),
-      },
-    }));
+    setFilters((prev) => ({ ...prev, [activeTab]: { ...INITIAL_FILTERS[activeTab] } }));
   }, [activeTab]);
 
   return {

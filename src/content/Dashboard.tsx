@@ -2,7 +2,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { useState } from 'react';
 import icon from '@/assets/icon.png';
 import exit from '@/assets/exit.png';
-import { CourseBase, TAB_TYPE } from './types';
+import { TAB_TYPE } from './types';
 import { OctagonAlert } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useGetCourses } from '@/hooks/useGetCourses';
@@ -18,10 +18,9 @@ import DashboardHeader from './components/DashboardHeader';
 
 export default function Dashboard() {
   const { courses } = useGetCourses();
-  const typeCourses: CourseBase[] = courses;
 
-  const { vods, assigns, quizzes, isPending, remainingTime, isError, updateData, setIsPending } =
-    useCourseData(typeCourses);
+  const { vods, assigns, quizzes, isPending, remainingTime, isError, refreshCourseData, setIsPending } =
+    useCourseData(courses);
 
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
   const [isOpen, setIsOpen] = useState(false);
@@ -50,7 +49,7 @@ export default function Dashboard() {
   const handleRefresh = () => {
     if (isPending || remainingTime <= 1) return;
     setIsPending(true);
-    updateData();
+    refreshCourseData();
   };
 
   return (
