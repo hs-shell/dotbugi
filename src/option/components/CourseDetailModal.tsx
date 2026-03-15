@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import type { Vod } from '@/content/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { BadgeCheck, Siren, TriangleAlert, Video, X } from 'lucide-react';
-import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString } from '@/lib/utils';
+import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isAttended } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -70,7 +70,7 @@ const CourseDetailModal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProp
           <ScrollArea className="h-auto">
             <div className="space-y-3 py-2">
               {vodList.map((vod, index) => {
-                const isAttendance = vod.isAttendance.toLowerCase().trim() === 'o';
+                const isAttendance = isAttended(vod.isAttendance);
                 return (
                   <Card
                     key={index}

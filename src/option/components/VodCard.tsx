@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Vod } from '@/content/types';
 
-import { calculateRemainingTime, extractEndDate, formatDateString, removeSquareBrackets } from '@/lib/utils';
+import { calculateRemainingTime, extractEndDate, formatDateString, isAttended, removeSquareBrackets } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CourseDetailModal from './CourseDetailModal';
 
@@ -19,7 +19,7 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
 
   let value = 0;
   vodList.forEach((vod) => {
-    if (vod.isAttendance.toLowerCase() === 'o') value += 1;
+    if (isAttended(vod.isAttendance)) value += 1;
   });
   const total = (value * 100) / vodList.length;
 
@@ -54,7 +54,7 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
 
           <div className="mt-2 flex space-x-1">
             <Badge variant="secondary" className="font-semibold hover:bg-zinc-200">
-              {total === 0 ? '학습전' : vodList[0].weeklyAttendance.toLowerCase() === 'o' ? '학습완료' : '학습중'}
+              {total === 0 ? '학습전' : isAttended(vodList[0].weeklyAttendance) ? '학습완료' : '학습중'}
             </Badge>
             <TooltipProvider>
               <Tooltip>

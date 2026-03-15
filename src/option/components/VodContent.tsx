@@ -5,7 +5,7 @@ import { loadAndTransform } from '@/lib/storage';
 import VodCard from './VodCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import thung from '@/assets/thung.png';
-import { isCurrentDateInRange } from '@/lib/utils';
+import { isAbsent, isCurrentDateInRange } from '@/lib/utils';
 import { makeVodGroupKey } from '@/utils/generate-key';
 
 export function VodContent() {
@@ -28,8 +28,8 @@ export function VodContent() {
         const firstA = groupA[0];
         const firstB = groupB[0];
 
-        const isAX = firstA.weeklyAttendance.toUpperCase().startsWith('X');
-        const isBX = firstB.weeklyAttendance.toUpperCase().startsWith('X');
+        const isAX = isAbsent(firstA.weeklyAttendance);
+        const isBX = isAbsent(firstB.weeklyAttendance);
 
         // X가 있는 항목을 먼저 정렬
         if (isAX && !isBX) return -1;

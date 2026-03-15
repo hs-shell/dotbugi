@@ -1,17 +1,17 @@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import icon from '@/assets/icon.png';
 import exit from '@/assets/exit.png';
-import { Assign, CourseBase, Filters, Quiz, TAB_TYPE, Vod } from './types';
+import { CourseBase, TAB_TYPE } from './types';
 import { OctagonAlert } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useGetCourses } from '@/hooks/useGetCourses';
 import VodList from './components/VodList';
 import AssignList from './components/AssignList';
 import QuizList from './components/QuizList';
-import { filterVods, filterAssigns, filterQuizzes } from '@/lib/filterData';
 import PendingDialog from './components/PendingDialog';
 import { useCourseData } from '@/hooks/useCourseData';
+import { useDashboardFilters } from '@/hooks/useDashboardFilters';
 import TabNavigation from './components/TabNavigation';
 import StickyPopoverTrigger from './components/StickyPopoverTrigger';
 import DashboardHeader from './components/DashboardHeader';
@@ -25,75 +25,22 @@ export default function Dashboard() {
 
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [vodSortBy] = useState<keyof Vod>('isAttendance');
-  const [assignSortBy] = useState<keyof Assign>('isSubmit');
-  const [quizSortBy] = useState<keyof Quiz>('dueDate');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const [filters, setFilters] = useState<Record<TAB_TYPE, Filters>>({
-    VIDEO: { courseTitles: [], attendanceStatuses: [] },
-    ASSIGN: { courseTitles: [], submitStatuses: [] },
-    QUIZ: { courseTitles: [] },
-  });
-
-  useEffect(() => {
-    setSearchTerm('');
-    setIsFilterOpen(false);
-  }, [activeTab]);
-
-  const courseTitlesMap = useMemo(
-    () => ({
-      VIDEO: Array.from(new Set(vods.map((vod) => vod.courseTitle))),
-      ASSIGN: Array.from(new Set(assigns.map((assign) => assign.courseTitle))),
-      QUIZ: Array.from(new Set(quizzes.map((quiz) => quiz.courseTitle))),
-    }),
-    [vods, assigns, quizzes]
-  );
-
-  const filteredVods = useMemo(
-    () => filterVods(vods, filters[activeTab], searchTerm, vodSortBy),
-    [vods, filters, activeTab, searchTerm, vodSortBy]
-  );
-
-  const filteredAssigns = useMemo(
-    () => filterAssigns(assigns, filters[activeTab], searchTerm, assignSortBy),
-    [assigns, filters, activeTab, searchTerm, assignSortBy]
-  );
-
-  const filteredQuizes = useMemo(
-    () => filterQuizzes(quizzes, filters[activeTab], searchTerm, quizSortBy),
-    [quizzes, filters, activeTab, searchTerm, quizSortBy]
-  );
-
-  const handleFilterChange = <K extends keyof Filters>(
-    field: K,
-    value: Filters[K] extends (infer T)[] | undefined ? T : never
-  ) => {
-    setFilters((prev) => {
-      const current = (prev[activeTab][field] as (typeof value)[]) || [];
-      const updated = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
-      return {
-        ...prev,
-        [activeTab]: { ...prev[activeTab], [field]: updated },
-      };
-    });
-  };
-
-  const handleCourseTitleChange = (title: string) => handleFilterChange('courseTitles', title);
-  const handleAttendanceFilterChange = (status: string) => handleFilterChange('attendanceStatuses', status);
-  const handleSubmitFilterChange = (isSubmit: boolean) => handleFilterChange('submitStatuses', isSubmit);
-
-  const clearFilters = () => {
-    setFilters((prev) => ({
-      ...prev,
-      [activeTab]: {
-        courseTitles: [],
-        ...(activeTab === 'VIDEO' ? { attendanceStatuses: [] } : {}),
-        ...(activeTab === 'ASSIGN' ? { submitStatuses: [] } : {}),
-      },
-    }));
-  };
+  const {
+    searchTerm,
+    setSearchTerm,
+    isFilterOpen,
+    setIsFilterOpen,
+    filters,
+    courseTitlesMap,
+    filteredVods,
+    filteredAssigns,
+    filteredQuizzes,
+    handleCourseTitleChange,
+    handleAttendanceFilterChange,
+    handleSubmitFilterChange,
+    clearFilters,
+  } = useDashboardFilters({ vods, assigns, quizzes, activeTab });
 
   const handleToggleOpen = (e: React.MouseEvent) => {
     setIsOpen((prev) => !prev);
@@ -162,7 +109,7 @@ export default function Dashboard() {
               <>
                 {activeTab === 'VIDEO' && <VodList courseData={filteredVods} />}
                 {activeTab === 'ASSIGN' && <AssignList courseData={filteredAssigns} />}
-                {activeTab === 'QUIZ' && <QuizList courseData={filteredQuizes} />}
+                {activeTab === 'QUIZ' && <QuizList courseData={filteredQuizzes} />}
               </>
             )}
           </div>

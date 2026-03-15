@@ -6,6 +6,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function isAttended(value: string) {
+  return value.toLowerCase().trim() === 'o';
+}
+
+export function isAbsent(value: string) {
+  return value.toUpperCase().startsWith('X');
+}
+
+const MS_PER_MINUTE = 1000 * 60;
+const MS_PER_HOUR = MS_PER_MINUTE * 60;
+const MS_PER_DAY = MS_PER_HOUR * 24;
+
 export function isCurrentDateInRange(dateRange: string | null) {
   if (!dateRange || !dateRange.includes(' ~ ')) {
     return false;
@@ -36,7 +48,7 @@ export function isWithinSevenDays(date: string) {
   const dueDate = new Date(date); // 문자열을 Date 객체로 변환
   const now = new Date(); // 현재 날짜
   const diffTime = dueDate.getTime() - now.getTime(); // 두 날짜의 차이 (밀리초)
-  const diffDays = diffTime / (1000 * 60 * 60 * 24); // 차이를 일(day)로 변환
+  const diffDays = diffTime / MS_PER_DAY;
   return diffDays <= 7 && diffDays >= 0;
 }
 
@@ -65,7 +77,7 @@ export const calculateDueDate = (dueDate: string | null): TimeDifferenceResult =
 
   if (now < endDate) {
     const timeDiff = endDate.getTime() - now.getTime();
-    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const days = Math.floor(timeDiff / MS_PER_DAY);
 
     if (days >= 1) {
       return {
@@ -75,8 +87,8 @@ export const calculateDueDate = (dueDate: string | null): TimeDifferenceResult =
         textColor: 'text-amber-500',
       };
     } else {
-      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-      const minutes = Math.floor(timeDiff / (1000 * 60));
+      const hours = Math.floor(timeDiff / MS_PER_HOUR);
+      const minutes = Math.floor(timeDiff / MS_PER_MINUTE);
       return {
         message: `${hours !== 0 ? `${hours}시간 후` : `${minutes}분 후`}`,
         borderColor: 'border-red-700',
@@ -114,9 +126,9 @@ export const calculateRemainingTime = (endTime: string | null) => {
   const now = new Date();
 
   const timeDiff = endDate.getTime() - now.getTime();
-  const daysLeft = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-  const hoursLeft = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutesLeft = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+  const daysLeft = Math.floor(timeDiff / MS_PER_DAY);
+  const hoursLeft = Math.floor((timeDiff % MS_PER_DAY) / MS_PER_HOUR);
+  const minutesLeft = Math.floor((timeDiff % MS_PER_HOUR) / MS_PER_MINUTE);
 
   if (daysLeft < 0 || hoursLeft < 0 || minutesLeft < 0) return `마감`;
   return `${daysLeft === 0 ? '' : daysLeft + '일'} ${hoursLeft === 0 ? '' : hoursLeft + '시간'} ${minutesLeft}분 남음`;
@@ -130,15 +142,9 @@ export const TimeAgo = (givenTimestamp: number) => {
   const now = Date.now();
   const diffMs = now - givenTimestamp;
 
-  // 각 단위별 밀리초
-  const msPerMinute = 1000 * 60;
-  const msPerHour = msPerMinute * 60;
-  const msPerDay = msPerHour * 24;
-
-  // 차이를 일, 시간, 분 단위로 계산
-  const days = Math.floor(diffMs / msPerDay);
-  const hours = Math.floor((diffMs % msPerDay) / msPerHour);
-  const minutes = Math.floor((diffMs % msPerHour) / msPerMinute);
+  const days = Math.floor(diffMs / MS_PER_DAY);
+  const hours = Math.floor((diffMs % MS_PER_DAY) / MS_PER_HOUR);
+  const minutes = Math.floor((diffMs % MS_PER_HOUR) / MS_PER_MINUTE);
   if (days === 0 && hours === 0 && minutes === 0) return '지금 막';
   return `${days !== 0 ? days + '일 ' : ''}${hours !== 0 ? hours + '시간 ' : ''}${minutes !== 0 ? minutes + '분 전' : '전'}`;
 };

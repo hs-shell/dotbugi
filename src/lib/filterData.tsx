@@ -1,4 +1,5 @@
 import { Vod, Assign, Quiz, Filters } from '@/content/types';
+import { isAttended } from './utils';
 
 // 필터 적용 for VODs
 export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, sortBy: keyof Vod): Vod[] {
@@ -12,7 +13,7 @@ export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, so
 
   if (attendanceStatuses && attendanceStatuses.length > 0) {
     data = data.filter((vod) => {
-      const status = vod.isAttendance.toLowerCase().trim() === 'o' ? '출석' : '결석';
+      const status = isAttended(vod.isAttendance) ? '출석' : '결석';
       return attendanceStatuses.includes(status);
     });
   }
@@ -27,8 +28,8 @@ export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, so
   }
 
   return data.sort((a, b) => {
-    const attendanceA = a.isAttendance.toLowerCase().trim() === 'o';
-    const attendanceB = b.isAttendance.toLowerCase().trim() === 'o';
+    const attendanceA = isAttended(a.isAttendance);
+    const attendanceB = isAttended(b.isAttendance);
 
     if (attendanceA !== attendanceB) {
       return attendanceA ? -1 : 1;

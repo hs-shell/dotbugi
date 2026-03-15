@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Vod } from '../types';
-import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isCurrentDateInRange } from '@/lib/utils';
+import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isAbsent, isAttended, isCurrentDateInRange } from '@/lib/utils';
 import { makeVodGroupKey } from '@/utils/generate-key';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import EmptyState from './EmptyState';
@@ -9,14 +9,6 @@ import CardFooterContent from './CardFooterContent';
 
 interface VideoProps {
   courseData: Vod[];
-}
-
-function isAttended(value: string) {
-  return value.toLowerCase().trim() === 'o';
-}
-
-function isAbsent(value: string) {
-  return value.toUpperCase().startsWith('X');
 }
 
 export default function VodList({ courseData }: VideoProps) {

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableItem from './SortableItem';
-import { isCurrentDateInRange } from '@/lib/utils';
+import { isAttended, isCurrentDateInRange } from '@/lib/utils';
 
 interface PlayerPopoverContentProps {
   isPopoverOpen: boolean;
@@ -58,7 +58,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     loadDataFromStorage('vod', (data) => {
       if (!data) return;
       const filtered = (data as Vod[]).filter(
-        (vod) => isCurrentDateInRange(vod.range) && vod.isAttendance.toLowerCase() !== 'o'
+        (vod) => isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)
       );
       setVods(filtered);
     });
@@ -69,7 +69,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
       loadDataFromStorage('vod', (data) => {
         if (!data) return;
         const filtered = (data as Vod[]).filter(
-          (vod) => isCurrentDateInRange(vod.range) && vod.isAttendance.toLowerCase() !== 'o'
+          (vod) => isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)
         );
         setVods(filtered);
       });
