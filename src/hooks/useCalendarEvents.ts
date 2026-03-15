@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { startOfDay } from 'date-fns';
-import { loadDataFromStorage } from '@/lib/storage';
+import { loadAndTransform } from '@/lib/storage';
 import { removeSquareBrackets } from '@/lib/utils';
 import { Vod, Assign, Quiz } from '@/content/types';
+import { makeVodGroupKey } from '@/utils/generate-key';
 
 export type CalendarEvent = {
   id: string;
@@ -16,35 +17,12 @@ export type CalendarEvent = {
 function useCalendarEvents() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
-  const loadEvents = <T>(storageKey: string, transform: (data: T[]) => CalendarEvent[]) => {
-    loadDataFromStorage(storageKey, (data: string | null) => {
-      if (!data) return;
-
-      let parsedData: T[];
-      if (typeof data === 'string') {
-        try {
-          parsedData = JSON.parse(data);
-        } catch (error) {
-          console.error(`JSON 파싱 에러 (${storageKey}):`, error);
-          return;
-        }
-      } else {
-        parsedData = data;
-      }
-
-      const eventsData = transform(parsedData);
-      setEvents((prev) => [...prev, ...eventsData]);
-    });
-  };
-
   useEffect(() => {
-    loadEvents<Vod>('vod', (vods) => {
+    loadAndTransform<Vod, CalendarEvent[]>('vod', (vods) => {
       const groupedData = vods.reduce(
         (acc, item) => {
-          const key = `${item.courseId}-${item.subject}-${item.range}`;
-          if (!acc[key]) {
-            acc[key] = [];
-          }
+          const key = makeVodGroupKey(item.courseId, item.subject, item.range);
+          if (!acc[key]) acc[key] = [];
           acc[key].push(item);
           return acc;
         },
@@ -63,10 +41,9 @@ function useCalendarEvents() {
           subject: removeSquareBrackets(vodItems[0].subject),
         };
       });
-    });
+    }, (result) => setEvents((prev) => [...prev, ...result]));
 
-    // assign 데이터 로딩 및 변환
-    loadEvents<Assign>('assign', (assigns) =>
+    loadAndTransform<Assign, CalendarEvent[]>('assign', (assigns) =>
       assigns.map((assign) => {
         const dueDate = assign.dueDate;
         const normalizedDate = dueDate ? startOfDay(new Date(dueDate)) : null;
@@ -79,10 +56,9 @@ function useCalendarEvents() {
           subject: removeSquareBrackets(assign.title),
         };
       })
-    );
+    , (result) => setEvents((prev) => [...prev, ...result]));
 
-    // quiz 데이터 로딩 및 변환
-    loadEvents<Quiz>('quiz', (quizzes) =>
+    loadAndTransform<Quiz, CalendarEvent[]>('quiz', (quizzes) =>
       quizzes.map((quiz) => {
         const dueDate = quiz.dueDate;
         const normalizedDate = dueDate ? startOfDay(new Date(dueDate)) : null;
@@ -95,7 +71,7 @@ function useCalendarEvents() {
           subject: removeSquareBrackets(quiz.title),
         };
       })
-    );
+    , (result) => setEvents((prev) => [...prev, ...result]));
   }, []);
 
   return events;

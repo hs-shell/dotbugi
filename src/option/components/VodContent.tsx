@@ -1,33 +1,20 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { Vod } from '@/content/types';
-import { loadDataFromStorage } from '@/lib/storage';
+import { loadAndTransform } from '@/lib/storage';
 import VodCard from './VodCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import thung from '@/assets/thung.png';
 import { isCurrentDateInRange } from '@/lib/utils';
+import { makeVodGroupKey } from '@/utils/generate-key';
 
 export function VodContent() {
   const [vodArray, setVodArray] = useState<Vod[][]>([]);
   useEffect(() => {
-    loadDataFromStorage('vod', (data: string | null) => {
-      if (!data) return;
-
-      let parsedData: Vod[];
-      if (typeof data === 'string') {
-        try {
-          parsedData = JSON.parse(data);
-        } catch (error) {
-          console.error('JSON 파싱 에러:', error);
-          return;
-        }
-      } else {
-        parsedData = data as Vod[];
-      }
-
+    loadAndTransform<Vod, Vod[][]>('vod', (parsedData) => {
       const groupedData = parsedData.reduce(
         (acc, item) => {
-          const key = `${item.courseId}-${item.subject}-${item.range}`;
+          const key = makeVodGroupKey(item.courseId, item.subject, item.range);
           if (!acc[key]) {
             acc[key] = [];
           }
@@ -89,8 +76,8 @@ export function VodContent() {
         return 0;
       });
 
-      setVodArray(sortedVodGroups);
-    });
+      return sortedVodGroups;
+    }, setVodArray);
   }, []);
 
   return (

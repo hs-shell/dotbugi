@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Vod } from '@/content/types';
 
-import { calculateRemainingTimeByRange, formatDateString, removeSquareBrackets } from '@/lib/utils';
+import { calculateRemainingTime, extractEndDate, formatDateString, removeSquareBrackets } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CourseDetailModal from './CourseDetailModal';
 
@@ -75,7 +75,7 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
                     paddingRight: '4px',
                   }}
                 >
-                  {calculateRemainingTimeByRange(vodList[0].range)}
+                  {calculateRemainingTime(extractEndDate(vodList[0].range))}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

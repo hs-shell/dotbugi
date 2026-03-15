@@ -3,7 +3,7 @@ import { Vod, Assign, Quiz, CourseBase } from '@/content/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { requestData } from '@/lib/fetchCourseData';
 import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
-import { makeAssignKey, makeQuizKey, makeVodKey } from '@/utils/generate-key';
+import { makeItemKey, makeVodKey } from '@/utils/generate-key';
 
 export function useCourseData(courses: CourseBase[]) {
   const [vods, setVods] = useState<Vod[]>([]);
@@ -52,8 +52,8 @@ export function useCourseData(courses: CourseBase[]) {
       const tempQuizes: Quiz[] = [];
 
       const vodSet = new Set(tempVods.map((v) => makeVodKey(v.courseId, v.title, v.week)));
-      const assignSet = new Set(tempAssigns.map((a) => makeAssignKey(a.courseId, a.title, a.dueDate ? a.dueDate : '')));
-      const quizSet = new Set(tempQuizes.map((q) => makeQuizKey(q.courseId, q.title, q.dueDate ? q.dueDate : '')));
+      const assignSet = new Set(tempAssigns.map((a) => makeItemKey(a.courseId, a.title, a.dueDate ? a.dueDate : '')));
+      const quizSet = new Set(tempQuizes.map((q) => makeItemKey(q.courseId, q.title, q.dueDate ? q.dueDate : '')));
 
       await Promise.all(
         courses.map(async (course) => {
@@ -88,7 +88,7 @@ export function useCourseData(courses: CourseBase[]) {
           });
 
           result.assignDataArray.forEach((assignData) => {
-            const assignKey = makeAssignKey(
+            const assignKey = makeItemKey(
               course.courseId,
               assignData.title,
               assignData.dueDate ? assignData.dueDate : ''
@@ -110,7 +110,7 @@ export function useCourseData(courses: CourseBase[]) {
           });
 
           result.quizDataArray.forEach((quizData) => {
-            const quizKey = makeQuizKey(course.courseId, quizData.title, quizData.dueDate ? quizData.dueDate : '');
+            const quizKey = makeItemKey(course.courseId, quizData.title, quizData.dueDate ? quizData.dueDate : '');
             if (!quizSet.has(quizKey) && isCurrentDateByDate(quizData.dueDate)) {
               console.info(quizKey);
               quizSet.add(quizKey);

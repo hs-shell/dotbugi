@@ -40,54 +40,10 @@ export function isWithinSevenDays(date: string) {
   return diffDays <= 7 && diffDays >= 0;
 }
 
-export const calculateTimeDifference = (timeRange: string | null): TimeDifferenceResult => {
-  if (!timeRange) {
-    return {
-      message: `정보없음`,
-      borderColor: 'border-amber-500',
-      borderLeftColor: 'border-l-amber-500',
-      textColor: 'text-amber-500',
-    };
-  }
-
-  const now = new Date();
-  const [startString, endString] = timeRange.split(' ~ ');
-  const startDate = new Date(startString);
-  const endDate = new Date(endString);
-
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    return { message: 'Invalid date format', borderColor: 'gray', borderLeftColor: 'gray', textColor: 'black' };
-  }
-
-  if (now < endDate) {
-    const timeDiff = endDate.getTime() - now.getTime();
-    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-
-    if (days >= 1) {
-      return {
-        message: `${days}일 후`,
-        borderColor: 'border-amber-500',
-        borderLeftColor: 'border-l-amber-500',
-        textColor: 'text-amber-500',
-      };
-    } else {
-      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-      const minutes = Math.floor(timeDiff / (1000 * 60));
-      return {
-        message: `${hours !== 0 ? `${hours}시간 후` : `${minutes}분 후`}`,
-        borderColor: 'border-red-700',
-        borderLeftColor: 'border-l-red-700',
-        textColor: 'text-red-700',
-      };
-    }
-  } else {
-    return {
-      message: '마감',
-      borderColor: 'border-red-950',
-      borderLeftColor: 'border-l-red-950',
-      textColor: 'text-red-950',
-    };
-  }
+export const extractEndDate = (range: string | null): string | null => {
+  if (!range) return null;
+  const parts = range.split(' ~ ');
+  return parts[1] ?? null;
 };
 
 export const calculateDueDate = (dueDate: string | null): TimeDifferenceResult => {
@@ -149,22 +105,6 @@ export const formatDateString = (input: string | null) => {
   );
 
   return formatted;
-};
-
-export const calculateRemainingTimeByRange = (range: string | null) => {
-  if (!range) return '정보없음';
-  const [, endDateStr] = range.split(' ~ ');
-  const endDate = new Date(endDateStr);
-
-  const now = new Date();
-
-  const timeDiff = endDate.getTime() - now.getTime();
-  const daysLeft = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-  const hoursLeft = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutesLeft = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (daysLeft < 0 || hoursLeft < 0 || minutesLeft < 0) return `마감`;
-  return `${daysLeft === 0 ? '' : daysLeft + '일'} ${hoursLeft === 0 ? '' : hoursLeft + '시간'} ${minutesLeft}분 남음`;
 };
 
 export const calculateRemainingTime = (endTime: string | null) => {

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Vod } from '../types';
-import { calculateRemainingTimeByRange, calculateTimeDifference, formatDateString, isCurrentDateInRange } from '@/lib/utils';
+import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isCurrentDateInRange } from '@/lib/utils';
+import { makeVodGroupKey } from '@/utils/generate-key';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import EmptyState from './EmptyState';
 import CardFooterContent from './CardFooterContent';
@@ -30,7 +31,7 @@ export default function VodList({ courseData }: VideoProps) {
   }
 
   const groupedData = courseData.reduce<Record<string, Vod[]>>((acc, item) => {
-    const key = `${item.courseId}-${item.subject}-${item.range}`;
+    const key = makeVodGroupKey(item.courseId, item.subject, item.range);
     if (!acc[key]) acc[key] = [];
     acc[key].push(item);
     return acc;
@@ -91,7 +92,7 @@ export default function VodList({ courseData }: VideoProps) {
 
         const item = vods[0];
         const cardKey = `${item.title}-${index}`;
-        const timeDifference = calculateTimeDifference(item.range);
+        const timeDifference = calculateDueDate(extractEndDate(item.range));
         const isExpanded = expandedCards[cardKey] || false;
         const attended = isAttended(item.weeklyAttendance);
 
@@ -134,7 +135,7 @@ export default function VodList({ courseData }: VideoProps) {
             <CardFooter className="flex justify-between items-center px-4 py-2 bg-[rgb(246,246,247)] font-medium">
               <CardFooterContent
                 timeDifference={timeDifference}
-                tooltipText={calculateRemainingTimeByRange(vods[0].range)}
+                tooltipText={calculateRemainingTime(extractEndDate(vods[0].range))}
                 statusColor={attended ? 'text-green-500' : timeDifference.textColor}
                 statusIcon={attended ? 'check' : timeDifference.message.includes('시간') ? 'siren' : 'warning'}
                 statusLabel={attended ? '출석' : '결석'}

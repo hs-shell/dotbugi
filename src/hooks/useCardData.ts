@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { loadDataFromStorage } from '@/lib/storage';
+import { loadAndTransform } from '@/lib/storage';
 import { Vod, Assign, Quiz } from '@/content/types';
+import { makeVodGroupKey } from '@/utils/generate-key';
 
 export type CardData = {
   type: 'vod' | 'assign' | 'quiz';
@@ -13,100 +14,37 @@ function useCardData() {
   const [assignSummary, setAssignSummary] = useState<CardData[]>([]);
   const [quizSummary, setQuizSummary] = useState<CardData[]>([]);
 
-  const loadEvents = <T>(
-    storageKey: string,
-    transform: (data: T[]) => CardData[],
-    setter: (data: CardData[]) => void
-  ) => {
-    loadDataFromStorage(storageKey, (data: string | null) => {
-      if (!data) return;
-
-      let parsedData: T[];
-      if (typeof data === 'string') {
-        try {
-          parsedData = JSON.parse(data);
-        } catch (error) {
-          console.error(`JSON 파싱 에러 (${storageKey}):`, error);
-          return;
-        }
-      } else {
-        parsedData = data;
-      }
-
-      const eventsData = transform(parsedData);
-      setter(eventsData);
-    });
-  };
-
   useEffect(() => {
-    loadEvents<Vod>(
-      'vod',
-      (vods) => {
-        const groupedData = vods.reduce(
-          (acc, item) => {
-            const key = `${item.courseId}-${item.subject}-${item.range}`;
-            if (!acc[key]) {
-              acc[key] = [];
-            }
-            acc[key].push(item);
-            return acc;
-          },
-          {} as Record<string, Vod[]>
-        );
+    loadAndTransform<Vod, CardData[]>('vod', (vods) => {
+      const groupedData = vods.reduce(
+        (acc, item) => {
+          const key = makeVodGroupKey(item.courseId, item.subject, item.range);
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(item);
+          return acc;
+        },
+        {} as Record<string, Vod[]>
+      );
 
-        let done = 0;
-        Object.values(groupedData).forEach((vodItems) => {
-          if (vodItems[0].weeklyAttendance.toLowerCase() === 'o') {
-            done += 1;
-          }
-        });
+      let done = 0;
+      Object.values(groupedData).forEach((vodItems) => {
+        if (vodItems[0].weeklyAttendance.toLowerCase() === 'o') {
+          done += 1;
+        }
+      });
 
-        return [
-          {
-            type: 'vod',
-            done,
-            total: Object.keys(groupedData).length,
-          },
-        ];
-      },
-      setVodSummary
-    );
+      return [{ type: 'vod', done, total: Object.keys(groupedData).length }];
+    }, setVodSummary);
 
-    loadEvents<Assign>(
-      'assign',
-      (assigns) => {
-        const total = assigns.length;
-        let done = 0;
-        assigns.forEach((assign) => {
-          if (assign.isSubmit) done += 1;
-        });
-        return [
-          {
-            type: 'assign',
-            done,
-            total,
-          },
-        ];
-      },
-      setAssignSummary
-    );
+    loadAndTransform<Assign, CardData[]>('assign', (assigns) => {
+      const done = assigns.filter((a) => a.isSubmit).length;
+      return [{ type: 'assign', done, total: assigns.length }];
+    }, setAssignSummary);
 
-    loadEvents<Quiz>(
-      'quiz',
-      (quizzes) => {
-        const total = quizzes.length;
-        // QuizData에 완료 여부 필드가 없어 항상 0
-        const done = 0;
-        return [
-          {
-            type: 'quiz',
-            done,
-            total,
-          },
-        ];
-      },
-      setQuizSummary
-    );
+    loadAndTransform<Quiz, CardData[]>('quiz', (quizzes) => {
+      // QuizData에 완료 여부 필드가 없어 항상 0
+      return [{ type: 'quiz', done: 0, total: quizzes.length }];
+    }, setQuizSummary);
   }, []);
 
   return { vodSummary, assignSummary, quizSummary };
