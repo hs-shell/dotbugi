@@ -1,55 +1,39 @@
+import { fetchHtml, getText, getHref } from './fetchHtml';
+
+// 과제 테이블 컬럼 (generaltable)
+// [주(c0)] [과제(c1)] [종료 일시(c2)] [제출(c3)] [성적(c4)]
+const COL = {
+  WEEK: '.cell.c0',
+  TITLE_LINK: '.cell.c1 a',
+  DUE_DATE: '.cell.c2',
+  SUBMIT_STATUS: '.cell.c3',
+} as const;
+
+const NOT_SUBMITTED = '미제출';
+
 export const fetchAssign = async (link: string) => {
   try {
-    const response = await fetch(link, {
-      method: 'GET',
-      credentials: 'include',
-    });
+    const doc = await fetchHtml(link);
+    const rows = doc.querySelectorAll('table.generaltable tbody tr');
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
+    let lastWeekLabel = '';
 
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    const headerMap: Record<string, string> = {};
-    const headers = Array.from(doc.querySelectorAll('table.generaltable thead tr th'));
-    headers.forEach((header) => {
-      const text = header.textContent?.trim();
-      const className = header.className.match(/c\d+/)?.[0];
-      if (text && className) {
-        if (text.includes('주제')) headerMap['subject'] = '.cell.' + className;
-        else if (text.includes('과제')) {
-          headerMap['title'] = '.cell.' + className;
-          headerMap['url'] = headerMap['title'] + ' a';
-        } else if (text.includes('종료 일시')) headerMap['dueDate'] = '.cell.' + className;
-        else if (text.includes('제출')) headerMap['isSubmit'] = '.cell.' + className;
-      }
-    });
-
-    let subject: string;
-    const rows = Array.from(doc.querySelectorAll('table.generaltable tbody tr'));
-    const assignments = rows
+    return Array.from(rows)
       .map((row) => {
-        const title =
-          row.querySelector(headerMap.title)?.textContent?.trim() ||
-          row.querySelector(headerMap.assign)?.textContent?.trim() ||
-          null;
-        const sbj = row.querySelector(headerMap.subject)?.textContent?.trim() || '';
-        const url = (row.querySelector(headerMap.url) as HTMLAnchorElement)?.href || null;
-        const dueDate = row.querySelector(headerMap.dueDate)?.textContent?.trim() || null;
-        const isSubmit = row.querySelector(headerMap.isSubmit)?.textContent?.trim() === '미제출' ? false : true;
+        const weekLabel = getText(row, COL.WEEK);
+        const title = getText(row, COL.TITLE_LINK);
+        const url = getHref(row, COL.TITLE_LINK);
+        const dueDate = getText(row, COL.DUE_DATE);
+        const isSubmit = getText(row, COL.SUBMIT_STATUS) !== NOT_SUBMITTED;
 
-        if (sbj.length !== 0) subject = sbj;
+        if (weekLabel) lastWeekLabel = weekLabel;
         if (!title || !url || !dueDate) return null;
-        return { subject, title, url, dueDate, isSubmit };
-      })
-      .filter((assign) => assign !== null);
 
-    return assignments;
+        return { subject: lastWeekLabel, title, url, dueDate, isSubmit };
+      })
+      .filter((item) => item !== null);
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.error('[Dotbugi] 과제 조회 오류:', error);
     throw error;
   }
 };

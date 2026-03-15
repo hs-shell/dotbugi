@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Vod, Assign, Quiz, CourseBase } from '@/content/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
-import { requestData } from '@/lib/fetchCourseData';
+import { scrapeCourseData } from '@/lib/fetchCourseData';
 import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
 import { makeItemKey, makeVodKey } from '@/utils/generate-key';
-import { mergeVodWithAttendance, mergeDueDateItems, deduplicateInto } from '@/lib/transformCourseData';
+import { mergeVodWithAttendance, mergeDueDateItems } from '@/lib/transformCourseData';
+import { deduplicateInto } from '@/lib/deduplicateInto';
 import { loadMockData } from '@/mocks/loadMockData';
 import {
   REFRESH_INTERVAL_MS,
@@ -66,7 +67,7 @@ export function useCourseData(courses: CourseBase[]) {
 
       await Promise.all(
         courses.map(async (course) => {
-          const scraped = await requestData(course.courseId);
+          const scraped = await scrapeCourseData(course.courseId);
 
           deduplicateInto(
             vods,
