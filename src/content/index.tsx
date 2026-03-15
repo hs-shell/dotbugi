@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+import Dashboard from './Dashboard';
 import styles from '@/styles/shadow.css?inline';
 import { createShadowRoot } from '@/lib/createShadowRoot';
 import { ShadowRootContext } from '@/lib/ShadowRootContext';
@@ -44,7 +44,7 @@ if (footer && url === HANSUNG_URL) {
     <ShadowRootContext.Provider value={shadowRoot}>
       <React.StrictMode>
         <TooltipProvider>
-          <App />
+          <Dashboard />
         </TooltipProvider>
       </React.StrictMode>
     </ShadowRootContext.Provider>
