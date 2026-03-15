@@ -87,9 +87,9 @@ export function filterAssigns(assigns: Assign[], filters: Filters, searchTerm: s
   });
 }
 
-// 필터 적용 for Quizes
-export function filterQuizes(quizes: Quiz[], filters: Filters, searchTerm: string, sortBy: keyof Quiz): Quiz[] {
-  let data = quizes;
+// 필터 적용 for Quizzes
+export function filterQuizzes(quizzes: Quiz[], filters: Filters, searchTerm: string, sortBy: keyof Quiz): Quiz[] {
+  let data = quizzes;
 
   const { courseTitles } = filters;
 

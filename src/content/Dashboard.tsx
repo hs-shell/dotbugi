@@ -5,11 +5,11 @@ import exit from '@/assets/exit.png';
 import { Assign, CourseBase, Filters, Quiz, TAB_TYPE, Vod } from './types';
 import { OctagonAlert } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { useGetCourses } from '@/hooks/useGetCourse';
+import { useGetCourses } from '@/hooks/useGetCourses';
 import VodList from './components/VodList';
 import AssignList from './components/AssignList';
 import QuizList from './components/QuizList';
-import { filterVods, filterAssigns, filterQuizes } from '@/lib/filterData';
+import { filterVods, filterAssigns, filterQuizzes } from '@/lib/filterData';
 import PendingDialog from './components/PendingDialog';
 import { useCourseData } from '@/hooks/useCourseData';
 import TabNavigation from './components/TabNavigation';
@@ -20,7 +20,7 @@ export default function Dashboard() {
   const { courses } = useGetCourses();
   const typeCourses: CourseBase[] = courses;
 
-  const { vods, assigns, quizes, isPending, remainingTime, isError, updateData, setIsPending } =
+  const { vods, assigns, quizzes, isPending, remainingTime, isError, updateData, setIsPending } =
     useCourseData(typeCourses);
 
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
@@ -46,9 +46,9 @@ export default function Dashboard() {
     () => ({
       VIDEO: Array.from(new Set(vods.map((vod) => vod.courseTitle))),
       ASSIGN: Array.from(new Set(assigns.map((assign) => assign.courseTitle))),
-      QUIZ: Array.from(new Set(quizes.map((quiz) => quiz.courseTitle))),
+      QUIZ: Array.from(new Set(quizzes.map((quiz) => quiz.courseTitle))),
     }),
-    [vods, assigns, quizes]
+    [vods, assigns, quizzes]
   );
 
   const filteredVods = useMemo(
@@ -62,8 +62,8 @@ export default function Dashboard() {
   );
 
   const filteredQuizes = useMemo(
-    () => filterQuizes(quizes, filters[activeTab], searchTerm, quizSortBy),
-    [quizes, filters, activeTab, searchTerm, quizSortBy]
+    () => filterQuizzes(quizzes, filters[activeTab], searchTerm, quizSortBy),
+    [quizzes, filters, activeTab, searchTerm, quizSortBy]
   );
 
   const handleFilterChange = <K extends keyof Filters>(

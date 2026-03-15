@@ -1,8 +1,8 @@
 import { SidebarHeader } from './SidebarHeader';
-import { TYPES } from '@/content/types';
+import { TAB_LABEL } from '@/content/types';
 import { data } from './data';
 
-export function Sidebar({ activeTab, setActiveTab }: { activeTab: TYPES; setActiveTab: (type: TYPES) => void }) {
+export function Sidebar({ activeTab, setActiveTab }: { activeTab: TAB_LABEL; setActiveTab: (type: TAB_LABEL) => void }) {
   return (
     <aside
       className={`

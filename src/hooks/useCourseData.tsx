@@ -8,7 +8,7 @@ import { makeItemKey, makeVodKey } from '@/utils/generate-key';
 export function useCourseData(courses: CourseBase[]) {
   const [vods, setVods] = useState<Vod[]>([]);
   const [assigns, setAssigns] = useState<Assign[]>([]);
-  const [quizes, setQuizes] = useState<Quiz[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -22,7 +22,7 @@ export function useCourseData(courses: CourseBase[]) {
       if (cancelled) return;
       setVods(mockVods);
       setAssigns(mockAssigns);
-      setQuizes(mockQuizes);
+      setQuizzes(mockQuizes);
       setRefreshTime(new Date().toLocaleTimeString());
       setRemainingTime(5);
     });
@@ -37,7 +37,7 @@ export function useCourseData(courses: CourseBase[]) {
       const { mockVods, mockAssigns, mockQuizes } = await import('@/mocks/mockData');
       setVods(mockVods);
       setAssigns(mockAssigns);
-      setQuizes(mockQuizes);
+      setQuizzes(mockQuizes);
       setRefreshTime(new Date().toLocaleTimeString());
       setRemainingTime(0);
       return;
@@ -130,7 +130,7 @@ export function useCourseData(courses: CourseBase[]) {
 
       setVods(tempVods);
       setAssigns(tempAssigns);
-      setQuizes(tempQuizes);
+      setQuizzes(tempQuizes);
 
       saveDataToStorage('vod', tempVods);
       saveDataToStorage('assign', tempAssigns);
@@ -188,9 +188,9 @@ export function useCourseData(courses: CourseBase[]) {
       });
       loadDataFromStorage('quiz', (data) => {
         if (!data) return;
-        setQuizes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
+        setQuizzes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
       });
     }
   }, [courses, updateData]);
-  return { vods, assigns, quizes, isPending, remainingTime, refreshTime, isError, updateData, setIsPending };
+  return { vods, assigns, quizzes, isPending, remainingTime, refreshTime, isError, updateData, setIsPending };
 }

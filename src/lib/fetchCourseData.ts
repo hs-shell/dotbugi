@@ -1,6 +1,6 @@
 import { fetchVodAttendance } from './fetchVodAttendance';
 import { fetchIndexPage } from './fetchIndexPage';
-import { getAssignPageLink, getIndexPageLink, getQuizPageLink, getVodPageLink } from '@/constants/constant';
+import { getAssignPageLink, getIndexPageLink, getQuizPageLink, getVodPageLink } from '@/constants/links';
 import { fetchAssign } from './fetchAssign';
 import { fetchQuiz } from './fetchQuiz';
 
