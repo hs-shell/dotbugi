@@ -50,13 +50,6 @@ export type TimeDifferenceResult = {
   textColor: string;
 };
 
-export interface Item {
-  prof: string;
-  title: string;
-  dueDate: string;
-  isCompleted: boolean;
-}
-
 export interface Filters {
   courseTitles: string[];
   attendanceStatuses?: string[];
