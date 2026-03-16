@@ -53,6 +53,7 @@ export default function DashboardHeader({
     VIDEO: t('header.vodList'),
     ASSIGN: t('header.assignList'),
     QUIZ: t('header.quizList'),
+    SETTING: t('header.setting'),
   };
 
   const attendanceOptions = attendanceValues.map((v) => t(`common:attendance.${v}`));
@@ -77,23 +78,24 @@ export default function DashboardHeader({
     <div className="bg-white w-full rounded-3xl z-10">
       <div className="w-full flex items-center justify-between px-5 pt-8 pb-6">
         <div className="items-center justify-center font-bold text-3xl">{TAB_TITLES[activeTab]}</div>
-        <div className="flex justify-center items-center">
-          <span
-            className={`text-sm px-1 ${remainingTime >= 30 ? 'text-amber-500 font-semibold' : 'text-zinc-400'}`}
-          >
-            {remainingTime < 60
-              ? t('common:date.minutesAgoShort', { minutes: Math.round(remainingTime) })
-              : t('common:date.hoursAgoShort', { hours: Math.floor(remainingTime / 60) })}
-          </span>
-          <button
-            className={`flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1 ${refreshDisabled && 'cursor-not-allowed'}`}
-            disabled={refreshDisabled}
-            onClick={onRefresh}
-          >
-            <RefreshCw className="w-8 h-8 p-0" />
-          </button>
-        </div>
+        {activeTab !== 'SETTING' && (
+          <div className="flex justify-center items-center">
+            <span className={`text-sm px-1 ${remainingTime >= 30 ? 'text-amber-500 font-semibold' : 'text-zinc-400'}`}>
+              {remainingTime < 60
+                ? t('common:date.minutesAgoShort', { minutes: Math.round(remainingTime) })
+                : t('common:date.hoursAgoShort', { hours: Math.floor(remainingTime / 60) })}
+            </span>
+            <button
+              className={`flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1 ${refreshDisabled && 'cursor-not-allowed'}`}
+              disabled={refreshDisabled}
+              onClick={onRefresh}
+            >
+              <RefreshCw className="w-8 h-8 p-0" />
+            </button>
+          </div>
+        )}
       </div>
+      {activeTab !== 'SETTING' && (<>
       <div className="mb-2 flex px-5 relative py-0">
         <Search className="absolute left-9 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
@@ -162,6 +164,7 @@ export default function DashboardHeader({
           </Popover>
         </div>
       </div>
+      </>)}
     </div>
   );
 }

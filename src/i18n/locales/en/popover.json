@@ -2,7 +2,8 @@
   "header": {
     "vodList": "Online Lectures",
     "assignList": "Assignments",
-    "quizList": "Quizzes"
+    "quizList": "Quizzes",
+    "setting": "Setting"
   },
   "pending": {
     "title": "Request in Progress",

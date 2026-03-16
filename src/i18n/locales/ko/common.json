@@ -2,6 +2,7 @@
   "vod": "강의",
   "assign": "과제",
   "quiz": "퀴즈",
+  "setting": "설정",
   "dashboard": "대시보드",
   "close": "닫기",
   "clearAll": "모두 지우기",
@@ -61,5 +62,6 @@
   "progress": "진도율",
   "attendancePeriod": "출석인정기간",
   "filterSet": "필터 설정됨",
-  "language": "언어"
+  "language": "언어",
+  "contact": "다른 방법으로 문의"
 }

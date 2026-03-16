@@ -2,6 +2,7 @@
   "vod": "Lectures",
   "assign": "Assignments",
   "quiz": "Quizzes",
+  "setting": "Setting",
   "dashboard": "Dashboard",
   "close": "Close",
   "clearAll": "Clear All",
@@ -61,5 +62,7 @@
   "progress": "Progress",
   "attendancePeriod": "Attendance Period",
   "filterSet": "Filter Applied",
-  "language": "Language"
+  "language": "Language",
+  "contact": "Contact Us",
+  "refresh": "Refresh"
 }

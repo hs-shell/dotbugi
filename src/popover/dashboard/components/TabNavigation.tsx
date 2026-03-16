@@ -1,4 +1,4 @@
-import { NotebookText, VideoIcon, Zap } from 'lucide-react';
+import { NotebookText, Settings, VideoIcon, Zap } from 'lucide-react';
 import { TAB_TYPE } from '@/types';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +10,7 @@ interface Prop {
 export default function TabNavigation({ activeTab, setActiveTab }: Prop) {
   const { t } = useTranslation('common');
   return (
-    <div className="grid w-full grid-cols-3 py-4 z-10">
+    <div className="grid w-full grid-cols-4 py-4 z-10">
       <div
         className={`flex flex-col items-center justify-center cursor-pointer font-semibold ${activeTab === TAB_TYPE.VIDEO ? 'text-blue-700 font-bold' : ''}`}
         onClick={() => setActiveTab(TAB_TYPE.VIDEO)}
@@ -31,6 +31,13 @@ export default function TabNavigation({ activeTab, setActiveTab }: Prop) {
       >
         <Zap className="w-7" />
         <span className={`mt-1 text-base`}>{t('quiz')}</span>
+      </div>
+      <div
+        className={`flex flex-col items-center justify-center cursor-pointer font-semibold ${activeTab === TAB_TYPE.SETTING ? 'text-blue-700 font-bold' : ''}`}
+        onClick={() => setActiveTab(TAB_TYPE.SETTING)}
+      >
+        <Settings className="w-7" />
+        <span className={`mt-1 text-base`}>{t('setting')}</span>
       </div>
     </div>
   );

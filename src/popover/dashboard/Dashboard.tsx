@@ -16,6 +16,7 @@ import TabNavigation from './components/TabNavigation';
 import StickyPopoverTrigger from './components/StickyPopoverTrigger';
 import DashboardHeader from './components/DashboardHeader';
 import { useTranslation } from 'react-i18next';
+import Setting from './components/Setting';
 
 export default function Dashboard() {
   const { t } = useTranslation('common');
@@ -111,6 +112,7 @@ export default function Dashboard() {
                 {activeTab === 'VIDEO' && <VodList courseData={filteredVods} />}
                 {activeTab === 'ASSIGN' && <AssignList courseData={filteredAssigns} />}
                 {activeTab === 'QUIZ' && <QuizList courseData={filteredQuizzes} />}
+                {activeTab === 'SETTING' && <Setting />}
               </>
             )}
           </div>
