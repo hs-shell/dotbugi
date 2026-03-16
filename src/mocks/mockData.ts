@@ -1,4 +1,4 @@
-import { CourseBase, Vod, Assign, Quiz } from '@/content/types';
+import { CourseBase, Vod, Assign, Quiz } from '@/types';
 
 function offsetDate(days: number, hours = 0): string {
   const d = new Date();

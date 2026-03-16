@@ -1,11 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import Dashboard from './Dashboard';
+import Dashboard from './dashboard/Dashboard';
 import styles from '@/styles/shadow.css?inline';
-import { createShadowRoot } from '@/lib/createShadowRoot';
-import { ShadowRootContext } from '@/lib/ShadowRootContext';
+import { createShadowRoot } from '@/popover/lib/createShadowRoot';
+import { ShadowRootContext } from '@/popover/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import PlayerApp from '@/player/App';
+import PlayerApp from '@/popover/player/App';
 
 const HANSUNG_URL = 'https://learn.hansung.ac.kr/';
 const footer = document.getElementById('page-footer');

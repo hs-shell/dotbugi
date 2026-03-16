@@ -1,8 +1,8 @@
 import { startOfDay } from 'date-fns';
-import { Vod } from '@/content/types';
+import { Vod } from '@/types';
 import { removeSquareBrackets } from '@/lib/utils';
 import { parseDate } from '@/lib/dateUtils';
-import { makeVodGroupKey } from '@/utils/generate-key';
+import { makeVodGroupKey } from '@/lib/generateKey';
 
 export type CalendarEvent = {
   id: string;

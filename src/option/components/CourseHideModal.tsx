@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
 import { useEffect, useState } from 'react';
-import type { Vod } from '@/content/types';
+import type { Vod } from '@/types';
 import type React from 'react';
 import { Button } from '@/components/ui/button';
 

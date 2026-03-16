@@ -1,4 +1,4 @@
-import { VodAttendanceData } from '@/content/types';
+import { VodAttendanceData } from '@/types';
 import { fetchHtml } from './fetchHtml';
 
 // 출석부 테이블 컬럼 인덱스 (user_progress_table)

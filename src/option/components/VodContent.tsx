@@ -1,12 +1,12 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
-import { Vod } from '@/content/types';
+import { Vod } from '@/types';
 import { loadAndTransform } from '@/lib/storage';
 import VodCard from './VodCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import thung from '@/assets/thung.png';
 import { isAbsent, isCurrentDateInRange } from '@/lib/utils';
-import { makeVodGroupKey } from '@/utils/generate-key';
+import { makeVodGroupKey } from '@/lib/generateKey';
 
 export function VodContent() {
   const [vodArray, setVodArray] = useState<Vod[][]>([]);

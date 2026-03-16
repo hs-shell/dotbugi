@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Assign, Filters, Quiz, TAB_TYPE, Vod } from '@/content/types';
+import { Assign, Filters, Quiz, TAB_TYPE, Vod } from '@/types';
 import { filterVods, filterAssigns, filterQuizzes } from '@/lib/filterData';
 
 interface UseDashboardFiltersParams {

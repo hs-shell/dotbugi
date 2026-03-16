@@ -1,6 +1,6 @@
 import { BadgeCheck, Clock, Siren, TriangleAlert } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { TimeDifferenceResult } from '../types';
+import { TimeDifferenceResult } from '@/types';
 
 const TOOLTIP_STYLE: React.CSSProperties = {
   backgroundColor: 'rgba(24, 24, 27, 0.6)',

@@ -1,6 +1,6 @@
 import { calculateDueDate, calculateRemainingTime } from '@/lib/utils';
 import { Card, CardFooter, CardHeader } from '@/components/ui/card';
-import { TimeDifferenceResult } from '../types';
+import { TimeDifferenceResult } from '@/types';
 import EmptyState from './EmptyState';
 import CardFooterContent from './CardFooterContent';
 

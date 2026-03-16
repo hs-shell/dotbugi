@@ -1,4 +1,4 @@
-import { Assign } from '../types';
+import { Assign } from '@/types';
 import DueDateList from './DueDateList';
 
 interface AssignmentProps {

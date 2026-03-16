@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
-import { Assign } from '@/content/types';
+import { Assign } from '@/types';
 import { loadDataFromStorage } from '@/lib/storage';
 import AssignCard from './AssignCard';
 import { ScrollArea } from '@/components/ui/scroll-area';

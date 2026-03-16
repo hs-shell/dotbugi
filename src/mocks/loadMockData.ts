@@ -1,4 +1,4 @@
-import { Vod, Assign, Quiz } from '@/content/types';
+import { Vod, Assign, Quiz } from '@/types';
 
 export type MockData = {
   vods: Vod[];

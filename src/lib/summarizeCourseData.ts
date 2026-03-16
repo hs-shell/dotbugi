@@ -1,5 +1,5 @@
-import { Vod } from '@/content/types';
-import { makeVodGroupKey } from '@/utils/generate-key';
+import { Vod } from '@/types';
+import { makeVodGroupKey } from '@/lib/generateKey';
 import { isAttended } from '@/lib/utils';
 
 export type CardData = {

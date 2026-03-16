@@ -2,7 +2,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { useState } from 'react';
 import icon from '@/assets/icon.png';
 import exit from '@/assets/exit.png';
-import { TAB_TYPE } from './types';
+import { TAB_TYPE } from '@/types';
 import { OctagonAlert } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useGetCourses } from '@/hooks/useGetCourses';

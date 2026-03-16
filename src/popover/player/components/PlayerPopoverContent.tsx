@@ -1,6 +1,6 @@
 import { PopoverContent } from '@radix-ui/react-popover';
 import PlayerIframe from './PlayerIframe';
-import type { Vod } from '@/content/types';
+import type { Vod } from '@/types';
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { loadDataFromStorage } from '@/lib/storage';
 import { Button } from '@/components/ui/button';

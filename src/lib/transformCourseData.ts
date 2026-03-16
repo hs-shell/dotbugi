@@ -1,4 +1,4 @@
-import { Vod, CourseBase } from '@/content/types';
+import { Vod, CourseBase } from '@/types';
 import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
 
 /**

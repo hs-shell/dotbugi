@@ -1,4 +1,4 @@
-import { CourseBase } from '@/content/types';
+import { CourseBase } from '@/types';
 import { saveDataToStorage } from '@/lib/storage';
 import { parseCoursesFromDOM } from '@/lib/parseCourses';
 import { useState, useEffect } from 'react';

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Vod, Assign, Quiz, CourseBase } from '@/content/types';
+import { Vod, Assign, Quiz, CourseBase } from '@/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { scrapeCourseData } from '@/lib/fetchCourseData';
 import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
-import { makeItemKey, makeVodKey } from '@/utils/generate-key';
+import { makeItemKey, makeVodKey } from '@/lib/generateKey';
 import { mergeVodWithAttendance, mergeDueDateItems } from '@/lib/transformCourseData';
 import { deduplicateInto } from '@/lib/deduplicateInto';
 import { loadMockData } from '@/mocks/loadMockData';

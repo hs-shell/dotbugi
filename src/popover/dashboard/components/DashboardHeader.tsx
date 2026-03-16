@@ -1,6 +1,6 @@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useMemo } from 'react';
-import { Filters, TAB_TYPE } from '../types';
+import { Filters, TAB_TYPE } from '@/types';
 import { ListFilter, RefreshCw, Search } from 'lucide-react';
 import filter from '@/assets/filter.svg';
 import { Button } from '@/components/ui/button';

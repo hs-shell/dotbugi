@@ -1,4 +1,4 @@
-import { Vod, Assign, Quiz, CourseBase, Filters } from '@/content/types';
+import { Vod, Assign, Quiz, CourseBase, Filters } from '@/types';
 import { isAttended } from './utils';
 
 function matchesBase(item: CourseBase & { title: string }, courseTitles: string[], term: string): boolean {

@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
-import { Quiz } from '@/content/types';
+import { Quiz } from '@/types';
 import { loadDataFromStorage } from '@/lib/storage';
 import QuizCard from './QuizCard';
 import { ScrollArea } from '@radix-ui/react-scroll-area';

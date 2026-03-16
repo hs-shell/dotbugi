@@ -1,4 +1,4 @@
-import { CourseBase } from '@/content/types';
+import { CourseBase } from '@/types';
 import { removeSquareBrackets } from '@/lib/utils';
 
 // course_label_ec = 커뮤니티(비교과), 클래스 기반 필터링으로 다국어 대응

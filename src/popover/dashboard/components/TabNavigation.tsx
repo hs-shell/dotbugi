@@ -1,5 +1,5 @@
 import { NotebookText, VideoIcon, Zap } from 'lucide-react';
-import { TAB_TYPE } from '../types';
+import { TAB_TYPE } from '@/types';
 
 interface Prop {
   activeTab: string;

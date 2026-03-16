@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Vod } from '@/content/types';
+import { Vod } from '@/types';
 
 import { calculateRemainingTime, extractEndDate, formatDateString, isAttended, removeSquareBrackets } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';

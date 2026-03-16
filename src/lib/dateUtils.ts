@@ -1,4 +1,4 @@
-import { TimeDifferenceResult } from '@/content/types';
+import { TimeDifferenceResult } from '@/types';
 
 const MS_PER_MINUTE = 1000 * 60;
 const MS_PER_HOUR = MS_PER_MINUTE * 60;

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Vod } from '../types';
+import { Vod } from '@/types';
 import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isAbsent, isAttended } from '@/lib/utils';
-import { makeVodGroupKey } from '@/utils/generate-key';
+import { makeVodGroupKey } from '@/lib/generateKey';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import EmptyState from './EmptyState';
 import CardFooterContent from './CardFooterContent';

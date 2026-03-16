@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { loadAndTransform } from '@/lib/storage';
-import { Vod, Assign, Quiz } from '@/content/types';
+import { Vod, Assign, Quiz } from '@/types';
 import { CardData, summarizeVods } from '@/lib/summarizeCourseData';
 
 export type { CardData };

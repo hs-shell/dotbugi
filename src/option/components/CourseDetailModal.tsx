@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import type { Vod } from '@/content/types';
+import type { Vod } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { BadgeCheck, Siren, TriangleAlert, Video, X } from 'lucide-react';
 import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isAttended } from '@/lib/utils';
