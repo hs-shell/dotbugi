@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import type { CourseBase } from '@/types';
 import { HexColorPicker } from 'react-colorful';
+import { useTranslation } from 'react-i18next';
 
 // Update the CourseColorSetting type to include opacity
 export type CourseColorSetting = {
@@ -44,6 +45,7 @@ const gradientPresets = [
 ];
 
 export default function ColorSetting() {
+  const { t } = useTranslation('option');
   const [courses, setCourses] = useState<CourseBase[]>([]);
   const [courseColors, setCourseColors] = useState<CourseColorSetting[]>([]);
   const [originalColors, setOriginalColors] = useState<Record<string, string>>({});
@@ -110,7 +112,7 @@ export default function ColorSetting() {
             color: newColor,
             colorType,
             gradient: gradientValue,
-            opacity: opacity !== undefined ? opacity : item.opacity || 1, // Preserve or set default opacity
+            opacity: opacity !== undefined ? opacity : item.opacity || 1,
           };
         }
         return item;
@@ -134,8 +136,8 @@ export default function ColorSetting() {
     setOriginalColors(originals);
 
     toast({
-      title: '색상 설정 저장 완료',
-      description: '강의 색상 설정이 저장되었습니다.',
+      title: t('color.saved'),
+      description: t('color.savedDesc'),
     });
   };
 
@@ -156,8 +158,8 @@ export default function ColorSetting() {
   return (
     <div className="container mx-auto py-6 space-y-6 px-4">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">강의 색상 설정</h1>
-        <p className="text-muted-foreground">각 강의에 표시될 색상을 설정합니다.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('color.title')}</h1>
+        <p className="text-muted-foreground">{t('color.description')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -176,7 +178,7 @@ export default function ColorSetting() {
       <div className="flex justify-end">
         <Button onClick={handleSave}>
           <Save className="mr-2 h-4 w-4" />
-          색상 저장
+          {t('color.save')}
         </Button>
       </div>
     </div>
@@ -198,6 +200,7 @@ interface CourseCardProps {
 }
 
 function CourseCard({ course, colorSetting, originalColor, onColorChange, onReset }: CourseCardProps) {
+  const { t } = useTranslation('option');
   const hasChanged = colorSetting.color !== originalColor;
   const [customColor, setCustomColor] = useState(colorSetting.color);
   const [customGradient, setCustomGradient] = useState(
@@ -293,7 +296,7 @@ function CourseCard({ course, colorSetting, originalColor, onColorChange, onRese
     <div className="mt-4">
       <div className="flex justify-between mb-1">
         <label htmlFor={`opacity-slider-${course.courseId}`} className="text-xs text-muted-foreground">
-          투명도
+          {t('color.opacity')}
         </label>
         <span className="text-xs">{Math.round(opacity * 100)}%</span>
       </div>
@@ -321,9 +324,8 @@ function CourseCard({ course, colorSetting, originalColor, onColorChange, onRese
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-12 h-12 p-0 rounded-lg border-1 relative">
-                {/* 배경 색상을 적용할 요소 */}
                 <div className="absolute inset-0 rounded-md" style={getBackgroundStyle()} />
-                <span className="sr-only">색상 선택</span>
+                <span className="sr-only">{t('color.pickColor')}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-4">
@@ -383,7 +385,7 @@ function CourseCard({ course, colorSetting, originalColor, onColorChange, onRese
 
                   <div className="grid grid-cols-2 gap-2 mb-4">
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">시작 색상</p>
+                      <p className="text-xs text-muted-foreground mb-1">{t('color.startColor')}</p>
                       <HexColorPicker
                         color={gradientStartColor}
                         onChange={(color) => handleGradientColorChange(color, gradientEndColor)}
@@ -391,7 +393,7 @@ function CourseCard({ course, colorSetting, originalColor, onColorChange, onRese
                       />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">끝 색상</p>
+                      <p className="text-xs text-muted-foreground mb-1">{t('color.endColor')}</p>
                       <HexColorPicker
                         color={gradientEndColor}
                         onChange={(color) => handleGradientColorChange(gradientStartColor, color)}
@@ -408,7 +410,7 @@ function CourseCard({ course, colorSetting, originalColor, onColorChange, onRese
             </PopoverContent>
           </Popover>
           <div className="flex flex-col">
-            <span className="text-sm font-medium">선택된 스타일</span>
+            <span className="text-sm font-medium">{t('color.selectedStyle')}</span>
             <div className="flex items-center gap-2">
               <code className="text-xs bg-muted px-1 py-0.5 rounded">
                 {colorSetting.colorType === 'solid'
@@ -418,7 +420,7 @@ function CourseCard({ course, colorSetting, originalColor, onColorChange, onRese
             </div>
           </div>
           {hasChanged && (
-            <Button variant="ghost" size="icon" className="ml-auto" onClick={onReset} title="원래 색상으로 되돌리기">
+            <Button variant="ghost" size="icon" className="ml-auto" onClick={onReset} title={t('color.resetToOriginal')}>
               <RotateCcw className="h-4 w-4" />
             </Button>
           )}

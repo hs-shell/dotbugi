@@ -10,7 +10,7 @@ const COL = {
   WEEKLY_ATTENDANCE: 5,
 } as const;
 
-const BULK_APPROVED = ['일괄출석인정', 'Batch attendance'];
+import { BULK_APPROVED } from './lmsKeywords';
 
 /**
  * rowspan/colspan이 있는 테이블 행을 평탄화된 셀 값 배열로 변환

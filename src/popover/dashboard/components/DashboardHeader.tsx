@@ -6,17 +6,12 @@ import filter from '@/assets/filter.svg';
 import { Button } from '@/components/ui/button';
 import FilterBadge from './FilterBadge';
 import FilterPanel from './FilterPanel';
+import { useTranslation } from 'react-i18next';
 
-const TAB_TITLES: Record<TAB_TYPE, string> = {
-  VIDEO: '온라인 강의 목록',
-  ASSIGN: '과제 목록',
-  QUIZ: '퀴즈 목록',
-};
-
-const attendanceOptions = ['출석', '결석'];
+const attendanceValues = ['attended', 'absent'] as const;
 const submitOptions = [
-  { label: '제출완료', value: true },
-  { label: '제출필요', value: false },
+  { value: true, internalLabel: 'done' as const },
+  { value: false, internalLabel: 'needed' as const },
 ];
 
 interface DashboardHeaderProps {
@@ -52,6 +47,20 @@ export default function DashboardHeader({
   isPending,
   onRefresh,
 }: DashboardHeaderProps) {
+  const { t } = useTranslation(['popover', 'common']);
+
+  const TAB_TITLES: Record<TAB_TYPE, string> = {
+    VIDEO: t('header.vodList'),
+    ASSIGN: t('header.assignList'),
+    QUIZ: t('header.quizList'),
+  };
+
+  const attendanceOptions = attendanceValues.map((v) => t(`common:attendance.${v}`));
+  const submitOptionsTranslated = submitOptions.map((o) => ({
+    label: t(`common:submit.${o.internalLabel}`),
+    value: o.value,
+  }));
+
   const isFilterSet = useMemo(() => {
     const currentFilters = filters[activeTab];
     const { courseTitles, attendanceStatuses, submitStatuses } = currentFilters;
@@ -72,7 +81,9 @@ export default function DashboardHeader({
           <span
             className={`text-sm px-1 ${remainingTime >= 30 ? 'text-amber-500 font-semibold' : 'text-zinc-400'}`}
           >
-            {remainingTime < 60 ? `${Math.round(remainingTime)}분 전` : `${Math.floor(remainingTime / 60)}시간 전`}
+            {remainingTime < 60
+              ? t('common:date.minutesAgoShort', { minutes: Math.round(remainingTime) })
+              : t('common:date.hoursAgoShort', { hours: Math.floor(remainingTime / 60) })}
           </span>
           <button
             className={`flex rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 p-2 ml-1 ${refreshDisabled && 'cursor-not-allowed'}`}
@@ -87,7 +98,7 @@ export default function DashboardHeader({
         <Search className="absolute left-9 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
           type="text"
-          placeholder="검색"
+          placeholder={t('common:search')}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           autoFocus={true}
@@ -111,7 +122,7 @@ export default function DashboardHeader({
             filters[activeTab].submitStatuses?.map((status) => (
               <FilterBadge
                 key={`submit-${status}`}
-                label={status ? '제출완료' : '제출필요'}
+                label={status ? t('common:submit.done') : t('common:submit.needed')}
                 onRemove={() => onSubmitFilterChange(status)}
               />
             ))}
@@ -124,7 +135,7 @@ export default function DashboardHeader({
                 className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mb-2 mr-5 ml-2 p-2"
               >
                 {isFilterSet ? (
-                  <img src={filter} className="w-9 h-9 p-0" alt="필터 설정됨" />
+                  <img src={filter} className="w-9 h-9 p-0" alt={t('common:filterSet')} />
                 ) : (
                   <ListFilter className="w-9 h-9 p-0" />
                 )}
@@ -139,13 +150,13 @@ export default function DashboardHeader({
                 handleAttendanceFilterChange={onAttendanceFilterChange}
                 handleSubmitFilterChange={onSubmitFilterChange}
                 attendanceOptions={attendanceOptions}
-                submitOptions={submitOptions}
+                submitOptions={submitOptionsTranslated}
               />
               <Button className="w-full text-xl h-12 font-semibold" variant="outline" onClick={onClearFilters}>
-                모두 지우기
+                {t('common:clearAll')}
               </Button>
               <Button className="w-full text-xl h-12 font-semibold" variant="default" onClick={onFilterToggle}>
-                닫기
+                {t('common:close')}
               </Button>
             </PopoverContent>
           </Popover>

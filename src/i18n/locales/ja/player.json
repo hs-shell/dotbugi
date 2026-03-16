@@ -1,0 +1,13 @@
+{
+  "noVideoInfo": "映像情報がありません",
+  "startPrompt": "自動受講を開始するには受講開始ボタンを押してください",
+  "stopWatching": "受講終了",
+  "expectedEnd": "{{time}} 完了予定",
+  "doneWatching": "受講完了",
+  "startWatching": "受講開始",
+  "lectureList": "講義リスト",
+  "noVideos": "受講する映像がありません",
+  "refreshPrompt": "Dotbugiをクリックして講義を更新してください",
+  "appIcon": "Dotbugiアイコン",
+  "appName": "Dotbugi 🔎"
+}

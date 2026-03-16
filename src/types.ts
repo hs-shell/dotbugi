@@ -39,6 +39,7 @@ export type Quiz = CourseBase & {
 
 export type TimeDifferenceResult = {
   message: string;
+  status: 'noInfo' | 'expired' | 'daysLeft' | 'urgent' | 'invalid';
   borderColor: string;
   borderLeftColor: string;
   textColor: string;

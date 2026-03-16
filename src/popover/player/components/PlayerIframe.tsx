@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const formatMMSS = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
@@ -10,13 +11,13 @@ interface PlayerIframeProps {
 }
 
 export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: PlayerIframeProps) {
+  const { t } = useTranslation('player');
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const isPlayingRef = useRef(isPlaying);
   const onNextVideoRef = useRef(onNextVideo);
 
   const [time, setTime] = useState({ current: 0, duration: 0 });
 
-  // iframe 랜더링 시 이벤트 등록
   const setIframeRef = (node: HTMLIFrameElement | null) => {
     iframeRef.current = node;
     if (node) {
@@ -39,7 +40,6 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
     onNextVideoRef.current = onNextVideo;
   }, [isPlaying, onNextVideo]);
 
-  // iframe 내 video 요소 접근 헬퍼
   const getVideoElement = () => {
     const iframe = iframeRef.current;
     if (!iframe) return null;
@@ -47,36 +47,32 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
       const doc = iframe.contentDocument || iframe.contentWindow?.document;
       return (doc?.querySelector('video') as HTMLVideoElement | null) ?? null;
     } catch (err) {
-      console.error('iframe 접근 에러', err);
+      console.error('iframe access error', err);
       return null;
     }
   };
 
-  // 재생, 일시정지 처리 함수
   const controlPlayback = (video: HTMLVideoElement | null, play: boolean) => {
     if (!video) return;
     if (play) {
       video.muted = false;
       video.volume = 0.01;
-      video.play().catch((e) => console.warn('재생 실패:', e));
+      video.play().catch((e) => console.warn('Playback failed:', e));
     } else {
       video.pause();
     }
   };
 
-  // load 이벤트 시 video listener 세팅
   const loadEventListener = () => {
     const video = getVideoElement();
     if (!video) return;
 
-    // 중복 방지
     video.onended = null;
     video.onended = () => onNextVideoRef.current();
 
     controlPlayback(video, isPlayingRef.current);
   };
 
-  // iframe load 이벤트 연결
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
@@ -84,7 +80,6 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
     return () => iframe.removeEventListener('load', loadEventListener);
   }, [videoSrc]);
 
-  // isPlaying 변경 시 재생 상태 제어
   useEffect(() => {
     controlPlayback(getVideoElement(), isPlaying);
   }, [isPlaying]);
@@ -102,7 +97,7 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
   return (
     <div className={`relative w-full h-full items-center justify-center rounded-xl ${!isPlaying && 'bg-black'}`}>
       <div
-        className={`absolute inset-0 flex items-center justify-center text-white 
+        className={`absolute inset-0 flex items-center justify-center text-white
           text-6xl font-bold bg-transparent pointer-events-none`}
       >
         {isPlaying ? (
@@ -117,11 +112,11 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
               </span>
             </div>
           ) : (
-            <div>영상 정보가 없습니다</div>
+            <div>{t('noVideoInfo')}</div>
           )
         ) : (
           <div className="flex justify-center items-center text-center text-3xl">
-            자동수강을 시작하려면 수강시작 버튼을 눌러주세요
+            {t('startPrompt')}
           </div>
         )}
       </div>

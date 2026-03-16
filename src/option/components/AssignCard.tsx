@@ -5,12 +5,14 @@ import { Assign } from '@/types';
 
 import { calculateDueDate, calculateRemainingTime } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTranslation } from 'react-i18next';
 
 interface TaskStatusCardProps {
   assign: Assign;
 }
 
 const AssignCard: React.FC<TaskStatusCardProps> = ({ assign }) => {
+  const { t } = useTranslation('common');
   const [showRemainingTime, setShowRemainingTime] = useState(false);
 
   useEffect(() => {
@@ -46,12 +48,8 @@ const AssignCard: React.FC<TaskStatusCardProps> = ({ assign }) => {
         </div>
 
         <div className="mt-6 flex space-x-1">
-          <Badge
-            variant="secondary"
-            className={`font-semibold hover:bg-zinc-200`}
-            // className={`font-semibold ${assign.isSubmit ? 'bg-green-900' : timeDifference.message.includes('마감') ? 'bg-red-950' : 'bg-amber-500'} bg-opacity-10`}
-          >
-            {assign.isSubmit ? '제출완료' : '제출필요'}
+          <Badge variant="secondary" className={`font-semibold hover:bg-zinc-200`}>
+            {assign.isSubmit ? t('submit.done') : t('submit.needed')}
           </Badge>
           <TooltipProvider>
             <Tooltip>

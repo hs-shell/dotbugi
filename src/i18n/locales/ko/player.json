@@ -1,0 +1,13 @@
+{
+  "noVideoInfo": "영상 정보가 없습니다",
+  "startPrompt": "자동수강을 시작하려면 수강시작 버튼을 눌러주세요",
+  "stopWatching": "수강 종료",
+  "expectedEnd": "{{time}} 완료 예정",
+  "doneWatching": "수강 완료",
+  "startWatching": "수강 시작",
+  "lectureList": "강의 목록",
+  "noVideos": "수강할 영상이 없습니다",
+  "refreshPrompt": "이클래스 돋부기를 눌러 강의를 새로고침 해주세요",
+  "appIcon": "돋부기 아이콘",
+  "appName": "돋부기 🔎"
+}

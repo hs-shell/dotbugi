@@ -19,7 +19,7 @@ export function Sidebar({ activeTab, setActiveTab }: { activeTab: TAB_LABEL; set
         <ul className="">
           {data.map((item) => (
             <li
-              key={item.title}
+              key={item.type}
               onClick={() => {
                 setActiveTab(item.type);
               }}

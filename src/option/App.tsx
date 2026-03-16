@@ -10,6 +10,7 @@ import QuizPage from '@/option/pages/QuizPage';
 import Header from './Header';
 import Labo from './Labo';
 import ColorSetting from './ColorSetting';
+import { useTranslation } from 'react-i18next';
 
 const pageVariants = {
   initial: {
@@ -33,6 +34,7 @@ const pageTransition = {
 };
 
 const AnimatedRoutes = () => {
+  const { t } = useTranslation('common');
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
@@ -53,7 +55,7 @@ const AnimatedRoutes = () => {
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/labo" element={<Labo />} />
           <Route path="/color" element={<ColorSetting />} />
-          <Route path="*" element={<div>404 Not Found</div>} />
+          <Route path="*" element={<div>{t('notFound')}</div>} />
         </Routes>
       </motion.div>
     </AnimatePresence>

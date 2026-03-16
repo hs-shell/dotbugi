@@ -1,5 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import '@/i18n';
 import Dashboard from './dashboard/Dashboard';
 import styles from '@/styles/shadow.css?inline';
 import { createShadowRoot } from '@/popover/lib/createShadowRoot';

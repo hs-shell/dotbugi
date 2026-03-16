@@ -2,33 +2,36 @@ import { loadDataFromStorage } from '@/lib/storage';
 import { TimeAgo } from '@/lib/utils';
 import { History } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 export default function Header({ location }: { location: string }) {
+  const { t } = useTranslation(['option', 'common']);
   const [lastRequest, setLastRequest] = useState('');
   useEffect(() => {
     loadDataFromStorage('lastRequestTime', (data: string | null) => {
-      if (!data) setLastRequest('기록이 존재하지 않습니다.');
+      if (!data) setLastRequest(t('common:noRecords'));
       else setLastRequest(TimeAgo(parseInt(data)));
     });
-  }, []);
+  }, [t]);
 
-  let title = '안녕하세요';
+  let title = t('header.hello');
 
   switch (location) {
     case '/vod':
-      title = '동영상 강의 목록';
-      window.document.title = '돋부기 | 강의 목록';
+      title = t('header.vodList');
+      window.document.title = t('pageTitle.vodList');
       break;
     case '/assignment':
-      title = '과제 목록';
-      window.document.title = '돋부기 | 과제 목록';
+      title = t('header.assignList');
+      window.document.title = t('pageTitle.assignList');
       break;
     case '/quiz':
-      title = '퀴즈 목록';
-      window.document.title = '돋부기 | 퀴즈 목록';
+      title = t('header.quizList');
+      window.document.title = t('pageTitle.quizList');
       break;
     default:
-      title = '대시보드 🚀';
-      window.document.title = '돋부기 | 대시보드';
+      title = t('header.dashboard');
+      window.document.title = t('pageTitle.dashboard');
       break;
   }
   return (

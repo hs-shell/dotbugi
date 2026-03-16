@@ -9,7 +9,7 @@ const COL = {
   SUBMIT_STATUS: '.cell.c3',
 } as const;
 
-const NOT_SUBMITTED = '미제출';
+import { NOT_SUBMITTED, normalizeLmsDate } from './lmsKeywords';
 
 export const fetchAssign = async (link: string) => {
   try {
@@ -24,10 +24,12 @@ export const fetchAssign = async (link: string) => {
 
       const title = getText(row, COL.TITLE_LINK);
       const url = getHref(row, COL.TITLE_LINK);
-      const dueDate = getText(row, COL.DUE_DATE);
-      if (!title || !url || !dueDate) return [];
+      const rawDueDate = getText(row, COL.DUE_DATE);
+      if (!title || !url || !rawDueDate) return [];
+      const dueDate = normalizeLmsDate(rawDueDate)!;
 
-      const isSubmit = getText(row, COL.SUBMIT_STATUS) !== NOT_SUBMITTED;
+      const submitText = getText(row, COL.SUBMIT_STATUS) ?? '';
+      const isSubmit = !NOT_SUBMITTED.some((keyword) => submitText.includes(keyword));
       return { subject: lastWeekLabel, title, url, dueDate, isSubmit };
     });
   } catch (error) {

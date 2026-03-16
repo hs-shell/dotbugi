@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 interface ModalProps {
   vodList: Vod[];
@@ -16,6 +17,7 @@ interface ModalProps {
 }
 
 const CourseDetailModal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProps) => {
+  const { t } = useTranslation('common');
   const [isVisible, setIsVisible] = useState(false);
   const [showRemainingTime, setShowRemainingTime] = useState(false);
 
@@ -87,7 +89,7 @@ const CourseDetailModal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProp
                       </div>
                       {isAttendance ? (
                         <BadgeCheck className={`h-5 w-5 text-green-500`} />
-                      ) : timeDifference.message.includes('마감') ? (
+                      ) : timeDifference.status === 'expired' ? (
                         <Siren className={`h-6 w-6 ${timeDifference.textColor}`} />
                       ) : (
                         <TriangleAlert className={`h-5 w-5 ${timeDifference.textColor}`} />
@@ -103,7 +105,7 @@ const CourseDetailModal: React.FC<ModalProps> = ({ vodList, onClose }: ModalProp
               <Tooltip>
                 <TooltipTrigger className="bg-transparent">
                   <Badge variant="secondary" className="font-semibold hover:bg-zinc-200 py-1">
-                    출석인정기간 : {formatDateString(vodList[0].range)}
+                    {t('attendancePeriod')} : {formatDateString(vodList[0].range)}
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent

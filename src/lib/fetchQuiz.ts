@@ -1,5 +1,6 @@
 import { fetchHtml, getText } from './fetchHtml';
 import { BASE_LINK } from '@/constants/links';
+import { normalizeLmsDate } from './lmsKeywords';
 
 // 퀴즈 테이블 컬럼 (generaltable)
 // [주(c0)] [제목(c1)] [종료 일시(c2)] [성적(c3)]
@@ -31,8 +32,9 @@ export const fetchQuiz = async (link: string) => {
         if (weekLabel) lastWeekLabel = weekLabel;
 
         const titleLink = row.querySelector<HTMLAnchorElement>(COL.TITLE_LINK);
-        const dueDate = getText(row, COL.DUE_DATE);
-        if (!titleLink || !dueDate) return [];
+        const rawDueDate = getText(row, COL.DUE_DATE);
+        if (!titleLink || !rawDueDate) return [];
+        const dueDate = normalizeLmsDate(rawDueDate)!;
 
         const title = titleLink.textContent?.trim();
         const rawHref = titleLink.getAttribute('href');

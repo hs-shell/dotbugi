@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Vod } from '@/types';
 import type React from 'react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface ModalProps {
   vod: Vod;
@@ -10,6 +11,7 @@ interface ModalProps {
 }
 
 const CourseHideModal: React.FC<ModalProps> = ({ vod, onClose }) => {
+  const { t } = useTranslation(['option', 'common']);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -39,19 +41,19 @@ const CourseHideModal: React.FC<ModalProps> = ({ vod, onClose }) => {
     >
       <div
         className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md"
-        onClick={(e) => e.stopPropagation()} // 모달 클릭 시 닫히지 않도록 방지
+        onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold mb-2">해당 강좌를 숨기시겠습니까?</h2>
+        <h2 className="text-xl font-bold mb-2">{t('option:modal.hideCourse')}</h2>
         <p className="text-lg font-medium text-zinc-600">
           {vod.courseTitle} - {vod.subject}
         </p>
 
         <div className="mt-4 flex justify-end space-x-2">
           <Button variant="outline" onClick={handleClose}>
-            닫기
+            {t('common:close')}
           </Button>
           <Button variant="destructive" onClick={handleHideCourse}>
-            숨기기
+            {t('option:modal.hide')}
           </Button>
         </div>
       </div>

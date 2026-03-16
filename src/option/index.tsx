@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter as Router } from 'react-router-dom';
+import '@/i18n';
 import '@/styles/option.css';
 import App from './App';
 

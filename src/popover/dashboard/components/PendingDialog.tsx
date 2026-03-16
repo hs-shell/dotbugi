@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import styles from '@/styles/shadow.css?inline';
 import { createShadowRoot } from '@/popover/lib/createShadowRoot';
+import { useTranslation } from 'react-i18next';
 
 interface PendingDialogProps {
   isPending: boolean;
@@ -12,6 +13,7 @@ interface PendingDialogProps {
 }
 
 export default function PendingDialog({ isPending, onClose }: PendingDialogProps) {
+  const { t } = useTranslation(['popover', 'common']);
   const [open, setOpen] = useState(false);
   const [cancelEnabled, setCancelEnabled] = useState(false);
   const [modalContainer, setModalContainer] = useState<Element | DocumentFragment | null>(null);
@@ -50,14 +52,12 @@ export default function PendingDialog({ isPending, onClose }: PendingDialogProps
     setModalContainer(newShadowRoot);
   }, []);
 
-  // open 상태에 따라 host의 display 업데이트
   useEffect(() => {
     if (hostElement) {
       hostElement.style.display = open ? 'flex' : 'none';
     }
   }, [open, hostElement]);
 
-  // isPending 상태에 따라 모달 열림/닫힘 관리
   useEffect(() => {
     if (isPending) {
       setOpen(true);
@@ -68,7 +68,6 @@ export default function PendingDialog({ isPending, onClose }: PendingDialogProps
     }
   }, [isPending]);
 
-  // 모달이 열리면 스크롤을 막고, 닫히면 복구
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
@@ -77,7 +76,6 @@ export default function PendingDialog({ isPending, onClose }: PendingDialogProps
     }
   }, [open]);
 
-  // 모달이 열릴 때 15초 후에 취소 버튼 활성화
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (open) {
@@ -91,7 +89,6 @@ export default function PendingDialog({ isPending, onClose }: PendingDialogProps
   }, [open]);
 
   const handleClose = () => {
-    // 취소 버튼이 활성화된 경우에만 닫힘 동작 실행
     if (cancelEnabled) {
       setOpen(false);
       if (onClose) {
@@ -103,13 +100,13 @@ export default function PendingDialog({ isPending, onClose }: PendingDialogProps
   const modalContent = (
     <Card className="w-3/4 max-w-4xl">
       <CardHeader className="m-4">
-        <CardTitle className="text-4xl font-bold">요청 진행 중</CardTitle>
-        <p className="my-6 text-xl text-zinc-500 font-medium">요청이 진행중입니다. 잠시만 기다려주세요.</p>
+        <CardTitle className="text-4xl font-bold">{t('pending.title')}</CardTitle>
+        <p className="my-6 text-xl text-zinc-500 font-medium">{t('pending.message')}</p>
       </CardHeader>
       <CardContent className="m-4">
         <div className="flex flex-col items-center justify-center py-6 space-y-8">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="my-6 text-xl text-zinc-900 font-medium">완료되면 자동으로 창이 닫힙니다.</p>
+          <p className="my-6 text-xl text-zinc-900 font-medium">{t('pending.autoClose')}</p>
         </div>
         <Button
           variant={'destructive'}
@@ -117,7 +114,7 @@ export default function PendingDialog({ isPending, onClose }: PendingDialogProps
           className="w-full h-16 rounded-lg"
           disabled={!cancelEnabled}
         >
-          <span className="text-xl text-white font-semibold">취소</span>
+          <span className="text-xl text-white font-semibold">{t('common:cancel')}</span>
         </Button>
       </CardContent>
     </Card>

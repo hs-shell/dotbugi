@@ -5,12 +5,14 @@ import { Quiz } from '@/types';
 
 import { calculateDueDate, calculateRemainingTime } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTranslation } from 'react-i18next';
 
 interface TaskStatusCardProps {
   quiz: Quiz;
 }
 
 const QuizCard: React.FC<TaskStatusCardProps> = ({ quiz }) => {
+  const { t } = useTranslation('common');
   const [showRemainingTime, setShowRemainingTime] = useState(false);
 
   useEffect(() => {
@@ -48,7 +50,7 @@ const QuizCard: React.FC<TaskStatusCardProps> = ({ quiz }) => {
 
         <div className="mt-6 flex space-x-1">
           <Badge variant="secondary" className={`font-semibold hover:bg-zinc-200`}>
-            직접확인
+            {t('status.checkManuallyNoSpace')}
           </Badge>
           <TooltipProvider>
             <Tooltip>

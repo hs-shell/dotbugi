@@ -1,0 +1,65 @@
+{
+  "vod": "講義",
+  "assign": "課題",
+  "quiz": "クイズ",
+  "dashboard": "ダッシュボード",
+  "close": "閉じる",
+  "clearAll": "すべてクリア",
+  "search": "検索",
+  "cancel": "キャンセル",
+  "notFound": "404 Not Found",
+  "attendance": {
+    "attended": "出席",
+    "absent": "欠席"
+  },
+  "submit": {
+    "done": "提出済み",
+    "needed": "未提出",
+    "doneSpaced": "提出済み",
+    "neededSpaced": "未提出"
+  },
+  "status": {
+    "notStarted": "未学習",
+    "completed": "学習完了",
+    "inProgress": "学習中",
+    "checkManually": "直接確認",
+    "checkManuallyNoSpace": "直接確認"
+  },
+  "date": {
+    "noDeadline": "期限なし",
+    "noInfo": "情報なし",
+    "expired": "締切",
+    "daysLater": "{{days}}日後",
+    "hoursLater": "{{hours}}時間後",
+    "minutesLater": "{{minutes}}分後",
+    "remaining": "{{days}}日{{hours}}時間{{minutes}}分 残り",
+    "remainingHoursMinutes": "{{hours}}時間{{minutes}}分 残り",
+    "remainingMinutes": "{{minutes}}分 残り",
+    "justNow": "たった今",
+    "daysAgo": "{{days}}日{{hours}}時間{{minutes}}分前",
+    "hoursAgo": "{{hours}}時間{{minutes}}分前",
+    "minutesAgo": "{{minutes}}分前",
+    "ago": "前",
+    "minutesAgoShort": "{{minutes}}分前",
+    "hoursAgoShort": "{{hours}}時間前",
+    "monthYear": "yyyy年 MM月",
+    "weekdays": ["日", "月", "火", "水", "木", "金", "土"]
+  },
+  "count": "{{count}} 件",
+  "countZero": "0 件",
+  "percentComplete": "{{percent}}% 完了",
+  "error": {
+    "occurred": "エラーが発生しました。",
+    "refreshPage": "ページを更新"
+  },
+  "noRecords": "記録がありません。",
+  "empty": {
+    "vod": "講義がありません",
+    "assign": "課題がありません",
+    "quiz": "クイズがありません"
+  },
+  "progress": "進捗率",
+  "attendancePeriod": "出席認定期間",
+  "filterSet": "フィルター適用中",
+  "language": "言語"
+}

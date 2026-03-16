@@ -1,0 +1,68 @@
+{
+  "header": {
+    "hello": "こんにちは",
+    "vodList": "動画講義一覧",
+    "assignList": "課題一覧",
+    "quizList": "クイズ一覧",
+    "dashboard": "ダッシュボード 🚀"
+  },
+  "pageTitle": {
+    "vodList": "Dotbugi | 講義一覧",
+    "assignList": "Dotbugi | 課題一覧",
+    "quizList": "Dotbugi | クイズ一覧",
+    "dashboard": "Dotbugi | ダッシュボード"
+  },
+  "sidebar": {
+    "university": "漢城大学校",
+    "appName": "Dotbugi 🔎",
+    "main": "メイン",
+    "todos": "やること",
+    "lab": "ラボ",
+    "calendarSync": "カレンダー連携",
+    "colorChange": "色設定"
+  },
+  "summary": {
+    "videoLecture": "動画講義"
+  },
+  "github": {
+    "likeProject": "このプロジェクトが気に入りましたか？",
+    "starOnGithub": "GitHubでスターをお願いします！"
+  },
+  "color": {
+    "title": "講義カラー設定",
+    "description": "各講義に表示される色を設定します。",
+    "save": "色を保存",
+    "saved": "カラー設定を保存しました",
+    "savedDesc": "講義のカラー設定が保存されました。",
+    "opacity": "不透明度",
+    "pickColor": "色を選択",
+    "startColor": "開始色",
+    "endColor": "終了色",
+    "selectedStyle": "選択されたスタイル",
+    "resetToOriginal": "元の色に戻す"
+  },
+  "calendar": {
+    "googleSync": "Google Calendar 連携",
+    "addEvent": "新しいイベント追加",
+    "disconnect": "連携解除",
+    "mySchedule": "カレンダー予定",
+    "noEvents": "予定がありません。",
+    "connectGoogle": "Google アカウント連携",
+    "syncFailed": "同期失敗 🚨",
+    "checkConnection": "Googleカレンダーの連携状態を確認してください",
+    "upToDate": "カレンダーは最新です 🤩",
+    "alreadySynced": "すでに最新情報で同期されています。",
+    "syncSuccess": "同期成功 🚀",
+    "eventsAdded": "{{count}}件のイベントが追加されました。",
+    "syncError": "同期エラー 🚨",
+    "syncErrorDesc": "イベントの同期中にエラーが発生しました。",
+    "videoLecture": "動画講義",
+    "testEvent": "テストイベント 🎉",
+    "testEventDesc": "Google Calendar APIを使用したイベント作成です。",
+    "eventAdded": "新しいイベントが追加されました！"
+  },
+  "modal": {
+    "hideCourse": "この講座を非表示にしますか？",
+    "hide": "非表示"
+  }
+}

@@ -7,14 +7,16 @@ import { Vod } from '@/types';
 import { calculateRemainingTime, extractEndDate, formatDateString, isAttended, removeSquareBrackets } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CourseDetailModal from './CourseDetailModal';
+import { useTranslation } from 'react-i18next';
 
 interface TaskStatusCardProps {
   vodList: Vod[];
 }
 
 const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
+  const { t } = useTranslation('common');
   const [isVisible, setIsVisible] = useState(false);
-  
+
   if (vodList.length === 0) return <></>;
 
   let value = 0;
@@ -22,7 +24,6 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
     if (isAttended(vod.isAttendance)) value += 1;
   });
   const total = (value * 100) / vodList.length;
-
 
   return (
     <>
@@ -54,7 +55,7 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
 
           <div className="mt-2 flex space-x-1">
             <Badge variant="secondary" className="font-semibold hover:bg-zinc-200">
-              {total === 0 ? '학습전' : isAttended(vodList[0].weeklyAttendance) ? '학습완료' : '학습중'}
+              {total === 0 ? t('status.notStarted') : isAttended(vodList[0].weeklyAttendance) ? t('status.completed') : t('status.inProgress')}
             </Badge>
             <TooltipProvider>
               <Tooltip>
@@ -82,7 +83,7 @@ const VodCard: React.FC<TaskStatusCardProps> = ({ vodList }) => {
           </div>
           <div className="mt-2">
             <div className="flex justify-between mb-1">
-              <span className="text-sm text-gray-500 font-semibold">진도율</span>
+              <span className="text-sm text-gray-500 font-semibold">{t('progress')}</span>
               <span className="text-sm text-gray-500">{Math.round(total)}%</span>
             </div>
             <Progress

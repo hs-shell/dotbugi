@@ -9,6 +9,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEn
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableItem from './SortableItem';
 import { isAttended, isCurrentDateInRange } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface PlayerPopoverContentProps {
   isPopoverOpen: boolean;
@@ -17,6 +18,7 @@ interface PlayerPopoverContentProps {
 }
 
 export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPlaying }: PlayerPopoverContentProps) {
+  const { t } = useTranslation('player');
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [vods, setVods] = useState<Vod[]>([]);
   const [isDone, setIsDone] = useState(false);
@@ -92,12 +94,12 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
 
   const autoPlayText =
     isHover && isPlaying
-      ? '수강 종료'
+      ? t('stopWatching')
       : isPlaying
-        ? `${formatExpectedEndTime(totalDurationSeconds)} 완료 예정`
+        ? t('expectedEnd', { time: formatExpectedEndTime(totalDurationSeconds) })
         : isDone
-          ? '수강 완료'
-          : '수강 시작';
+          ? t('doneWatching')
+          : t('startWatching');
 
   return (
     <PopoverContent
@@ -126,7 +128,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
               </div>
 
               <div className="w-1/3 flex flex-col py-4 px-4 min-w-0 bg-zinc-50 rounded-xl">
-                <h3 className="text-4xl font-bold text-black mb-4 flex-shrink-0">강의 목록</h3>
+                <h3 className="text-4xl font-bold text-black mb-4 flex-shrink-0">{t('lectureList')}</h3>
                 <div className="overflow-y-auto flex-1 pr-2 scrollbar-hide">
                   <style>{`
                     .scrollbar-hide::-webkit-scrollbar {
@@ -177,10 +179,10 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
         ) : (
           <div className="flex flex-col justify-center items-center h-full w-full gap-y-2">
             <div className="w-full flex items-center justify-center text-zinc-800 text-3xl font-medium">
-              수강할 영상이 없습니다
+              {t('noVideos')}
             </div>
             <div className="w-full flex items-center justify-center text-zinc-500">
-              이클래스 돋부기를 눌러 강의를 새로고침 해주세요
+              {t('refreshPrompt')}
             </div>
           </div>
         )}
