@@ -5,12 +5,12 @@ function parseWeekNumber(section: Element): number {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-function parseVodTitle(activity: Element): string | null {
+function parseVodTitle(activity: Element): string | undefined {
   const nameEl = activity.querySelector('.instancename');
-  if (!nameEl) return null;
+  if (!nameEl) return;
   const clone = nameEl.cloneNode(true) as Element;
   clone.querySelector('.accesshide')?.remove();
-  return clone.textContent?.trim() || null;
+  return clone.textContent?.trim();
 }
 
 export const fetchVodList = async (link: string) => {

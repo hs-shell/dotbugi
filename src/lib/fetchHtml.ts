@@ -22,5 +22,5 @@ export function getText(parent: Element, selector: string): string | null {
 
 /** 셀렉터로 a 태그의 href 추출. 없으면 null */
 export function getHref(parent: Element, selector: string): string | null {
-  return (parent.querySelector(selector) as HTMLAnchorElement)?.href || null;
+  return parent.querySelector<HTMLAnchorElement>(selector)?.href || null;
 }

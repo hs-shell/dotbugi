@@ -3,29 +3,18 @@ import { isAttended } from './utils';
 
 // 필터 적용 for VODs
 export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, sortBy: keyof Vod): Vod[] {
-  let data = vods;
-
   const { courseTitles, attendanceStatuses } = filters;
+  const term = searchTerm.toLowerCase();
 
-  if (courseTitles.length > 0) {
-    data = data.filter((vod) => courseTitles.includes(vod.courseTitle));
-  }
-
-  if (attendanceStatuses && attendanceStatuses.length > 0) {
-    data = data.filter((vod) => {
+  const data = vods.filter((vod) => {
+    if (courseTitles.length > 0 && !courseTitles.includes(vod.courseTitle)) return false;
+    if (attendanceStatuses && attendanceStatuses.length > 0) {
       const status = isAttended(vod.isAttendance) ? '출석' : '결석';
-      return attendanceStatuses.includes(status);
-    });
-  }
-
-  if (searchTerm !== '') {
-    data = data.filter(
-      (item) =>
-        item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
+      if (!attendanceStatuses.includes(status)) return false;
+    }
+    if (term && !vod.courseTitle.toLowerCase().includes(term) && !vod.title.toLowerCase().includes(term) && !vod.prof.toLowerCase().includes(term)) return false;
+    return true;
+  });
 
   return data.sort((a, b) => {
     const attendanceA = isAttended(a.isAttendance);
@@ -49,26 +38,15 @@ export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, so
 
 // 필터 적용 for Assigns
 export function filterAssigns(assigns: Assign[], filters: Filters, searchTerm: string, sortBy: keyof Assign): Assign[] {
-  let data = assigns;
-
   const { courseTitles, submitStatuses } = filters;
+  const term = searchTerm.toLowerCase();
 
-  if (courseTitles.length > 0) {
-    data = data.filter((assign) => courseTitles.includes(assign.courseTitle));
-  }
-
-  if (submitStatuses && submitStatuses.length > 0) {
-    data = data.filter((assign) => submitStatuses.includes(assign.isSubmit));
-  }
-
-  if (searchTerm !== '') {
-    data = data.filter(
-      (item) =>
-        item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
+  const data = assigns.filter((assign) => {
+    if (courseTitles.length > 0 && !courseTitles.includes(assign.courseTitle)) return false;
+    if (submitStatuses && submitStatuses.length > 0 && !submitStatuses.includes(assign.isSubmit)) return false;
+    if (term && !assign.courseTitle.toLowerCase().includes(term) && !assign.title.toLowerCase().includes(term) && !assign.prof.toLowerCase().includes(term)) return false;
+    return true;
+  });
 
   return data.sort((a, b) => {
     // 미제출 우선 배치
@@ -90,22 +68,14 @@ export function filterAssigns(assigns: Assign[], filters: Filters, searchTerm: s
 
 // 필터 적용 for Quizzes
 export function filterQuizzes(quizzes: Quiz[], filters: Filters, searchTerm: string, sortBy: keyof Quiz): Quiz[] {
-  let data = quizzes;
-
   const { courseTitles } = filters;
+  const term = searchTerm.toLowerCase();
 
-  if (courseTitles.length > 0) {
-    data = data.filter((quiz) => courseTitles.includes(quiz.courseTitle));
-  }
-
-  if (searchTerm !== '') {
-    data = data.filter(
-      (item) =>
-        item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
+  const data = quizzes.filter((quiz) => {
+    if (courseTitles.length > 0 && !courseTitles.includes(quiz.courseTitle)) return false;
+    if (term && !quiz.courseTitle.toLowerCase().includes(term) && !quiz.title.toLowerCase().includes(term) && !quiz.prof.toLowerCase().includes(term)) return false;
+    return true;
+  });
 
   return data.sort((a, b) => {
     switch (sortBy) {

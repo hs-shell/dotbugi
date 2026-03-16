@@ -70,15 +70,7 @@ export default function DashboardHeader({
         <div className="items-center justify-center font-bold text-3xl">{TAB_TITLES[activeTab]}</div>
         <div className="flex justify-center items-center">
           <span
-            className={`text-sm px-1 ${
-              remainingTime < 60
-                ? Math.round(remainingTime) >= 30
-                  ? 'text-amber-500 font-semibold'
-                  : 'text-zinc-400'
-                : Math.floor(remainingTime / 60) >= 1
-                  ? 'text-amber-500 font-semibold'
-                  : 'text-zinc-400'
-            }`}
+            className={`text-sm px-1 ${remainingTime >= 30 ? 'text-amber-500 font-semibold' : 'text-zinc-400'}`}
           >
             {remainingTime < 60 ? `${Math.round(remainingTime)}분 전` : `${Math.floor(remainingTime / 60)}시간 전`}
           </span>

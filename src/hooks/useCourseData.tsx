@@ -137,14 +137,14 @@ export function useCourseData(courses: CourseBase[]) {
       refreshCourseData();
     } else {
       setRemainingTime((now - lastRequest) / REFRESH_INTERVAL_MS);
-      loadDataFromStorage('vod', (data) => {
-        if (data) setVods((data as Vod[]).filter((vod) => isCurrentDateInRange(vod.range)));
+      loadDataFromStorage<Vod[]>('vod', (data) => {
+        if (data) setVods(data.filter((vod) => isCurrentDateInRange(vod.range)));
       });
-      loadDataFromStorage('assign', (data) => {
-        if (data) setAssigns((data as Assign[]).filter((assign) => isCurrentDateByDate(assign.dueDate)));
+      loadDataFromStorage<Assign[]>('assign', (data) => {
+        if (data) setAssigns(data.filter((assign) => isCurrentDateByDate(assign.dueDate)));
       });
-      loadDataFromStorage('quiz', (data) => {
-        if (data) setQuizzes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
+      loadDataFromStorage<Quiz[]>('quiz', (data) => {
+        if (data) setQuizzes(data.filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
       });
     }
   }, [courses, refreshCourseData]);

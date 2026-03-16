@@ -21,9 +21,5 @@ function parseCourseFromElement(li: Element): CourseBase | null {
 export function parseCoursesFromDOM(): CourseBase[] {
   return Array.from(document.querySelectorAll('.my-course-lists > li'))
     .filter((li) => !li.classList.contains(COMMUNITY_CLASS))
-    .reduce<CourseBase[]>((acc, li) => {
-      const course = parseCourseFromElement(li);
-      if (course) acc.push(course);
-      return acc;
-    }, []);
+    .flatMap((li) => parseCourseFromElement(li) ?? []);
 }
