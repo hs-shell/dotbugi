@@ -18,20 +18,18 @@ export const fetchAssign = async (link: string) => {
 
     let lastWeekLabel = '';
 
-    return Array.from(rows)
-      .map((row) => {
-        const weekLabel = getText(row, COL.WEEK);
-        const title = getText(row, COL.TITLE_LINK);
-        const url = getHref(row, COL.TITLE_LINK);
-        const dueDate = getText(row, COL.DUE_DATE);
-        const isSubmit = getText(row, COL.SUBMIT_STATUS) !== NOT_SUBMITTED;
+    return Array.from(rows).flatMap((row) => {
+      const weekLabel = getText(row, COL.WEEK);
+      if (weekLabel) lastWeekLabel = weekLabel;
 
-        if (weekLabel) lastWeekLabel = weekLabel;
-        if (!title || !url || !dueDate) return null;
+      const title = getText(row, COL.TITLE_LINK);
+      const url = getHref(row, COL.TITLE_LINK);
+      const dueDate = getText(row, COL.DUE_DATE);
+      if (!title || !url || !dueDate) return [];
 
-        return { subject: lastWeekLabel, title, url, dueDate, isSubmit };
-      })
-      .filter((item) => item !== null);
+      const isSubmit = getText(row, COL.SUBMIT_STATUS) !== NOT_SUBMITTED;
+      return { subject: lastWeekLabel, title, url, dueDate, isSubmit };
+    });
   } catch (error) {
     console.error('[Dotbugi] 과제 조회 오류:', error);
     throw error;

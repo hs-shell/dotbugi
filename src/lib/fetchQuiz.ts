@@ -26,19 +26,20 @@ export const fetchQuiz = async (link: string) => {
     let lastWeekLabel = '';
 
     return Array.from(rows)
-      .map((row) => {
+      .flatMap((row) => {
         const weekLabel = getText(row, COL.WEEK);
-        const titleLink = row.querySelector(COL.TITLE_LINK) as HTMLAnchorElement | null;
-        const title = titleLink?.textContent?.trim() || null;
-        const rawHref = titleLink?.getAttribute('href') || null;
-        const dueDate = getText(row, COL.DUE_DATE);
-
         if (weekLabel) lastWeekLabel = weekLabel;
-        if (!title || !rawHref || !dueDate) return null;
+
+        const titleLink = row.querySelector<HTMLAnchorElement>(COL.TITLE_LINK);
+        const dueDate = getText(row, COL.DUE_DATE);
+        if (!titleLink || !dueDate) return [];
+
+        const title = titleLink.textContent?.trim();
+        const rawHref = titleLink.getAttribute('href');
+        if (!title || !rawHref) return [];
 
         return { title, subject: lastWeekLabel, url: toQuizUrl(rawHref), dueDate };
-      })
-      .filter((item) => item !== null);
+      });
   } catch (error) {
     console.error('[Dotbugi] 퀴즈 조회 오류:', error);
     throw error;

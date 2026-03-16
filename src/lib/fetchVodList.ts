@@ -23,17 +23,15 @@ export const fetchVodList = async (link: string) => {
       const subject = getText(section, '.sectionname') || `${week}`;
       const vodActivities = section.querySelectorAll('li.modtype_vod:not(.dimmed) .activityinstance');
 
-      return Array.from(vodActivities)
-        .map((activity) => {
-          const title = parseVodTitle(activity);
-          const url = getHref(activity, 'a');
-          const range = getText(activity, '.text-ubstrap');
-          const length = getText(activity, '.text-info')?.replace(',', '') ?? '';
+      return Array.from(vodActivities).flatMap((activity) => {
+        const title = parseVodTitle(activity);
+        const url = getHref(activity, 'a');
+        const range = getText(activity, '.text-ubstrap');
+        if (!title || !url || !range) return [];
 
-          if (!title || !url || !range) return null;
-          return { week, subject, title, url, range, length };
-        })
-        .filter((item) => item !== null);
+        const length = getText(activity, '.text-info')?.replace(',', '') ?? '';
+        return { week, subject, title, url, range, length };
+      });
     });
   } catch (error) {
     console.error('[Dotbugi] VOD 목록 조회 오류:', error);
