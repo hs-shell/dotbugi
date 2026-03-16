@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Vod } from '../types';
-import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isAbsent, isAttended, isCurrentDateInRange } from '@/lib/utils';
+import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isAbsent, isAttended } from '@/lib/utils';
 import { makeVodGroupKey } from '@/utils/generate-key';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import EmptyState from './EmptyState';
@@ -29,36 +29,22 @@ export default function VodList({ courseData }: VideoProps) {
     return acc;
   }, {});
 
+  const getEndTime = (range: string | null) => {
+    const end = extractEndDate(range);
+    return end ? new Date(end).getTime() : Number.MAX_SAFE_INTEGER;
+  };
+
   const sortedVodGroups = Object.values(groupedData).sort((groupA, groupB) => {
-    const firstA = groupA[0];
-    const firstB = groupB[0];
+    const a = groupA[0];
+    const b = groupB[0];
 
-    const isAX = isAbsent(firstA.weeklyAttendance);
-    const isBX = isAbsent(firstB.weeklyAttendance);
+    // 결석 우선
+    const aAbsent = isAbsent(a.weeklyAttendance);
+    const bAbsent = isAbsent(b.weeklyAttendance);
+    if (aAbsent !== bAbsent) return aAbsent ? -1 : 1;
 
-    if (isAX && !isBX) return -1;
-    if (!isAX && isBX) return 1;
-
-    const inRangeA = isCurrentDateInRange(firstA.range);
-    const inRangeB = isCurrentDateInRange(firstB.range);
-
-    if (inRangeA && !inRangeB) return -1;
-    if (!inRangeA && inRangeB) return 1;
-
-    const isRangeANull = firstA.range === null;
-    const isRangeBNull = firstB.range === null;
-
-    if (isRangeANull && !isRangeBNull) return 1;
-    if (!isRangeANull && isRangeBNull) return -1;
-
-    if (!isAX && !isRangeANull && !isRangeBNull) {
-      const dateA = new Date(firstA.range!.split(' ~ ')[0]);
-      const dateB = new Date(firstB.range!.split(' ~ ')[0]);
-      if (dateA < dateB) return -1;
-      if (dateA > dateB) return 1;
-    }
-
-    return firstA.courseTitle.localeCompare(firstB.courseTitle);
+    // 마감일 오름차순
+    return getEndTime(a.range) - getEndTime(b.range);
   });
 
   return (
@@ -69,17 +55,9 @@ export default function VodList({ courseData }: VideoProps) {
         const sortedVods = vods.slice().sort((a, b) => {
           const aAbsent = isAbsent(a.isAttendance);
           const bAbsent = isAbsent(b.isAttendance);
-          if (aAbsent && !bAbsent) return -1;
-          if (!aAbsent && bAbsent) return 1;
+          if (aAbsent !== bAbsent) return aAbsent ? -1 : 1;
 
-          if (a.range && b.range) {
-            const dateA = new Date(a.range.split(' ~ ')[0]);
-            const dateB = new Date(b.range.split(' ~ ')[0]);
-            if (dateA < dateB) return -1;
-            if (dateA > dateB) return 1;
-          }
-
-          return a.courseTitle.localeCompare(b.courseTitle);
+          return getEndTime(a.range) - getEndTime(b.range);
         });
 
         const item = vods[0];
