@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
+const formatMMSS = (seconds: number) =>
+  `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
+
 interface PlayerIframeProps {
   videoSrc: string;
   onNextVideo: () => void;
@@ -106,17 +109,11 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
           time.duration > 0 ? (
             <div className="flex items-center justify-center p-8 bg-zinc-950 bg-opacity-80 rounded-xl">
               <span className="flex items-center justify-center text-white min-w-[4ch]">
-                {Math.floor(time.current / 60)}:
-                {Math.floor(time.current % 60)
-                  .toString()
-                  .padStart(2, '0')}{' '}
+                {formatMMSS(time.current)}{' '}
               </span>
               <span className="flex items-center justify-center text-zinc-300"> / </span>
               <span className="flex items-center justify-center text-zinc-300 min-w-[4ch]">
-                {Math.floor(time.duration / 60)}:
-                {Math.floor(time.duration % 60)
-                  .toString()
-                  .padStart(2, '0')}
+                {formatMMSS(time.duration)}
               </span>
             </div>
           ) : (

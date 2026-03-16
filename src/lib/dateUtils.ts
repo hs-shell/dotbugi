@@ -4,14 +4,19 @@ const MS_PER_MINUTE = 1000 * 60;
 const MS_PER_HOUR = MS_PER_MINUTE * 60;
 const MS_PER_DAY = MS_PER_HOUR * 24;
 
+/** 하이픈 구분 날짜 문자열을 Date로 변환 (Safari 호환) */
+export function parseDate(str: string): Date {
+  return new Date(str.replace(/-/g, '/'));
+}
+
 export function isCurrentDateInRange(dateRange: string | null) {
   if (!dateRange || !dateRange.includes(' ~ ')) return false;
 
   const [startStr, endStr] = dateRange.split(' ~ ');
   if (!startStr || !endStr) return false;
 
-  const startDate = new Date(startStr.replace(/-/g, '/'));
-  const endDate = new Date(endStr.replace(/-/g, '/'));
+  const startDate = parseDate(startStr);
+  const endDate = parseDate(endStr);
   const now = new Date();
 
   return now >= startDate && now <= endDate;

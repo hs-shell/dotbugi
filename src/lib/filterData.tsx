@@ -1,5 +1,17 @@
-import { Vod, Assign, Quiz, Filters } from '@/content/types';
+import { Vod, Assign, Quiz, CourseBase, Filters } from '@/content/types';
 import { isAttended } from './utils';
+
+function matchesBase(item: CourseBase & { title: string }, courseTitles: string[], term: string): boolean {
+  if (courseTitles.length > 0 && !courseTitles.includes(item.courseTitle)) return false;
+  if (
+    term &&
+    !item.courseTitle.toLowerCase().includes(term) &&
+    !item.title.toLowerCase().includes(term) &&
+    !item.prof.toLowerCase().includes(term)
+  )
+    return false;
+  return true;
+}
 
 // 필터 적용 for VODs
 export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, sortBy: keyof Vod): Vod[] {
@@ -7,12 +19,11 @@ export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, so
   const term = searchTerm.toLowerCase();
 
   const data = vods.filter((vod) => {
-    if (courseTitles.length > 0 && !courseTitles.includes(vod.courseTitle)) return false;
+    if (!matchesBase(vod, courseTitles, term)) return false;
     if (attendanceStatuses && attendanceStatuses.length > 0) {
       const status = isAttended(vod.isAttendance) ? '출석' : '결석';
       if (!attendanceStatuses.includes(status)) return false;
     }
-    if (term && !vod.courseTitle.toLowerCase().includes(term) && !vod.title.toLowerCase().includes(term) && !vod.prof.toLowerCase().includes(term)) return false;
     return true;
   });
 
@@ -42,9 +53,8 @@ export function filterAssigns(assigns: Assign[], filters: Filters, searchTerm: s
   const term = searchTerm.toLowerCase();
 
   const data = assigns.filter((assign) => {
-    if (courseTitles.length > 0 && !courseTitles.includes(assign.courseTitle)) return false;
+    if (!matchesBase(assign, courseTitles, term)) return false;
     if (submitStatuses && submitStatuses.length > 0 && !submitStatuses.includes(assign.isSubmit)) return false;
-    if (term && !assign.courseTitle.toLowerCase().includes(term) && !assign.title.toLowerCase().includes(term) && !assign.prof.toLowerCase().includes(term)) return false;
     return true;
   });
 
@@ -71,11 +81,7 @@ export function filterQuizzes(quizzes: Quiz[], filters: Filters, searchTerm: str
   const { courseTitles } = filters;
   const term = searchTerm.toLowerCase();
 
-  const data = quizzes.filter((quiz) => {
-    if (courseTitles.length > 0 && !courseTitles.includes(quiz.courseTitle)) return false;
-    if (term && !quiz.courseTitle.toLowerCase().includes(term) && !quiz.title.toLowerCase().includes(term) && !quiz.prof.toLowerCase().includes(term)) return false;
-    return true;
-  });
+  const data = quizzes.filter((quiz) => matchesBase(quiz, courseTitles, term));
 
   return data.sort((a, b) => {
     switch (sortBy) {

@@ -54,27 +54,22 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     setCurrentVideoIndex((prev) => (prev + 1) % vods.length);
   }, [vods, currentVideoIndex, setIsPlaying]);
 
-  useEffect(() => {
-    loadDataFromStorage('vod', (data) => {
+  const loadUnattendedVods = useCallback(() => {
+    loadDataFromStorage<Vod[]>('vod', (data) => {
       if (!data) return;
-      const filtered = (data as Vod[]).filter(
-        (vod) => isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)
-      );
-      setVods(filtered);
+      setVods(data.filter((vod) => isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)));
     });
   }, []);
 
   useEffect(() => {
+    loadUnattendedVods();
+  }, [loadUnattendedVods]);
+
+  useEffect(() => {
     if (isPopoverOpen && !isPlaying && vods.length === 0) {
-      loadDataFromStorage('vod', (data) => {
-        if (!data) return;
-        const filtered = (data as Vod[]).filter(
-          (vod) => isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)
-        );
-        setVods(filtered);
-      });
+      loadUnattendedVods();
     }
-  }, [isPlaying, vods, isPopoverOpen]);
+  }, [isPlaying, vods, isPopoverOpen, loadUnattendedVods]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

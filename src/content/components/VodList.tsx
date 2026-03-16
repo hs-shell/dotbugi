@@ -34,31 +34,24 @@ export default function VodList({ courseData }: VideoProps) {
     return end ? new Date(end).getTime() : Number.MAX_SAFE_INTEGER;
   };
 
-  const sortedVodGroups = Object.values(groupedData).sort((groupA, groupB) => {
-    const a = groupA[0];
-    const b = groupB[0];
-
-    // 결석 우선
-    const aAbsent = isAbsent(a.weeklyAttendance);
-    const bAbsent = isAbsent(b.weeklyAttendance);
+  // 결석 우선 → 마감일 오름차순
+  const compareByAbsentThenEndTime = (a: Vod, b: Vod, absentKey: keyof Vod) => {
+    const aAbsent = isAbsent(a[absentKey] as string);
+    const bAbsent = isAbsent(b[absentKey] as string);
     if (aAbsent !== bAbsent) return aAbsent ? -1 : 1;
-
-    // 마감일 오름차순
     return getEndTime(a.range) - getEndTime(b.range);
-  });
+  };
+
+  const sortedVodGroups = Object.values(groupedData).sort((groupA, groupB) =>
+    compareByAbsentThenEndTime(groupA[0], groupB[0], 'weeklyAttendance'),
+  );
 
   return (
     <div className="space-y-4">
       {sortedVodGroups.map((vods, index) => {
         if (!vods || vods.length === 0) return null;
 
-        const sortedVods = vods.slice().sort((a, b) => {
-          const aAbsent = isAbsent(a.isAttendance);
-          const bAbsent = isAbsent(b.isAttendance);
-          if (aAbsent !== bAbsent) return aAbsent ? -1 : 1;
-
-          return getEndTime(a.range) - getEndTime(b.range);
-        });
+        const sortedVods = vods.slice().sort((a, b) => compareByAbsentThenEndTime(a, b, 'isAttendance'));
 
         const item = vods[0];
         const cardKey = `${item.title}-${index}`;

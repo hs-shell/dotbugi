@@ -1,5 +1,5 @@
 import { SidebarHeader } from './SidebarHeader';
-import { TAB_LABEL } from '@/content/types';
+import { TAB_LABEL } from './data';
 import { data } from './data';
 
 export function Sidebar({ activeTab, setActiveTab }: { activeTab: TAB_LABEL; setActiveTab: (type: TAB_LABEL) => void }) {

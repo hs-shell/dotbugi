@@ -1,5 +1,10 @@
-import { TAB_LABEL } from '@/content/types';
 import { NotebookText, Video, Zap } from 'lucide-react';
+
+export enum TAB_LABEL {
+  vod = '강의',
+  assignment = '과제',
+  quiz = '퀴즈',
+}
 
 export const data = [
   {

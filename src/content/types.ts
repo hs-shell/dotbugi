@@ -55,9 +55,3 @@ export enum TAB_TYPE {
   ASSIGN = 'ASSIGN',
   QUIZ = 'QUIZ',
 }
-
-export enum TAB_LABEL {
-  vod = '강의',
-  assignment = '과제',
-  quiz = '퀴즈',
-}

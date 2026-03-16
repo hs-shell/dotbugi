@@ -1,6 +1,7 @@
 import { startOfDay } from 'date-fns';
 import { Vod } from '@/content/types';
 import { removeSquareBrackets } from '@/lib/utils';
+import { parseDate } from '@/lib/dateUtils';
 import { makeVodGroupKey } from '@/utils/generate-key';
 
 export type CalendarEvent = {
@@ -25,8 +26,8 @@ export function vodGroupsToEvents(vods: Vod[]): CalendarEvent[] {
     return {
       id: key,
       type: 'vod' as const,
-      start: startStr ? new Date(startStr.replace(/-/g, '/')) : null,
-      end: endStr ? new Date(endStr.replace(/-/g, '/')) : null,
+      start: startStr ? parseDate(startStr) : null,
+      end: endStr ? parseDate(endStr) : null,
       title: removeSquareBrackets(items[0].courseTitle),
       subject: removeSquareBrackets(items[0].subject),
     };
