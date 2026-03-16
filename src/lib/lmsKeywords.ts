@@ -22,3 +22,40 @@ export const BULK_APPROVED = [
   // 'ja',
   // 'zh',
 ];
+
+/**
+ * LMS 날짜 문자열을 JS Date가 파싱 가능한 형식으로 정규화
+ *
+ * 지원 형식:
+ *   ko/en: "2023-04-24 10:50"
+ *   zh:    "2023年04月24日 星期一 10:50"
+ *   ja:    "2023年 04月 24日(月曜日) 10:50"
+ *
+ * 결과: "2023-04-24 10:50" (통일)
+ */
+export function normalizeLmsDate(raw: string | null): string | null {
+  if (!raw) return null;
+  const str = raw.trim();
+
+  // 이미 ISO-like 형식이면 그대로 반환 (ko/en)
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str;
+
+  // ja/zh: "2023年04月24日..." 또는 "2023年 04月 24日..."
+  const match = str.match(/(\d{4})年\s*(\d{2})月\s*(\d{2})日.*?(\d{2}:\d{2})/);
+  if (match) {
+    return `${match[1]}-${match[2]}-${match[3]} ${match[4]}`;
+  }
+
+  return str;
+}
+
+/**
+ * LMS VOD range 문자열 정규화 ("시작 ~ 종료" 형태)
+ * 각 날짜를 개별적으로 정규화하여 반환
+ */
+export function normalizeLmsRange(raw: string | null): string | null {
+  if (!raw) return null;
+  if (!raw.includes('~')) return normalizeLmsDate(raw);
+  const parts = raw.split('~').map((s) => normalizeLmsDate(s.trim()));
+  return parts.join(' ~ ');
+}

@@ -1,4 +1,5 @@
 import { fetchHtml, getText, getHref } from './fetchHtml';
+import { normalizeLmsRange } from './lmsKeywords';
 
 function parseWeekNumber(section: Element): number {
   const match = section.id?.match(/section-(\d+)/);
@@ -26,8 +27,9 @@ export const fetchVodList = async (link: string) => {
       return Array.from(vodActivities).flatMap((activity) => {
         const title = parseVodTitle(activity);
         const url = getHref(activity, 'a');
-        const range = getText(activity, '.text-ubstrap');
-        if (!title || !url || !range) return [];
+        const rawRange = getText(activity, '.text-ubstrap');
+        if (!title || !url || !rawRange) return [];
+        const range = normalizeLmsRange(rawRange)!;
 
         const length = getText(activity, '.text-info')?.replace(',', '') ?? '';
         return { week, subject, title, url, range, length };
