@@ -2,8 +2,10 @@ import type React from 'react';
 import { useState } from 'react';
 import { Github } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const GitHubStarBanner: React.FC = () => {
+  const { t } = useTranslation('option');
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
@@ -50,8 +52,8 @@ const GitHubStarBanner: React.FC = () => {
             </motion.svg>
           </div>
         </div>
-        <p className="text-sm font-medium text-slate-700 group-hover:text-slate-900">이 프로젝트가 마음에 드시나요?</p>
-        <p className="text-xs text-slate-500 group-hover:text-slate-700 mt-1">GitHub에서 스타를 눌러주세요!</p>
+        <p className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{t('github.likeProject')}</p>
+        <p className="text-xs text-slate-500 group-hover:text-slate-700 mt-1">{t('github.starOnGithub')}</p>
       </div>
     </div>
   );

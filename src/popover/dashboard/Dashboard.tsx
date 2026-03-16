@@ -15,8 +15,10 @@ import { useDashboardFilters } from '@/hooks/useDashboardFilters';
 import TabNavigation from './components/TabNavigation';
 import StickyPopoverTrigger from './components/StickyPopoverTrigger';
 import DashboardHeader from './components/DashboardHeader';
+import { useTranslation } from 'react-i18next';
 
 export default function Dashboard() {
+  const { t } = useTranslation('common');
   const { courses } = useGetCourses();
 
   const { vods, assigns, quizzes, isPending, remainingTime, isError, refreshCourseData, setIsPending } =
@@ -96,12 +98,12 @@ export default function Dashboard() {
             ) : isError ? (
               <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                 <OctagonAlert className="w-12 h-12 text-red-800" />
-                <p className="py-4 text-2xl font-semibold text-red-800">오류가 발생했습니다.</p>
+                <p className="py-4 text-2xl font-semibold text-red-800">{t('error.occurred')}</p>
                 <p
                   onClick={() => location.reload()}
                   className="py-4 text-xl font-medium underline text-zinc-500 hover:text-zinc-950 hover:cursor-pointer transition-all duration-200"
                 >
-                  페이지 새로고침
+                  {t('error.refreshPage')}
                 </p>
               </div>
             ) : (

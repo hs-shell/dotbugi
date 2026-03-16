@@ -1,0 +1,68 @@
+{
+  "header": {
+    "hello": "안녕하세요",
+    "vodList": "동영상 강의 목록",
+    "assignList": "과제 목록",
+    "quizList": "퀴즈 목록",
+    "dashboard": "대시보드 🚀"
+  },
+  "pageTitle": {
+    "vodList": "돋부기 | 강의 목록",
+    "assignList": "돋부기 | 과제 목록",
+    "quizList": "돋부기 | 퀴즈 목록",
+    "dashboard": "돋부기 | 대시보드"
+  },
+  "sidebar": {
+    "university": "한성대학교",
+    "appName": "돋부기 🔎",
+    "main": "메인",
+    "todos": "할 일",
+    "lab": "실험실",
+    "calendarSync": "캘린더 연동",
+    "colorChange": "색상 변경"
+  },
+  "summary": {
+    "videoLecture": "동영상 강의"
+  },
+  "github": {
+    "likeProject": "이 프로젝트가 마음에 드시나요?",
+    "starOnGithub": "GitHub에서 스타를 눌러주세요!"
+  },
+  "color": {
+    "title": "강의 색상 설정",
+    "description": "각 강의에 표시될 색상을 설정합니다.",
+    "save": "색상 저장",
+    "saved": "색상 설정 저장 완료",
+    "savedDesc": "강의 색상 설정이 저장되었습니다.",
+    "opacity": "투명도",
+    "pickColor": "색상 선택",
+    "startColor": "시작 색상",
+    "endColor": "끝 색상",
+    "selectedStyle": "선택된 스타일",
+    "resetToOriginal": "원래 색상으로 되돌리기"
+  },
+  "calendar": {
+    "googleSync": "Google Calendar 연동",
+    "addEvent": "새 이벤트 추가",
+    "disconnect": "연동 해제",
+    "mySchedule": "내 캘린더 일정",
+    "noEvents": "일정이 없습니다.",
+    "connectGoogle": "Google 계정 연동",
+    "syncFailed": "동기화 실패 🚨",
+    "checkConnection": "구글 캘린더 연동 상태를 확인해주세요",
+    "upToDate": "캘린더가 최신 상태입니다 🤩",
+    "alreadySynced": "이미 최신 정보로 동기화되었습니다.",
+    "syncSuccess": "동기화 성공 🚀",
+    "eventsAdded": "{{count}}개의 이벤트가 추가되었습니다.",
+    "syncError": "동기화 오류 🚨",
+    "syncErrorDesc": "이벤트 동기화 중 오류가 발생했습니다.",
+    "videoLecture": "동영상 강의",
+    "testEvent": "테스트 이벤트 🎉",
+    "testEventDesc": "이것은 Google Calendar API를 사용한 이벤트 생성입니다.",
+    "eventAdded": "새로운 이벤트가 추가되었습니다!"
+  },
+  "modal": {
+    "hideCourse": "해당 강좌를 숨기시겠습니까?",
+    "hide": "숨기기"
+  }
+}

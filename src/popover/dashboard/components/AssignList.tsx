@@ -1,15 +1,17 @@
 import { Assign } from '@/types';
 import DueDateList from './DueDateList';
+import { useTranslation } from 'react-i18next';
 
 interface AssignmentProps {
   courseData: Assign[];
 }
 
 export default function AssignList({ courseData }: AssignmentProps) {
+  const { t } = useTranslation('common');
   return (
     <DueDateList
       courseData={courseData}
-      emptyLabel="과제"
+      emptyLabel="assign"
       getBorderClass={(item, timeDiff) => (item.isSubmit ? 'border-green-500' : timeDiff.borderColor)}
       getStatusIcon={(item, timeDiff) => {
         if (item.isSubmit) return 'check';
@@ -17,7 +19,7 @@ export default function AssignList({ courseData }: AssignmentProps) {
         return 'warning';
       }}
       getStatusColor={(item, timeDiff) => (item.isSubmit ? 'text-green-500' : timeDiff.textColor)}
-      getStatusLabel={(item) => (item.isSubmit ? '제출 완료' : '제출 필요')}
+      getStatusLabel={(item) => (item.isSubmit ? t('submit.doneSpaced') : t('submit.neededSpaced'))}
     />
   );
 }

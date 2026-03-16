@@ -13,7 +13,7 @@ interface DueDateItem {
 
 interface DueDateListProps<T extends DueDateItem> {
   courseData: T[];
-  emptyLabel: string;
+  emptyLabel: 'vod' | 'assign' | 'quiz';
   getBorderClass: (item: T, timeDiff: TimeDifferenceResult) => string;
   getStatusIcon: (item: T, timeDiff: TimeDifferenceResult) => 'check' | 'siren' | 'warning';
   getStatusColor: (item: T, timeDiff: TimeDifferenceResult) => string;

@@ -6,12 +6,14 @@ import { makeVodGroupKey } from '@/lib/generateKey';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import EmptyState from './EmptyState';
 import CardFooterContent from './CardFooterContent';
+import { useTranslation } from 'react-i18next';
 
 interface VideoProps {
   courseData: Vod[];
 }
 
 export default function VodList({ courseData }: VideoProps) {
+  const { t } = useTranslation('common');
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
   const toggleCard = (key: string) => {
@@ -19,7 +21,7 @@ export default function VodList({ courseData }: VideoProps) {
   };
 
   if (!courseData || courseData.length === 0) {
-    return <EmptyState label="강의" />;
+    return <EmptyState label="vod" />;
   }
 
   const groupedData = courseData.reduce<Record<string, Vod[]>>((acc, item) => {
@@ -34,7 +36,6 @@ export default function VodList({ courseData }: VideoProps) {
     return end ? new Date(end).getTime() : Number.MAX_SAFE_INTEGER;
   };
 
-  // 결석 우선 → 마감일 오름차순
   const compareByAbsentThenEndTime = (a: Vod, b: Vod, absentKey: keyof Vod) => {
     const aAbsent = isAbsent(a[absentKey] as string);
     const bAbsent = isAbsent(b[absentKey] as string);
@@ -100,8 +101,8 @@ export default function VodList({ courseData }: VideoProps) {
                 timeDifference={timeDifference}
                 tooltipText={calculateRemainingTime(extractEndDate(vods[0].range))}
                 statusColor={attended ? 'text-green-500' : timeDifference.textColor}
-                statusIcon={attended ? 'check' : timeDifference.message.includes('시간') ? 'siren' : 'warning'}
-                statusLabel={attended ? '출석' : '결석'}
+                statusIcon={attended ? 'check' : timeDifference.status === 'urgent' ? 'siren' : 'warning'}
+                statusLabel={attended ? t('attendance.attended') : t('attendance.absent')}
               />
             </CardFooter>
           </Card>

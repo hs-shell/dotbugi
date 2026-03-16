@@ -2,9 +2,10 @@ import { ManifestV3Export } from '@crxjs/vite-plugin';
 
 const manifest = {
   manifest_version: 3,
-  name: 'HSU 돋부기 🔎',
+  name: '__MSG_extName__',
   version: '4.0.5',
-  description: '한성대학교 LMS 강의, 과제, 퀴즈를 한 눈에!',
+  description: '__MSG_extDescription__',
+  default_locale: 'ko',
   action: {},
   icons: {
     '16': 'images/icon/icon-16.png',

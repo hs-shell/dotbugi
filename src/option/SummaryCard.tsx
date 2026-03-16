@@ -5,9 +5,11 @@ import { Zap, Video, NotebookTextIcon } from 'lucide-react';
 import { ReactNode } from 'react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface CardItemProps {
   title: string;
+  type: 'vod' | 'assign' | 'quiz';
   icon: ReactNode;
   data: CardData;
   color: string;
@@ -23,12 +25,14 @@ const colorMap: Record<string, string> = {
 };
 
 export default function SummaryCard() {
+  const { t } = useTranslation(['option', 'common']);
   const { vod, assign, quiz } = useCardData();
 
-  const CardItem = ({ title, icon, data, color, link }: CardItemProps) => {
+  const CardItem = ({ title, type, icon, data, color, link }: CardItemProps) => {
     const { done, total } = data;
     const percentage = total > 0 ? Math.round((done / total) * 100) : 0;
     const bgColorClass = colorMap[color] || 'bg-gray-500';
+    const isQuiz = type === 'quiz';
 
     return (
       <Link to={link}>
@@ -37,19 +41,15 @@ export default function SummaryCard() {
             <h3 className="font-semibold text-sm text-muted-foreground">{title}</h3>
             {icon}
           </CardHeader>
-          <CardContent className='h-full'>
-            {title.includes('퀴즈') ? (
-              <div className="text-2xl font-bold">{total > 0 ? `${total} 개` : '0 개'}</div>
+          <CardContent className="h-full">
+            {isQuiz ? (
+              <div className="text-2xl font-bold">{total > 0 ? t('common:count', { count: total }) : t('common:countZero')}</div>
             ) : (
-              <div className="text-2xl font-bold">{total > 0 ? `${done} / ${total}` : '0 개'}</div>
+              <div className="text-2xl font-bold">{total > 0 ? `${done} / ${total}` : t('common:countZero')}</div>
             )}
-            {title.includes('퀴즈') ? (
-              <div />
-            ) : (
-              <Progress value={percentage} className={clsx('h-2 mt-2')} indicatorColor={bgColorClass} />
-            )}
+            {isQuiz ? <div /> : <Progress value={percentage} className={clsx('h-2 mt-2')} indicatorColor={bgColorClass} />}
             <p className={`text-xs text-muted-foreground mt-2`}>
-              {title.includes('퀴즈') ? '직접 확인' : percentage + '% 완료'}
+              {isQuiz ? t('common:status.checkManually') : t('common:percentComplete', { percent: percentage })}
             </p>
           </CardContent>
         </Card>
@@ -60,21 +60,24 @@ export default function SummaryCard() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
       <CardItem
-        title="동영상 강의"
+        title={t('summary.videoLecture')}
+        type="vod"
         icon={<Video className="h-4 w-4 text-blue-500" />}
         data={vod}
         color="blue"
         link={'vod'}
       />
       <CardItem
-        title="과제"
+        title={t('common:assign')}
+        type="assign"
         icon={<NotebookTextIcon className="h-4 w-4 text-violet-500" />}
         data={assign}
         color="violet"
         link={'assignment'}
       />
       <CardItem
-        title="퀴즈"
+        title={t('common:quiz')}
+        type="quiz"
         icon={<Zap className="h-4 w-4 text-amber-500" />}
         data={quiz}
         color="amber"

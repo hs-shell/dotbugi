@@ -1,8 +1,11 @@
+import i18n from '@/i18n';
 import { TimeDifferenceResult } from '@/types';
 
 const MS_PER_MINUTE = 1000 * 60;
 const MS_PER_HOUR = MS_PER_MINUTE * 60;
 const MS_PER_DAY = MS_PER_HOUR * 24;
+
+const t = (key: string, options?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...options });
 
 /** 하이픈 구분 날짜 문자열을 Date로 변환 (Safari 호환) */
 export function parseDate(str: string): Date {
@@ -39,31 +42,50 @@ export function extractEndDate(range: string | null): string | null {
 
 export function calculateDueDate(dueDate: string | null): TimeDifferenceResult {
   if (!dueDate) {
-    return { message: '정보없음', borderColor: 'border-amber-500', borderLeftColor: 'border-l-amber-500', textColor: 'text-amber-500' };
+    return {
+      message: t('date.noInfo'),
+      status: 'noInfo',
+      borderColor: 'border-amber-500',
+      borderLeftColor: 'border-l-amber-500',
+      textColor: 'text-amber-500',
+    };
   }
 
   const now = new Date();
   const endDate = new Date(dueDate);
 
   if (isNaN(endDate.getTime())) {
-    return { message: 'Invalid date format', borderColor: 'gray', borderLeftColor: 'gray', textColor: 'black' };
+    return { message: 'Invalid date format', status: 'invalid', borderColor: 'gray', borderLeftColor: 'gray', textColor: 'black' };
   }
 
   if (now >= endDate) {
-    return { message: '마감', borderColor: 'border-red-950', borderLeftColor: 'border-l-red-950', textColor: 'text-red-950' };
+    return {
+      message: t('date.expired'),
+      status: 'expired',
+      borderColor: 'border-red-950',
+      borderLeftColor: 'border-l-red-950',
+      textColor: 'text-red-950',
+    };
   }
 
   const timeDiff = endDate.getTime() - now.getTime();
   const days = Math.floor(timeDiff / MS_PER_DAY);
 
   if (days >= 1) {
-    return { message: `${days}일 후`, borderColor: 'border-amber-500', borderLeftColor: 'border-l-amber-500', textColor: 'text-amber-500' };
+    return {
+      message: t('date.daysLater', { days }),
+      status: 'daysLeft',
+      borderColor: 'border-amber-500',
+      borderLeftColor: 'border-l-amber-500',
+      textColor: 'text-amber-500',
+    };
   }
 
   const hours = Math.floor(timeDiff / MS_PER_HOUR);
   const minutes = Math.floor(timeDiff / MS_PER_MINUTE);
   return {
-    message: hours !== 0 ? `${hours}시간 후` : `${minutes}분 후`,
+    message: hours !== 0 ? t('date.hoursLater', { hours }) : t('date.minutesLater', { minutes }),
+    status: 'urgent',
     borderColor: 'border-red-700',
     borderLeftColor: 'border-l-red-700',
     textColor: 'text-red-700',
@@ -71,15 +93,18 @@ export function calculateDueDate(dueDate: string | null): TimeDifferenceResult {
 }
 
 export function calculateRemainingTime(endTime: string | null) {
-  if (!endTime) return '정보없음';
+  if (!endTime) return t('date.noInfo');
 
   const timeDiff = new Date(endTime).getTime() - Date.now();
   const daysLeft = Math.floor(timeDiff / MS_PER_DAY);
   const hoursLeft = Math.floor((timeDiff % MS_PER_DAY) / MS_PER_HOUR);
   const minutesLeft = Math.floor((timeDiff % MS_PER_HOUR) / MS_PER_MINUTE);
 
-  if (daysLeft < 0 || hoursLeft < 0 || minutesLeft < 0) return '마감';
-  return `${daysLeft === 0 ? '' : daysLeft + '일'} ${hoursLeft === 0 ? '' : hoursLeft + '시간'} ${minutesLeft}분 남음`;
+  if (daysLeft < 0 || hoursLeft < 0 || minutesLeft < 0) return t('date.expired');
+
+  if (daysLeft > 0) return t('date.remaining', { days: daysLeft, hours: hoursLeft, minutes: minutesLeft });
+  if (hoursLeft > 0) return t('date.remainingHoursMinutes', { hours: hoursLeft, minutes: minutesLeft });
+  return t('date.remainingMinutes', { minutes: minutesLeft });
 }
 
 export function timeAgo(givenTimestamp: number) {
@@ -89,6 +114,8 @@ export function timeAgo(givenTimestamp: number) {
   const hours = Math.floor((diffMs % MS_PER_DAY) / MS_PER_HOUR);
   const minutes = Math.floor((diffMs % MS_PER_HOUR) / MS_PER_MINUTE);
 
-  if (days === 0 && hours === 0 && minutes === 0) return '지금 막';
-  return `${days !== 0 ? days + '일 ' : ''}${hours !== 0 ? hours + '시간 ' : ''}${minutes !== 0 ? minutes + '분 전' : '전'}`;
+  if (days === 0 && hours === 0 && minutes === 0) return t('date.justNow');
+  if (days > 0) return t('date.daysAgo', { days, hours, minutes });
+  if (hours > 0) return t('date.hoursAgo', { hours, minutes });
+  return t('date.minutesAgo', { minutes });
 }

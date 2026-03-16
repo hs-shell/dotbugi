@@ -29,6 +29,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { loadDataFromStorage } from '@/lib/storage';
 import GoogleCalendar from '@/assets/calendar.png';
+import { useTranslation } from 'react-i18next';
 function isSameDate(d1: Date, d2: Date) {
   return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 }
@@ -85,6 +86,7 @@ const colorClasses = [
 ];
 
 export function Calendar() {
+  const { t } = useTranslation(['option', 'common']);
   const events = useCalendarEvents();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -94,9 +96,9 @@ export function Calendar() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const typeFilters = [
-    { value: 'vod', label: '동영상 강의' },
-    { value: 'assign', label: '과제' },
-    { value: 'quiz', label: '퀴즈' },
+    { value: 'vod', label: t('option:calendar.videoLecture') },
+    { value: 'assign', label: t('common:assign') },
+    { value: 'quiz', label: t('common:quiz') },
   ];
 
   const titleFilters = Array.from(new Set(events.map((event) => event.title))).map((title) => ({
@@ -363,8 +365,8 @@ export function Calendar() {
     const token = await getOAuthToken();
     if (!token) {
       toast({
-        title: '동기화 실패 🚨',
-        description: '구글 캘린더 연동 상태를 확인해주세요',
+        title: t('option:calendar.syncFailed'),
+        description: t('option:calendar.checkConnection'),
         variant: 'destructive',
       });
       return;
@@ -376,8 +378,8 @@ export function Calendar() {
     const token = await getOAuthToken();
     if (!token) {
       toast({
-        title: '동기화 실패 🚨',
-        description: '구글 캘린더 연동 상태를 확인해주세요',
+        title: t('option:calendar.syncFailed'),
+        description: t('option:calendar.checkConnection'),
         variant: 'destructive',
       });
       return;
@@ -414,8 +416,8 @@ export function Calendar() {
 
       if (uniqueNewEvents.length === 0) {
         toast({
-          title: '캘린더가 최신 상태입니다 🤩',
-          description: '이미 최신 정보로 동기화되었습니다.',
+          title: t('option:calendar.upToDate'),
+          description: t('option:calendar.alreadySynced'),
           variant: 'default',
         });
       } else {
@@ -423,15 +425,15 @@ export function Calendar() {
           await addCalendarEvent(event, token);
         }
         toast({
-          title: '동기화 성공 🚀',
-          description: `${uniqueNewEvents.length}개의 이벤트가 추가되었습니다.`,
+          title: t('option:calendar.syncSuccess'),
+          description: t('option:calendar.eventsAdded', { count: uniqueNewEvents.length }),
           variant: 'default',
         });
       }
     } catch (error) {
       toast({
-        title: '동기화 오류 🚨',
-        description: '이벤트 동기화 중 오류가 발생했습니다.',
+        title: t('option:calendar.syncError'),
+        description: t('option:calendar.syncErrorDesc'),
         variant: 'destructive',
       });
       console.error(error);
@@ -453,7 +455,7 @@ export function Calendar() {
           <Button variant="ghost" onClick={handlePrevMonth}>
             <ChevronLeft />
           </Button>
-          <div className="font-semibold text-lg">{format(currentMonth, 'yyyy년 MM월')}</div>
+          <div className="font-semibold text-lg">{format(currentMonth, t('common:date.monthYear'))}</div>
           <Button variant="ghost" onClick={handleNextMonth}>
             <ChevronRight />
           </Button>
@@ -476,7 +478,7 @@ export function Calendar() {
                   className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mt-2 mb-2 mr-5 ml-2 py-3 px-5"
                 >
                   {isFilterSet ? (
-                    <img src={filter} className="w-5 h-5 p-0" alt="필터 설정됨" />
+                    <img src={filter} className="w-5 h-5 p-0" alt={t('common:filterSet')} />
                   ) : (
                     <ListFilter className="w-5 h-5 p-0" />
                   )}
@@ -517,14 +519,14 @@ export function Calendar() {
                   ))}
                 </div>
                 <Button className="w-full text-base h-8 font-semibold mt-1" variant="outline" onClick={clearFilters}>
-                  모두 지우기
+                  {t('common:clearAll')}
                 </Button>
                 <Button
                   className="w-full text-base h-8 font-semibold"
                   variant="default"
                   onClick={() => setIsFilterOpen(false)}
                 >
-                  닫기
+                  {t('common:close')}
                 </Button>
               </PopoverContent>
             </Popover>
@@ -534,8 +536,8 @@ export function Calendar() {
 
       {/* 요일 헤더 */}
       <div className="grid grid-cols-7 text-center font-semibold mb-2">
-        {['일', '월', '화', '수', '목', '금', '토'].map((dayName) => (
-          <div key={dayName} className={`text-sm ${dayName === '일' ? 'text-red-700' : ''}`}>
+        {(t('common:date.weekdays', { returnObjects: true }) as string[]).map((dayName, idx) => (
+          <div key={dayName} className={`text-sm ${idx === 0 ? 'text-red-700' : ''}`}>
             {dayName}
           </div>
         ))}

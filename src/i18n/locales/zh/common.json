@@ -1,0 +1,65 @@
+{
+  "vod": "课程",
+  "assign": "作业",
+  "quiz": "测验",
+  "dashboard": "仪表盘",
+  "close": "关闭",
+  "clearAll": "全部清除",
+  "search": "搜索",
+  "cancel": "取消",
+  "notFound": "404 Not Found",
+  "attendance": {
+    "attended": "出勤",
+    "absent": "缺勤"
+  },
+  "submit": {
+    "done": "已提交",
+    "needed": "未提交",
+    "doneSpaced": "已提交",
+    "neededSpaced": "未提交"
+  },
+  "status": {
+    "notStarted": "未学习",
+    "completed": "学习完成",
+    "inProgress": "学习中",
+    "checkManually": "手动确认",
+    "checkManuallyNoSpace": "手动确认"
+  },
+  "date": {
+    "noDeadline": "无截止日",
+    "noInfo": "无信息",
+    "expired": "已截止",
+    "daysLater": "{{days}}天后",
+    "hoursLater": "{{hours}}小时后",
+    "minutesLater": "{{minutes}}分钟后",
+    "remaining": "剩余{{days}}天{{hours}}小时{{minutes}}分钟",
+    "remainingHoursMinutes": "剩余{{hours}}小时{{minutes}}分钟",
+    "remainingMinutes": "剩余{{minutes}}分钟",
+    "justNow": "刚刚",
+    "daysAgo": "{{days}}天{{hours}}小时{{minutes}}分钟前",
+    "hoursAgo": "{{hours}}小时{{minutes}}分钟前",
+    "minutesAgo": "{{minutes}}分钟前",
+    "ago": "前",
+    "minutesAgoShort": "{{minutes}}分钟前",
+    "hoursAgoShort": "{{hours}}小时前",
+    "monthYear": "yyyy年 MM月",
+    "weekdays": ["日", "一", "二", "三", "四", "五", "六"]
+  },
+  "count": "{{count}} 个",
+  "countZero": "0 个",
+  "percentComplete": "{{percent}}% 完成",
+  "error": {
+    "occurred": "发生了错误。",
+    "refreshPage": "刷新页面"
+  },
+  "noRecords": "没有记录。",
+  "empty": {
+    "vod": "没有课程",
+    "assign": "没有作业",
+    "quiz": "没有测验"
+  },
+  "progress": "进度",
+  "attendancePeriod": "出勤认定期间",
+  "filterSet": "已设置筛选",
+  "language": "语言"
+}

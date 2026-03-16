@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PopoverTrigger } from '@/components/ui/popover';
 import icon from '@/assets/icon.png';
 import { BorderTrail } from '@/components/ui/border-trail';
+import { useTranslation } from 'react-i18next';
 
 interface PlayerPopoverTriggerProps {
   onClick: () => void;
@@ -9,6 +10,7 @@ interface PlayerPopoverTriggerProps {
 }
 
 export default function PlayerPopoverTrigger({ onClick, isPlaying }: PlayerPopoverTriggerProps) {
+  const { t } = useTranslation('player');
   const containerRef = useRef<HTMLLIElement>(null);
   const [parentWidth, setParentWidth] = useState<number>(0);
 
@@ -34,19 +36,19 @@ export default function PlayerPopoverTrigger({ onClick, isPlaying }: PlayerPopov
       <li
         ref={containerRef}
         onClick={onClick}
-        className="relative flex justify-center items-center text-white text-2xl 
+        className="relative flex justify-center items-center text-white text-2xl
                    font-bold cursor-pointer h-[61px] px-4 bg-transparent overflow-visible"
       >
         <div className="flex w-full justify-start items-center z-10 px-4">
-          <img src={icon} alt="돋부기 아이콘" className={`${isCompact ? 'w-6 h-6 mr-2' : 'w-10 h-10 mr-4'}`} />
+          <img src={icon} alt={t('appIcon')} className={`${isCompact ? 'w-6 h-6 mr-2' : 'w-10 h-10 mr-4'}`} />
           <div className="flex justify-between w-full items-center">
-            {!isCompact && <h5 className="m-1">돋부기 🔎</h5>}
+            {!isCompact && <h5 className="m-1">{t('appName')}</h5>}
             <span className={`w-4 h-4 rounded-full ${isPlaying ? 'bg-green-700' : 'bg-red-700'}`} />
           </div>
         </div>
 
         <BorderTrail
-          className="absolute inset-0 z-[9999] pointer-events-none 
+          className="absolute inset-0 z-[9999] pointer-events-none
                      bg-gradient-to-r from-white/10 via-white/80 to-white/10
                      dark:from-white/10 dark:via-white/60 dark:to-white/10"
           style={{

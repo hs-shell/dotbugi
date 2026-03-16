@@ -1,0 +1,65 @@
+{
+  "vod": "강의",
+  "assign": "과제",
+  "quiz": "퀴즈",
+  "dashboard": "대시보드",
+  "close": "닫기",
+  "clearAll": "모두 지우기",
+  "search": "검색",
+  "cancel": "취소",
+  "notFound": "404 Not Found",
+  "attendance": {
+    "attended": "출석",
+    "absent": "결석"
+  },
+  "submit": {
+    "done": "제출완료",
+    "needed": "제출필요",
+    "doneSpaced": "제출 완료",
+    "neededSpaced": "제출 필요"
+  },
+  "status": {
+    "notStarted": "학습전",
+    "completed": "학습완료",
+    "inProgress": "학습중",
+    "checkManually": "직접 확인",
+    "checkManuallyNoSpace": "직접확인"
+  },
+  "date": {
+    "noDeadline": "기한없음",
+    "noInfo": "정보없음",
+    "expired": "마감",
+    "daysLater": "{{days}}일 후",
+    "hoursLater": "{{hours}}시간 후",
+    "minutesLater": "{{minutes}}분 후",
+    "remaining": "{{days}}일 {{hours}}시간 {{minutes}}분 남음",
+    "remainingHoursMinutes": "{{hours}}시간 {{minutes}}분 남음",
+    "remainingMinutes": "{{minutes}}분 남음",
+    "justNow": "지금 막",
+    "daysAgo": "{{days}}일 {{hours}}시간 {{minutes}}분 전",
+    "hoursAgo": "{{hours}}시간 {{minutes}}분 전",
+    "minutesAgo": "{{minutes}}분 전",
+    "ago": "전",
+    "minutesAgoShort": "{{minutes}}분 전",
+    "hoursAgoShort": "{{hours}}시간 전",
+    "monthYear": "yyyy년 MM월",
+    "weekdays": ["일", "월", "화", "수", "목", "금", "토"]
+  },
+  "count": "{{count}} 개",
+  "countZero": "0 개",
+  "percentComplete": "{{percent}}% 완료",
+  "error": {
+    "occurred": "오류가 발생했습니다.",
+    "refreshPage": "페이지 새로고침"
+  },
+  "noRecords": "기록이 존재하지 않습니다.",
+  "empty": {
+    "vod": "강의가 없습니다",
+    "assign": "과제가 없습니다",
+    "quiz": "퀴즈가 없습니다"
+  },
+  "progress": "진도율",
+  "attendancePeriod": "출석인정기간",
+  "filterSet": "필터 설정됨",
+  "language": "언어"
+}

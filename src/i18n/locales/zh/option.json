@@ -1,0 +1,68 @@
+{
+  "header": {
+    "hello": "你好",
+    "vodList": "视频课程列表",
+    "assignList": "作业列表",
+    "quizList": "测验列表",
+    "dashboard": "仪表盘 🚀"
+  },
+  "pageTitle": {
+    "vodList": "Dotbugi | 课程列表",
+    "assignList": "Dotbugi | 作业列表",
+    "quizList": "Dotbugi | 测验列表",
+    "dashboard": "Dotbugi | 仪表盘"
+  },
+  "sidebar": {
+    "university": "汉城大学",
+    "appName": "Dotbugi 🔎",
+    "main": "主页",
+    "todos": "待办",
+    "lab": "实验室",
+    "calendarSync": "日历同步",
+    "colorChange": "颜色设置"
+  },
+  "summary": {
+    "videoLecture": "视频课程"
+  },
+  "github": {
+    "likeProject": "喜欢这个项目吗？",
+    "starOnGithub": "在GitHub上给我们加星！"
+  },
+  "color": {
+    "title": "课程颜色设置",
+    "description": "设置每门课程显示的颜色。",
+    "save": "保存颜色",
+    "saved": "颜色设置已保存",
+    "savedDesc": "课程颜色设置已保存。",
+    "opacity": "不透明度",
+    "pickColor": "选择颜色",
+    "startColor": "起始颜色",
+    "endColor": "结束颜色",
+    "selectedStyle": "已选样式",
+    "resetToOriginal": "恢复原始颜色"
+  },
+  "calendar": {
+    "googleSync": "Google Calendar 同步",
+    "addEvent": "添加新事件",
+    "disconnect": "断开连接",
+    "mySchedule": "我的日历事件",
+    "noEvents": "没有事件。",
+    "connectGoogle": "连接Google账户",
+    "syncFailed": "同步失败 🚨",
+    "checkConnection": "请检查Google日历连接状态。",
+    "upToDate": "日历已是最新状态 🤩",
+    "alreadySynced": "已同步最新信息。",
+    "syncSuccess": "同步成功 🚀",
+    "eventsAdded": "已添加{{count}}个事件。",
+    "syncError": "同步错误 🚨",
+    "syncErrorDesc": "同步事件时发生错误。",
+    "videoLecture": "视频课程",
+    "testEvent": "测试事件 🎉",
+    "testEventDesc": "这是使用Google Calendar API创建的事件。",
+    "eventAdded": "已添加新事件！"
+  },
+  "modal": {
+    "hideCourse": "确定要隐藏此课程吗？",
+    "hide": "隐藏"
+  }
+}

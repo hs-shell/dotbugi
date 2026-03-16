@@ -1,5 +1,6 @@
 import { Vod, Assign, Quiz, CourseBase, Filters } from '@/types';
 import { isAttended } from './utils';
+import i18n from '@/i18n';
 
 function matchesBase(item: CourseBase & { title: string }, courseTitles: string[], term: string): boolean {
   if (courseTitles.length > 0 && !courseTitles.includes(item.courseTitle)) return false;
@@ -18,10 +19,13 @@ export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, so
   const { courseTitles, attendanceStatuses } = filters;
   const term = searchTerm.toLowerCase();
 
+  const attendedLabel = i18n.t('attendance.attended', { ns: 'common' });
+  const absentLabel = i18n.t('attendance.absent', { ns: 'common' });
+
   const data = vods.filter((vod) => {
     if (!matchesBase(vod, courseTitles, term)) return false;
     if (attendanceStatuses && attendanceStatuses.length > 0) {
-      const status = isAttended(vod.isAttendance) ? '출석' : '결석';
+      const status = isAttended(vod.isAttendance) ? attendedLabel : absentLabel;
       if (!attendanceStatuses.includes(status)) return false;
     }
     return true;

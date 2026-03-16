@@ -1,0 +1,65 @@
+{
+  "vod": "Lectures",
+  "assign": "Assignments",
+  "quiz": "Quizzes",
+  "dashboard": "Dashboard",
+  "close": "Close",
+  "clearAll": "Clear All",
+  "search": "Search",
+  "cancel": "Cancel",
+  "notFound": "404 Not Found",
+  "attendance": {
+    "attended": "Attended",
+    "absent": "Absent"
+  },
+  "submit": {
+    "done": "Submitted",
+    "needed": "Not Submitted",
+    "doneSpaced": "Submitted",
+    "neededSpaced": "Not Submitted"
+  },
+  "status": {
+    "notStarted": "Not Started",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "checkManually": "Check Manually",
+    "checkManuallyNoSpace": "Check Manually"
+  },
+  "date": {
+    "noDeadline": "No Deadline",
+    "noInfo": "No Info",
+    "expired": "Expired",
+    "daysLater": "In {{days}} days",
+    "hoursLater": "In {{hours}} hours",
+    "minutesLater": "In {{minutes}} min",
+    "remaining": "{{days}}d {{hours}}h {{minutes}}m left",
+    "remainingHoursMinutes": "{{hours}}h {{minutes}}m left",
+    "remainingMinutes": "{{minutes}}m left",
+    "justNow": "Just now",
+    "daysAgo": "{{days}}d {{hours}}h {{minutes}}m ago",
+    "hoursAgo": "{{hours}}h {{minutes}}m ago",
+    "minutesAgo": "{{minutes}}m ago",
+    "ago": "ago",
+    "minutesAgoShort": "{{minutes}}m ago",
+    "hoursAgoShort": "{{hours}}h ago",
+    "monthYear": "MMMM yyyy",
+    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  },
+  "count": "{{count}}",
+  "countZero": "0",
+  "percentComplete": "{{percent}}% Done",
+  "error": {
+    "occurred": "An error occurred.",
+    "refreshPage": "Refresh Page"
+  },
+  "noRecords": "No records found.",
+  "empty": {
+    "vod": "No lectures",
+    "assign": "No assignments",
+    "quiz": "No quizzes"
+  },
+  "progress": "Progress",
+  "attendancePeriod": "Attendance Period",
+  "filterSet": "Filter Applied",
+  "language": "Language"
+}
