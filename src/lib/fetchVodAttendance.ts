@@ -10,7 +10,7 @@ const COL = {
   WEEKLY_ATTENDANCE: 5,
 } as const;
 
-const BULK_APPROVED = '일괄출석인정';
+const BULK_APPROVED = ['일괄출석인정', 'Batch attendance'];
 
 /**
  * rowspan/colspan이 있는 테이블 행을 평탄화된 셀 값 배열로 변환
@@ -93,7 +93,7 @@ export const fetchVodAttendance = async (link: string) => {
         } else {
           weeklyAttendance = lastWeeklyAttendance;
         }
-        if (weeklyAttendance.includes(BULK_APPROVED)) weeklyAttendance = 'o';
+        if (BULK_APPROVED.some((keyword) => weeklyAttendance.includes(keyword))) weeklyAttendance = 'o';
 
         const parsedWeek = parseInt(cells[COL.WEEK] || '');
         if (!isNaN(parsedWeek)) currentWeek = parsedWeek;
