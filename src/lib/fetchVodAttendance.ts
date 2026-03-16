@@ -1,129 +1,114 @@
-import { VodAttendanceData } from '@/content/types';
+import { VodAttendanceData } from '@/types';
+import { fetchHtml } from './fetchHtml';
+
+// 출석부 테이블 컬럼 인덱스 (user_progress_table)
+// [주차(0)] [강의 자료(1)] [출석인정 요구시간(2)] [총 학습시간(3)] [출석(4)] [주차 출석(5)]
+const COL = {
+  WEEK: 0,
+  TITLE: 1,
+  ATTENDANCE: 4,
+  WEEKLY_ATTENDANCE: 5,
+} as const;
+
+const BULK_APPROVED = ['일괄출석인정', 'Batch attendance'];
+
+/**
+ * rowspan/colspan이 있는 테이블 행을 평탄화된 셀 값 배열로 변환
+ */
+function flattenRow(
+  row: Element,
+  pendingSpans: (number | undefined)[],
+  spanValues: (string | null)[],
+): (string | null)[] {
+  const cells = Array.from(row.querySelectorAll('td'));
+  const rowData: (string | null)[] = [];
+  let col = 0;
+
+  const consumePendingSpans = () => {
+    while (pendingSpans[col] && pendingSpans[col]! > 0) {
+      rowData.push(spanValues[col] || null);
+      pendingSpans[col]! -= 1;
+      col++;
+    }
+  };
+
+  consumePendingSpans();
+
+  for (const cell of cells) {
+    consumePendingSpans();
+
+    const rowspan = parseInt(cell.getAttribute('rowspan') || '1', 10);
+    const colspan = parseInt(cell.getAttribute('colspan') || '1', 10);
+    const content = cell.textContent?.trim() || '';
+
+    for (let i = 0; i < colspan; i++) {
+      rowData.push(content);
+      if (rowspan > 1) {
+        pendingSpans[col] = rowspan - 1;
+        spanValues[col] = content;
+      } else {
+        spanValues[col] = null;
+      }
+      col++;
+    }
+  }
+
+  while (col < pendingSpans.length) {
+    if (pendingSpans[col] && pendingSpans[col]! > 0) {
+      rowData.push(spanValues[col] || null);
+      pendingSpans[col]! -= 1;
+    } else {
+      rowData.push(null);
+    }
+    col++;
+  }
+
+  return rowData;
+}
 
 /**
  * 온라인 출석부 정보 가져오기
- *
- * @param link 강의 링크
- * @returns [{온라인 강의 제목, 출석 여부, 주차정보}...]
  */
 export const fetchVodAttendance = async (link: string) => {
   try {
-    const response = await fetch(link, {
-      method: 'GET',
-      credentials: 'include',
-    });
+    const doc = await fetchHtml(link);
+    const rows = doc.querySelectorAll('.user_progress_table > tbody > tr');
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    const headerMap: Record<string, number> = {};
-
-    const headers = Array.from(doc.querySelectorAll('.user_progress_table > thead > tr > th'));
-
-    headers.forEach((header, index) => {
-      const text = header.textContent?.trim() || '';
-      if (text === '강의 자료') headerMap['title'] = index;
-      else if (text === '출석') headerMap['isAttendance'] = index;
-      else if (text === '주차 출석') headerMap['weeklyAttendance'] = index;
-    });
-
-    const rows = Array.from(doc.querySelectorAll('.user_progress_table > tbody > tr'));
-
-    const spanTable: (number | undefined)[] = [];
-    const cellValues: (string | null)[] = [];
-    const vods: VodAttendanceData[] = [];
-    let idx = 0;
+    const pendingSpans: (number | undefined)[] = [];
+    const spanValues: (string | null)[] = [];
+    const results: VodAttendanceData[] = [];
+    let currentWeek = 0;
     let lastWeeklyAttendance = '';
+
     rows.forEach((row) => {
       try {
-        const cells = Array.from(row.querySelectorAll('td'));
-        let colIndex = 0;
-        const rowData: (string | null)[] = [];
+        const cells = flattenRow(row, pendingSpans, spanValues);
 
-        while (spanTable[colIndex] && spanTable[colIndex]! > 0) {
-          rowData.push(cellValues[colIndex] || null);
-          spanTable[colIndex]! -= 1;
-          colIndex++;
-        }
+        const title = cells[COL.TITLE] || '';
+        const isAttendance = cells[COL.ATTENDANCE] || '';
 
-        cells.forEach((cell) => {
-          while (spanTable[colIndex] && spanTable[colIndex]! > 0) {
-            rowData.push(cellValues[colIndex] || null);
-            spanTable[colIndex]! -= 1;
-            colIndex++;
-          }
-
-          const rowspan = parseInt(cell.getAttribute('rowspan') || '1', 10);
-          const colspan = parseInt(cell.getAttribute('colspan') || '1', 10);
-          const cellContent = cell.textContent?.trim() || '';
-
-          for (let i = 0; i < colspan; i++) {
-            rowData.push(cellContent);
-
-            if (rowspan > 1) {
-              spanTable[colIndex] = rowspan - 1;
-              cellValues[colIndex] = cellContent;
-            } else {
-              cellValues[colIndex] = null;
-            }
-            colIndex++;
-          }
-        });
-
-        while (colIndex < spanTable.length) {
-          if (spanTable[colIndex] && spanTable[colIndex]! > 0) {
-            rowData.push(cellValues[colIndex] || null);
-            spanTable[colIndex]! -= 1;
-          } else {
-            rowData.push(null);
-          }
-          colIndex++;
-        }
-
-        let weeklyAttendance =
-          headerMap['weeklyAttendance'] !== undefined ? rowData[headerMap['weeklyAttendance']] || '' : '';
+        let weeklyAttendance = cells[COL.WEEKLY_ATTENDANCE] || '';
         if (weeklyAttendance) {
           lastWeeklyAttendance = weeklyAttendance;
         } else {
           weeklyAttendance = lastWeeklyAttendance;
         }
+        if (BULK_APPROVED.some((keyword) => weeklyAttendance.includes(keyword))) weeklyAttendance = 'o';
 
-        if (weeklyAttendance.includes('일괄출석인정')) weeklyAttendance = 'o';
+        const parsedWeek = parseInt(cells[COL.WEEK] || '');
+        if (!isNaN(parsedWeek)) currentWeek = parsedWeek;
 
-        const title = headerMap['title'] !== undefined ? rowData[headerMap['title']] || '' : '';
-        const isAttendance = headerMap['isAttendance'] !== undefined ? rowData[headerMap['isAttendance']] || '' : '';
+        if (!title || !isAttendance) return;
 
-        let weekStr = rowData[0] || '';
-        if (weekStr !== '' && !isNaN(parseInt(weekStr))) {
-          idx = parseInt(weekStr);
-        } else {
-          weekStr = idx.toString();
-        }
-
-        if (!title || !isAttendance) {
-          return;
-        }
-        const week = parseInt(weekStr);
-
-        vods.push({
-          title,
-          isAttendance,
-          weeklyAttendance,
-          week,
-        });
+        results.push({ title, isAttendance, weeklyAttendance, week: currentWeek });
       } catch (error) {
-        console.error(`[Dotbugi] 영상 강의 조회 오류: ${link} ${row}`, error);
+        console.error(`[Dotbugi] 출석부 행 파싱 오류: ${link}`, error);
       }
     });
 
-    return vods;
+    return results;
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.error('[Dotbugi] 출석부 조회 오류:', error);
     throw error;
   }
 };

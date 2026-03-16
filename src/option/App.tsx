@@ -3,10 +3,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import { Toaster } from '@/components/ui/toaster';
 
-import VodPage from 'src/pages/VodPage';
-import AssignmentPage from 'src/pages/AssignmentPage';
-import DashboardPage from '@/pages/DashboardPage';
-import QuizPage from '@/pages/QuizPage';
+import VodPage from '@/option/pages/VodPage';
+import AssignmentPage from '@/option/pages/AssignmentPage';
+import DashboardPage from '@/option/pages/DashboardPage';
+import QuizPage from '@/option/pages/QuizPage';
 import Header from './Header';
 import Labo from './Labo';
 import ColorSetting from './ColorSetting';

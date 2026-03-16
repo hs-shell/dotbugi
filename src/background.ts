@@ -6,27 +6,8 @@ interface AlarmDetails {
 const alarmsMap: { [alarmId: string]: AlarmDetails } = {};
 
 function parseDateTime(dateTimeStr: string): Date | null {
-  const parts = dateTimeStr.split(' ');
-  if (parts.length !== 2) {
-    return null;
-  }
-
-  const [datePart, timePart] = parts;
-  const dateComponents = datePart.split('-');
-  const timeComponents = timePart.split(':');
-
-  if (dateComponents.length !== 3 || (timeComponents.length !== 2 && timeComponents.length !== 3)) {
-    return null;
-  }
-
-  const year = parseInt(dateComponents[0], 10);
-  const month = parseInt(dateComponents[1], 10) - 1;
-  const day = parseInt(dateComponents[2], 10);
-  const hour = parseInt(timeComponents[0], 10);
-  const minute = parseInt(timeComponents[1], 10);
-  const second = timeComponents.length === 3 ? parseInt(timeComponents[2], 10) : 0;
-
-  return new Date(year, month, day, hour, minute, second);
+  const date = new Date(dateTimeStr.replace(' ', 'T'));
+  return isNaN(date.getTime()) ? null : date;
 }
 
 function schedulePreEventAlarm(alarmId: string, dateTimeStr: string, title: string, message: string): void {

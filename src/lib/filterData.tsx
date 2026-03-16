@@ -1,34 +1,35 @@
-import { Vod, Assign, Quiz, Filters } from '@/content/types';
+import { Vod, Assign, Quiz, CourseBase, Filters } from '@/types';
+import { isAttended } from './utils';
+
+function matchesBase(item: CourseBase & { title: string }, courseTitles: string[], term: string): boolean {
+  if (courseTitles.length > 0 && !courseTitles.includes(item.courseTitle)) return false;
+  if (
+    term &&
+    !item.courseTitle.toLowerCase().includes(term) &&
+    !item.title.toLowerCase().includes(term) &&
+    !item.prof.toLowerCase().includes(term)
+  )
+    return false;
+  return true;
+}
 
 // 필터 적용 for VODs
 export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, sortBy: keyof Vod): Vod[] {
-  let data = vods;
-
   const { courseTitles, attendanceStatuses } = filters;
+  const term = searchTerm.toLowerCase();
 
-  if (courseTitles.length > 0) {
-    data = data.filter((vod) => courseTitles.includes(vod.courseTitle));
-  }
-
-  if (attendanceStatuses && attendanceStatuses.length > 0) {
-    data = data.filter((vod) => {
-      const status = vod.isAttendance.toLowerCase().trim() === 'o' ? '출석' : '결석';
-      return attendanceStatuses.includes(status);
-    });
-  }
-
-  if (searchTerm !== '') {
-    data = data.filter(
-      (item) =>
-        item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
+  const data = vods.filter((vod) => {
+    if (!matchesBase(vod, courseTitles, term)) return false;
+    if (attendanceStatuses && attendanceStatuses.length > 0) {
+      const status = isAttended(vod.isAttendance) ? '출석' : '결석';
+      if (!attendanceStatuses.includes(status)) return false;
+    }
+    return true;
+  });
 
   return data.sort((a, b) => {
-    const attendanceA = a.isAttendance.toLowerCase().trim() === 'o';
-    const attendanceB = b.isAttendance.toLowerCase().trim() === 'o';
+    const attendanceA = isAttended(a.isAttendance);
+    const attendanceB = isAttended(b.isAttendance);
 
     if (attendanceA !== attendanceB) {
       return attendanceA ? -1 : 1;
@@ -48,26 +49,14 @@ export function filterVods(vods: Vod[], filters: Filters, searchTerm: string, so
 
 // 필터 적용 for Assigns
 export function filterAssigns(assigns: Assign[], filters: Filters, searchTerm: string, sortBy: keyof Assign): Assign[] {
-  let data = assigns;
-
   const { courseTitles, submitStatuses } = filters;
+  const term = searchTerm.toLowerCase();
 
-  if (courseTitles.length > 0) {
-    data = data.filter((assign) => courseTitles.includes(assign.courseTitle));
-  }
-
-  if (submitStatuses && submitStatuses.length > 0) {
-    data = data.filter((assign) => submitStatuses.includes(assign.isSubmit));
-  }
-
-  if (searchTerm !== '') {
-    data = data.filter(
-      (item) =>
-        item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
+  const data = assigns.filter((assign) => {
+    if (!matchesBase(assign, courseTitles, term)) return false;
+    if (submitStatuses && submitStatuses.length > 0 && !submitStatuses.includes(assign.isSubmit)) return false;
+    return true;
+  });
 
   return data.sort((a, b) => {
     // 미제출 우선 배치
@@ -87,24 +76,12 @@ export function filterAssigns(assigns: Assign[], filters: Filters, searchTerm: s
   });
 }
 
-// 필터 적용 for Quizes
-export function filterQuizes(quizes: Quiz[], filters: Filters, searchTerm: string, sortBy: keyof Quiz): Quiz[] {
-  let data = quizes;
-
+// 필터 적용 for Quizzes
+export function filterQuizzes(quizzes: Quiz[], filters: Filters, searchTerm: string, sortBy: keyof Quiz): Quiz[] {
   const { courseTitles } = filters;
+  const term = searchTerm.toLowerCase();
 
-  if (courseTitles.length > 0) {
-    data = data.filter((quiz) => courseTitles.includes(quiz.courseTitle));
-  }
-
-  if (searchTerm !== '') {
-    data = data.filter(
-      (item) =>
-        item.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.prof.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
+  const data = quizzes.filter((quiz) => matchesBase(quiz, courseTitles, term));
 
   return data.sort((a, b) => {
     switch (sortBy) {

@@ -25,7 +25,7 @@ import {
   getCalendarEvents,
   convertCalendarEventsToGoogleEvents,
   GoogleCalendarEvent,
-} from '@/lib/calendarUtils';
+} from '@/option/lib/calendarUtils';
 import { toast } from '@/hooks/use-toast';
 import { loadDataFromStorage } from '@/lib/storage';
 import GoogleCalendar from '@/assets/calendar.png';

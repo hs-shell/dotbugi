@@ -1,6 +1,6 @@
 import { PopoverContent } from '@radix-ui/react-popover';
 import PlayerIframe from './PlayerIframe';
-import type { Vod } from '@/content/types';
+import type { Vod } from '@/types';
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { loadDataFromStorage } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableItem from './SortableItem';
-import { isCurrentDateInRange } from '@/lib/utils';
+import { isAttended, isCurrentDateInRange } from '@/lib/utils';
 
 interface PlayerPopoverContentProps {
   isPopoverOpen: boolean;
@@ -54,27 +54,22 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     setCurrentVideoIndex((prev) => (prev + 1) % vods.length);
   }, [vods, currentVideoIndex, setIsPlaying]);
 
-  useEffect(() => {
-    loadDataFromStorage('vod', (data) => {
+  const loadUnattendedVods = useCallback(() => {
+    loadDataFromStorage<Vod[]>('vod', (data) => {
       if (!data) return;
-      const filtered = (data as Vod[]).filter(
-        (vod) => isCurrentDateInRange(vod.range) && vod.isAttendance.toLowerCase() !== 'o'
-      );
-      setVods(filtered);
+      setVods(data.filter((vod) => isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)));
     });
   }, []);
 
   useEffect(() => {
+    loadUnattendedVods();
+  }, [loadUnattendedVods]);
+
+  useEffect(() => {
     if (isPopoverOpen && !isPlaying && vods.length === 0) {
-      loadDataFromStorage('vod', (data) => {
-        if (!data) return;
-        const filtered = (data as Vod[]).filter(
-          (vod) => isCurrentDateInRange(vod.range) && vod.isAttendance.toLowerCase() !== 'o'
-        );
-        setVods(filtered);
-      });
+      loadUnattendedVods();
     }
-  }, [isPlaying, vods, isPopoverOpen]);
+  }, [isPlaying, vods, isPopoverOpen, loadUnattendedVods]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

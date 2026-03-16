@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
-import type { CourseBase } from '@/content/types';
+import type { CourseBase } from '@/types';
 import { HexColorPicker } from 'react-colorful';
 
 // Update the CourseColorSetting type to include opacity

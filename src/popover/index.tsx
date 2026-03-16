@@ -1,11 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+import Dashboard from './dashboard/Dashboard';
 import styles from '@/styles/shadow.css?inline';
-import { createShadowRoot } from '@/lib/createShadowRoot';
-import { ShadowRootContext } from '@/lib/ShadowRootContext';
+import { createShadowRoot } from '@/popover/lib/createShadowRoot';
+import { ShadowRootContext } from '@/popover/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import PlayerApp from '@/player/App';
+import PlayerApp from '@/popover/player/App';
 
 const HANSUNG_URL = 'https://learn.hansung.ac.kr/';
 const footer = document.getElementById('page-footer');
@@ -44,7 +44,7 @@ if (footer && url === HANSUNG_URL) {
     <ShadowRootContext.Provider value={shadowRoot}>
       <React.StrictMode>
         <TooltipProvider>
-          <App />
+          <Dashboard />
         </TooltipProvider>
       </React.StrictMode>
     </ShadowRootContext.Provider>

@@ -1,196 +1,163 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Vod, Assign, Quiz, CourseBase } from '@/content/types';
+import { Vod, Assign, Quiz, CourseBase } from '@/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
-import { requestData } from '@/lib/fetchCourseData';
+import { scrapeCourseData } from '@/lib/fetchCourseData';
 import { isCurrentDateByDate, isCurrentDateInRange } from '@/lib/utils';
-import { makeAssignKey, makeQuizKey, makeVodKey } from '@/utils/generate-key';
+import { makeItemKey, makeVodKey } from '@/lib/generateKey';
+import { mergeVodWithAttendance, mergeDueDateItems } from '@/lib/transformCourseData';
+import { deduplicateInto } from '@/lib/deduplicateInto';
+import { loadMockData } from '@/mocks/loadMockData';
+import {
+  REFRESH_INTERVAL_MS,
+  CACHE_TTL_MINUTES,
+  CACHE_TTL_MS,
+  getLastRequestTime,
+  setLastRequestTime,
+  clearLastRequestTime,
+} from '@/lib/cache';
 
 export function useCourseData(courses: CourseBase[]) {
   const [vods, setVods] = useState<Vod[]>([]);
   const [assigns, setAssigns] = useState<Assign[]>([]);
-  const [quizes, setQuizes] = useState<Quiz[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState<boolean>(false);
+  const [isPending, setIsPending] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
   const [isError, setIsError] = useState(false);
 
-  // dev 모드: mock 데이터 로드
+  const applyMock = useCallback(async () => {
+    const mock = await loadMockData();
+    setVods(mock.vods);
+    setAssigns(mock.assigns);
+    setQuizzes(mock.quizzes);
+  }, []);
+
   useEffect(() => {
     if (!import.meta.env.VITE_MOCK) return;
     let cancelled = false;
-    import('@/mocks/mockData').then(({ mockVods, mockAssigns, mockQuizes }) => {
+    applyMock().then(() => {
       if (cancelled) return;
-      setVods(mockVods);
-      setAssigns(mockAssigns);
-      setQuizes(mockQuizes);
       setRefreshTime(new Date().toLocaleTimeString());
       setRemainingTime(5);
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [applyMock]);
 
-  // dev 모드에서는 실제 fetch를 하지 않음
-  const updateData = useCallback(async () => {
+  const refreshCourseData = useCallback(async () => {
     if (import.meta.env.VITE_MOCK) {
-      const { mockVods, mockAssigns, mockQuizes } = await import('@/mocks/mockData');
-      setVods(mockVods);
-      setAssigns(mockAssigns);
-      setQuizes(mockQuizes);
+      await applyMock();
       setRefreshTime(new Date().toLocaleTimeString());
       setRemainingTime(0);
       return;
     }
+
     try {
       setIsError(false);
       setIsPending(true);
-      const currentTime = new Date().getTime();
+      const fetchedAt = Date.now();
 
-      const tempVods: Vod[] = [];
-      const tempAssigns: Assign[] = [];
-      const tempQuizes: Quiz[] = [];
-
-      const vodSet = new Set(tempVods.map((v) => makeVodKey(v.courseId, v.title, v.week)));
-      const assignSet = new Set(tempAssigns.map((a) => makeAssignKey(a.courseId, a.title, a.dueDate ? a.dueDate : '')));
-      const quizSet = new Set(tempQuizes.map((q) => makeQuizKey(q.courseId, q.title, q.dueDate ? q.dueDate : '')));
+      const vods: Vod[] = [];
+      const assigns: Assign[] = [];
+      const quizzes: Quiz[] = [];
+      const seenVods = new Set<string>();
+      const seenAssigns = new Set<string>();
+      const seenQuizzes = new Set<string>();
 
       await Promise.all(
         courses.map(async (course) => {
-          const result = await requestData(course.courseId);
+          const scraped = await scrapeCourseData(course.courseId);
 
-          result.vodDataArray.forEach((vodData) => {
-            result.vodAttendanceArray.forEach((vodAttendanceData) => {
-              const vodKey = makeVodKey(course.courseId, vodData.title, vodData.week);
-              if (
-                vodAttendanceData.title === vodData.title &&
-                vodAttendanceData.week === vodData.week &&
-                isCurrentDateInRange(vodData.range)
-              ) {
-                if (!vodSet.has(vodKey)) {
-                  vodSet.add(vodKey);
-                  tempVods.push({
-                    courseId: course.courseId,
-                    prof: course.prof,
-                    courseTitle: course.courseTitle,
-                    week: vodAttendanceData.week,
-                    title: vodData.title,
-                    isAttendance: vodAttendanceData.isAttendance,
-                    weeklyAttendance: vodAttendanceData.weeklyAttendance,
-                    length: vodData.length,
-                    range: vodData.range,
-                    subject: vodData.subject,
-                    url: vodData.url,
-                  });
-                }
-              }
-            });
-          });
-
-          result.assignDataArray.forEach((assignData) => {
-            const assignKey = makeAssignKey(
-              course.courseId,
-              assignData.title,
-              assignData.dueDate ? assignData.dueDate : ''
-            );
-            if (!assignSet.has(assignKey) && isCurrentDateByDate(assignData.dueDate)) {
-              console.info(assignKey);
-              assignSet.add(assignKey);
-              tempAssigns.push({
-                courseId: course.courseId,
-                prof: course.prof,
-                courseTitle: course.courseTitle,
-                subject: assignData.subject,
-                title: assignData.title,
-                dueDate: assignData.dueDate,
-                isSubmit: assignData.isSubmit,
-                url: assignData.url,
-              });
-            }
-          });
-
-          result.quizDataArray.forEach((quizData) => {
-            const quizKey = makeQuizKey(course.courseId, quizData.title, quizData.dueDate ? quizData.dueDate : '');
-            if (!quizSet.has(quizKey) && isCurrentDateByDate(quizData.dueDate)) {
-              console.info(quizKey);
-              quizSet.add(quizKey);
-              tempQuizes.push({
-                courseId: course.courseId,
-                prof: course.prof,
-                courseTitle: course.courseTitle,
-                subject: quizData.subject,
-                title: quizData.title,
-                dueDate: quizData.dueDate,
-                url: quizData.url,
-              });
-            }
-          });
+          deduplicateInto(
+            vods,
+            mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray),
+            seenVods,
+            (v) => makeVodKey(v.courseId, v.title, v.week),
+          );
+          deduplicateInto(
+            assigns,
+            mergeDueDateItems(course, scraped.assignDataArray),
+            seenAssigns,
+            (a) => makeItemKey(a.courseId, a.title, a.dueDate ?? ''),
+          );
+          deduplicateInto(
+            quizzes,
+            mergeDueDateItems(course, scraped.quizDataArray),
+            seenQuizzes,
+            (q) => makeItemKey(q.courseId, q.title, q.dueDate ?? ''),
+          );
         })
       );
 
-      setVods(tempVods);
-      setAssigns(tempAssigns);
-      setQuizes(tempQuizes);
+      setVods(vods);
+      setAssigns(assigns);
+      setQuizzes(quizzes);
 
-      saveDataToStorage('vod', tempVods);
-      saveDataToStorage('assign', tempAssigns);
-      saveDataToStorage('quiz', tempQuizes);
+      saveDataToStorage('vod', vods);
+      saveDataToStorage('assign', assigns);
+      saveDataToStorage('quiz', quizzes);
 
-      setRefreshTime(new Date(currentTime).toLocaleTimeString());
+      setRefreshTime(new Date(fetchedAt).toLocaleTimeString());
       setRemainingTime(0);
-      localStorage.setItem('lastRequestTime', currentTime.toString());
-      saveDataToStorage('lastRequestTime', currentTime.toString());
-
-      setIsPending(false);
+      setLastRequestTime(fetchedAt);
+      saveDataToStorage('lastRequestTime', fetchedAt.toString());
     } catch (error) {
       console.warn(error);
-      localStorage.removeItem('lastRequestTime');
+      clearLastRequestTime();
       setIsError(true);
+    } finally {
       setIsPending(false);
     }
-  }, [courses]);
+  }, [courses, applyMock]);
 
+  // 캐시 TTL 기반 자동 갱신 타이머
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    if (remainingTime >= 1440) {
-      updateData();
-    } else {
-      timer = setTimeout(() => {
-        setRemainingTime((prev) => prev + 1);
-      }, 60 * 1000);
+    if (remainingTime >= CACHE_TTL_MINUTES) {
+      refreshCourseData();
+      return;
     }
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [remainingTime, updateData]);
+    const timer = setTimeout(() => setRemainingTime((prev) => prev + 1), REFRESH_INTERVAL_MS);
+    return () => clearTimeout(timer);
+  }, [remainingTime, refreshCourseData]);
 
+  // 초기 로드: 캐시 확인 후 fetch 또는 캐시 사용
   useEffect(() => {
     if (!courses || courses.length === 0) return;
 
-    const lastRequestTime = localStorage.getItem('lastRequestTime');
-    const currentTime = new Date().getTime();
-    const oneDay = 60 * 60 * 1000 * 24;
+    const lastRequest = getLastRequestTime();
+    const now = Date.now();
 
-    if (lastRequestTime) setRefreshTime(new Date(parseInt(lastRequestTime, 10)).toLocaleTimeString());
-    if (!lastRequestTime || currentTime - parseInt(lastRequestTime, 10) >= oneDay) {
+    if (lastRequest) {
+      setRefreshTime(new Date(lastRequest).toLocaleTimeString());
+    }
+
+    if (!lastRequest || now - lastRequest >= CACHE_TTL_MS) {
       setIsPending(true);
-      updateData();
+      refreshCourseData();
     } else {
-      const minutes = (currentTime - parseInt(lastRequestTime, 10)) / (60 * 1000);
-      setRemainingTime(minutes);
-      loadDataFromStorage('vod', (data) => {
-        if (!data) return;
-        setVods((data as Vod[]).filter((vod) => isCurrentDateInRange(vod.range)));
+      setRemainingTime((now - lastRequest) / REFRESH_INTERVAL_MS);
+      loadDataFromStorage<Vod[]>('vod', (data) => {
+        if (data) setVods(data.filter((vod) => isCurrentDateInRange(vod.range)));
       });
-      loadDataFromStorage('assign', (data) => {
-        if (!data) return;
-        setAssigns((data as Assign[]).filter((assign) => isCurrentDateByDate(assign.dueDate)));
+      loadDataFromStorage<Assign[]>('assign', (data) => {
+        if (data) setAssigns(data.filter((assign) => isCurrentDateByDate(assign.dueDate)));
       });
-      loadDataFromStorage('quiz', (data) => {
-        if (!data) return;
-        setQuizes((data as Quiz[]).filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
+      loadDataFromStorage<Quiz[]>('quiz', (data) => {
+        if (data) setQuizzes(data.filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
       });
     }
-  }, [courses, updateData]);
-  return { vods, assigns, quizes, isPending, remainingTime, refreshTime, isError, updateData, setIsPending };
+  }, [courses, refreshCourseData]);
+
+  return {
+    vods,
+    assigns,
+    quizzes,
+    isPending,
+    remainingTime,
+    refreshTime,
+    isError,
+    refreshCourseData,
+    setIsPending,
+  };
 }

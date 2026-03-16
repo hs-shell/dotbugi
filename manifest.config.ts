@@ -18,7 +18,7 @@ const manifest = {
   content_scripts: [
     {
       matches: ['https://learn.hansung.ac.kr/**'],
-      js: ['src/content/index.tsx'],
+      js: ['src/popover/index.tsx'],
     },
   ],
   web_accessible_resources: [
