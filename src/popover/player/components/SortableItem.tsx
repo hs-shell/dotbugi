@@ -1,4 +1,4 @@
-import { Vod } from '@/content/types';
+import { Vod } from '@/types';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Dispatch, SetStateAction } from 'react';

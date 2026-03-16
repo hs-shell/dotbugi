@@ -1,12 +1,12 @@
 import { NotebookText, VideoIcon, Zap } from 'lucide-react';
-import { TAB_TYPE } from '../types';
+import { TAB_TYPE } from '@/types';
 
 interface Prop {
   activeTab: string;
   setActiveTab: (tabType: TAB_TYPE) => void;
 }
 
-export default function PopoverFooter({ activeTab, setActiveTab }: Prop) {
+export default function TabNavigation({ activeTab, setActiveTab }: Prop) {
   return (
     <div className="grid w-full grid-cols-3 py-4 z-10">
       <div

@@ -1,11 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
-import { Assign } from '@/content/types';
+import { Assign } from '@/types';
 import { loadDataFromStorage } from '@/lib/storage';
 import AssignCard from './AssignCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import thung from '@/assets/thung.png';
-import { isCurrentDateByDate } from '@/lib/utils';
 
 export function AssignContent() {
   const [assignArray, setAssignArray] = useState<Assign[]>([]);
@@ -27,48 +26,16 @@ export function AssignContent() {
       }
 
       const sortedAssignArray = parsedData.sort((a, b) => {
-        const isAX = a.isSubmit;
-        const isBX = b.isSubmit;
+        // 미제출 우선 배치
+        if (!a.isSubmit && b.isSubmit) return -1;
+        if (a.isSubmit && !b.isSubmit) return 1;
 
-        // isSubmit이 false인 항목을 우선 배치
-        if (!isAX && isBX) return -1;
-        if (isAX && !isBX) return 1;
+        // 마감 빠른 순 (null은 맨 뒤)
+        const dateA = a.dueDate === null ? Number.MAX_SAFE_INTEGER : new Date(a.dueDate).getTime();
+        const dateB = b.dueDate === null ? Number.MAX_SAFE_INTEGER : new Date(b.dueDate).getTime();
+        if (dateA !== dateB) return dateA - dateB;
 
-        const isCurrentDateByDateA = isCurrentDateByDate(a.dueDate); // isCurrentDateByDate 적용
-        const isCurrentDateByDateB = isCurrentDateByDate(b.dueDate);
-
-        // isSubmit이 false일 때는 isCurrentDateByDate가 true인 항목을 먼저 배치, 그 다음 dueDate가 null인 항목
-        if (!isAX) {
-          if (isCurrentDateByDateA && !isCurrentDateByDateB) return -1;
-          if (!isCurrentDateByDateA && isCurrentDateByDateB) return 1;
-          const isANull = a.dueDate === null;
-          const isBNull = b.dueDate === null;
-          if (isANull && !isBNull) return 1;
-          if (!isANull && isBNull) return -1;
-        }
-
-        // isSubmit이 true일 때는 isCurrentDateByDate가 true인 항목을 먼저 배치, 그 다음 dueDate가 null인 항목
-        if (isAX) {
-          if (isCurrentDateByDateA && !isCurrentDateByDateB) return -1;
-          if (!isCurrentDateByDateA && isCurrentDateByDateB) return 1;
-          const isANull = a.dueDate === null;
-          const isBNull = b.dueDate === null;
-          if (isANull && !isBNull) return -1;
-          if (!isANull && isBNull) return 1;
-        }
-
-        // dueDate 기준으로 날짜 순으로 정렬
-        const dateA = a.dueDate === null ? Number.MAX_SAFE_INTEGER : new Date(a.dueDate!).getTime();
-        const dateB = b.dueDate === null ? Number.MAX_SAFE_INTEGER : new Date(b.dueDate!).getTime();
-
-        if (dateA < dateB) return -1;
-        if (dateA > dateB) return 1;
-
-        // courseTitle로 기본 정렬
-        if (a.courseTitle < b.courseTitle) return -1;
-        if (a.courseTitle > b.courseTitle) return 1;
-
-        return 0;
+        return a.courseTitle.localeCompare(b.courseTitle);
       });
 
       setAssignArray(sortedAssignArray);

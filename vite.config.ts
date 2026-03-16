@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
       react(),
       tsconfigPaths(),
       Pages(),
-      // dev 환경에서는 crx 플러그인을 제외
+      // dev 서버에서는 crx 플러그인을 제외 (mock 빌드에서는 포함)
       !isDev &&
         crx({
           manifest,

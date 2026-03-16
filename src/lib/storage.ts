@@ -21,3 +21,30 @@ export function loadDataFromStorage<T>(key: string, callback: (data: T | null) =
     }
   });
 }
+
+/**
+ * storage에서 데이터를 로드하고 JSON 파싱 후 변환 함수를 적용하는 유틸
+ */
+export function loadAndTransform<T, R>(
+  storageKey: string,
+  transform: (data: T[]) => R,
+  callback: (result: R) => void
+): void {
+  loadDataFromStorage(storageKey, (data: string | null) => {
+    if (!data) return;
+
+    let parsedData: T[];
+    if (typeof data === 'string') {
+      try {
+        parsedData = JSON.parse(data);
+      } catch (error) {
+        console.error(`JSON 파싱 에러 (${storageKey}):`, error);
+        return;
+      }
+    } else {
+      parsedData = data;
+    }
+
+    callback(transform(parsedData));
+  });
+}

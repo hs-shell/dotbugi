@@ -3,7 +3,7 @@ import { ManifestV3Export } from '@crxjs/vite-plugin';
 const manifest = {
   manifest_version: 3,
   name: 'HSU 돋부기 🔎',
-  version: '4.0.3',
+  version: '4.0.5',
   description: '한성대학교 LMS 강의, 과제, 퀴즈를 한 눈에!',
   action: {},
   icons: {
@@ -18,7 +18,7 @@ const manifest = {
   content_scripts: [
     {
       matches: ['https://learn.hansung.ac.kr/**'],
-      js: ['src/content/index.tsx'],
+      js: ['src/popover/index.tsx'],
     },
   ],
   web_accessible_resources: [

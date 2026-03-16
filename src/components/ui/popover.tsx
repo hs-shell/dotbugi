@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cn } from '@/lib/utils';
-import { useShadowRoot } from '@/lib/ShadowRootContext';
+import { useShadowRoot } from '@/popover/lib/ShadowRootContext';
 
 const Popover = PopoverPrimitive.Root;
 

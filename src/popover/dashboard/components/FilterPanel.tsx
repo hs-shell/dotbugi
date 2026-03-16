@@ -1,6 +1,6 @@
 import React from 'react';
 import FilterItem from './FilterItem';
-import { TAB_TYPE, Filters } from '../types';
+import { TAB_TYPE, Filters } from '@/types';
 
 interface FilterPanelProps {
   filters: Record<TAB_TYPE, Filters>;

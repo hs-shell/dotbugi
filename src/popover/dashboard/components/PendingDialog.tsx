@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import styles from '@/styles/shadow.css?inline';
-import { createShadowRoot } from '@/lib/createShadowRoot';
+import { createShadowRoot } from '@/popover/lib/createShadowRoot';
 
 interface PendingDialogProps {
   isPending: boolean;
