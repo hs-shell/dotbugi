@@ -25,6 +25,8 @@ export function useCourseData(courses: CourseBase[]) {
   const [remainingTime, setRemainingTime] = useState(0);
   const [isError, setIsError] = useState(false);
 
+  const useMockData = import.meta.env.VITE_MOCK && !import.meta.env.VITE_MOCK_COURSES;
+
   const applyMock = useCallback(async () => {
     const mock = await loadMockData();
     setVods(mock.vods);
@@ -33,7 +35,7 @@ export function useCourseData(courses: CourseBase[]) {
   }, []);
 
   useEffect(() => {
-    if (!import.meta.env.VITE_MOCK) return;
+    if (!useMockData) return;
     let cancelled = false;
     applyMock().then(() => {
       if (cancelled) return;
@@ -43,10 +45,10 @@ export function useCourseData(courses: CourseBase[]) {
     return () => {
       cancelled = true;
     };
-  }, [applyMock]);
+  }, [applyMock, useMockData]);
 
   const refreshCourseData = useCallback(async () => {
-    if (import.meta.env.VITE_MOCK) {
+    if (useMockData) {
       await applyMock();
       setRefreshTime(new Date().toLocaleTimeString());
       setRemainingTime(0);
@@ -137,14 +139,15 @@ export function useCourseData(courses: CourseBase[]) {
       refreshCourseData();
     } else {
       setRemainingTime((now - lastRequest) / REFRESH_INTERVAL_MS);
+      const skipFilter = !!import.meta.env.VITE_MOCK_SKIP_DATE_FILTER;
       loadDataFromStorage<Vod[]>('vod', (data) => {
-        if (data) setVods(data.filter((vod) => isCurrentDateInRange(vod.range)));
+        if (data) setVods(skipFilter ? data : data.filter((vod) => isCurrentDateInRange(vod.range)));
       });
       loadDataFromStorage<Assign[]>('assign', (data) => {
-        if (data) setAssigns(data.filter((assign) => isCurrentDateByDate(assign.dueDate)));
+        if (data) setAssigns(skipFilter ? data : data.filter((assign) => isCurrentDateByDate(assign.dueDate)));
       });
       loadDataFromStorage<Quiz[]>('quiz', (data) => {
-        if (data) setQuizzes(data.filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
+        if (data) setQuizzes(skipFilter ? data : data.filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
       });
     }
   }, [courses, refreshCourseData]);
