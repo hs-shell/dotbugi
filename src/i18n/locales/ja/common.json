@@ -64,5 +64,21 @@
   "filterSet": "フィルター適用中",
   "language": "言語",
   "contact": "お問い合わせ",
-  "refresh": "更新"
+  "calendar": {
+    "bannerTitle": "Google Calendar 連携",
+    "bannerDesc": "Dotbugiで講義・課題・クイズの日程をGoogle Calendarで管理しましょう",
+    "login": "ログイン",
+    "sync": "タスク同期",
+    "syncShort": "同期",
+    "logout": "ログアウト"
+  },
+  "refresh": "更新",
+  "bubble": {
+    "tasks": "未完了 {{count}}件",
+    "updatedAgo": "{{time}} 更新"
+  },
+  "github": {
+    "likeProject": "このプロジェクトが気に入りましたか？",
+    "starOnGithub": "GitHubでスターをお願いします！"
+  }
 }

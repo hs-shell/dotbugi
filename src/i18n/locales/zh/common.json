@@ -65,5 +65,21 @@
   "filterSet": "已设置筛选",
   "language": "语言",
   "contact": "联系我们",
-  "refresh": "刷新"
+  "calendar": {
+    "bannerTitle": "Google Calendar 同步",
+    "bannerDesc": "通过Dotbugi在Google Calendar上管理课程、作业和测验日程",
+    "login": "登录",
+    "sync": "同步任务",
+    "syncShort": "同步",
+    "logout": "退出登录"
+  },
+  "refresh": "刷新",
+  "bubble": {
+    "tasks": "{{count}}项未完成",
+    "updatedAgo": "{{time}}更新"
+  },
+  "github": {
+    "likeProject": "喜欢这个项目吗？",
+    "starOnGithub": "在GitHub上给我们加星！"
+  }
 }

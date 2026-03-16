@@ -63,5 +63,22 @@
   "attendancePeriod": "출석인정기간",
   "filterSet": "필터 설정됨",
   "language": "언어",
-  "contact": "다른 방법으로 문의"
+  "contact": "문의하기",
+  "calendar": {
+    "bannerTitle": "Google Calendar 연동",
+    "bannerDesc": "돋부기를 통해 강의, 과제, 퀴즈 일정을 Google Calendar로 관리하세요",
+    "login": "로그인",
+    "sync": "태스크 동기화",
+    "syncShort": "동기화",
+    "logout": "로그아웃"
+  },
+  "refresh": "새로고침",
+  "bubble": {
+    "tasks": "미완료 {{count}}건",
+    "updatedAgo": "{{time}} 최신화"
+  },
+  "github": {
+    "likeProject": "이 프로젝트가 마음에 드시나요?",
+    "starOnGithub": "GitHub에서 스타를 눌러주세요!"
+  }
 }
