@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { loadAndTransform } from '@/lib/storage';
 import { Vod, Assign, Quiz } from '@/types';
-import { CalendarEvent, vodGroupsToEvents, dueDateItemToEvent } from '@/option/lib/transformCalendarEvents';
+import { CalendarEvent, vodGroupsToEvents, dueDateItemToEvent } from '@/lib/transformCalendarEvents';
 
 export type { CalendarEvent };
 

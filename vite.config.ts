@@ -3,9 +3,8 @@ import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import { defineConfig } from 'vite';
-import Pages from 'vite-plugin-pages';
 
-import manifest from './manifest.config';
+import { createManifest } from './manifest.config';
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
@@ -15,11 +14,10 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tsconfigPaths(),
-      Pages(),
       // dev 서버에서는 crx 플러그인을 제외 (mock 빌드에서는 포함)
       !isDev &&
         crx({
-          manifest,
+          manifest: createManifest(mode),
           contentScripts: {
             injectCss: true,
           },
@@ -31,12 +29,6 @@ export default defineConfig(({ mode }) => {
         src: path.resolve(__dirname, './src'),
       },
     },
-    build: {
-      rollupOptions: {
-        input: {
-          options: 'option.html',
-        },
-      },
-    },
+    build: {},
   };
 });

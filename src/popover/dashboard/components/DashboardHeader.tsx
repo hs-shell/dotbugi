@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -112,16 +113,19 @@ export default function DashboardHeader({
                 className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 60) ? 'bg-red-500' : 'bg-green-500'}`}
               />
             </DropdownMenuItem>
-            {isCalendarConnected && (
-              <DropdownMenuItem onClick={onCalendarSync} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
-                <img src={GoogleCalendar} className="w-5 h-5" alt="" />
-                {t('common:calendar.syncShort')}
-              </DropdownMenuItem>
-            )}
             <DropdownMenuItem onClick={onOpenSetting} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
               <Settings />
               {t('common:setting')}
             </DropdownMenuItem>
+            {isCalendarConnected && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onCalendarSync} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
+                  <img src={GoogleCalendar} className="w-5 h-5" alt="" />
+                  {t('common:calendar.syncShort')}
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

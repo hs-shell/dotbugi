@@ -1,5 +1,5 @@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import icon from '@/assets/icon.png';
 import exit from '@/assets/exit.png';
 import { TAB_TYPE } from '@/types';
@@ -19,6 +19,15 @@ import InfoBubble from './components/InfoBubble';
 import { useTranslation } from 'react-i18next';
 import { isAttended } from '@/lib/utils';
 import Setting from './components/Setting';
+import {
+  getOAuthToken,
+  removeCachedAuthToken,
+  getCalendarEvents,
+  addCalendarEvent,
+  convertCalendarEventsToGoogleEvents,
+  GoogleCalendarEvent,
+} from '@/lib/calendarUtils';
+import { vodGroupsToEvents, dueDateItemToEvent } from '@/lib/transformCalendarEvents';
 
 const BUBBLE_DISMISS_KEY = 'dotbugi_bubble_dismissed';
 const BUBBLE_DISMISS_DURATION = import.meta.env.VITE_MOCK ? 1000 * 30 : 1000 * 60 * 60; // mock: 30초, prod: 1시간
@@ -43,10 +52,55 @@ export default function Dashboard() {
   const [calendarToken, setCalendarToken] = useState<string | null>(null);
 
   const isCalendarConnected = calendarToken !== null;
-  const handleCalendarLogin = () => setCalendarToken('mock');
-  const handleCalendarLogout = () => setCalendarToken(null);
-  const handleCalendarSync = () => {
-    // TODO: calendar sync logic
+
+  useEffect(() => {
+    getOAuthToken(false).then((token) => {
+        if (token) setCalendarToken(token);
+    });
+  }, []);
+
+  const handleCalendarLogin = async () => {
+    const token = await getOAuthToken(true);
+    if (token) {
+      setCalendarToken(token);
+    }
+  };
+
+  const handleCalendarLogout = async () => {
+    if (calendarToken) {
+      try {
+        await removeCachedAuthToken(calendarToken);
+      } catch (e) {
+        console.warn('[Dotbugi] removeCachedAuthToken failed:', e);
+      }
+    }
+    setCalendarToken(null);
+  };
+
+  const handleCalendarSync = async () => {
+    const token = calendarToken ?? (await getOAuthToken(true));
+    if (!token) return;
+
+    const calendarEvents = [
+      ...vodGroupsToEvents(vods),
+      ...assigns.map((a) => dueDateItemToEvent(a, 'assign')),
+      ...quizzes.map((q) => dueDateItemToEvent(q, 'quiz')),
+    ];
+
+    const existingEvents: GoogleCalendarEvent[] = await getCalendarEvents(token);
+    const newEventsData = convertCalendarEventsToGoogleEvents(calendarEvents);
+
+    const eventKey = (event: { summary?: string; start: { dateTime?: string; date?: string }; end: { dateTime?: string; date?: string } }) =>
+      `${(event.summary || '').trim().toLowerCase()}|${new Date(event.start.dateTime || event.start.date || '').getTime()}|${new Date(event.end.dateTime || event.end.date || '').getTime()}`;
+
+    const existingKeys = new Set(existingEvents.map(eventKey));
+    const uniqueNewEvents = newEventsData.filter((e) => !existingKeys.has(eventKey(e)));
+
+    for (const event of uniqueNewEvents) {
+      await addCalendarEvent(event, token);
+    }
+
+    console.log(`[Dotbugi] Calendar sync: ${uniqueNewEvents.length} events added`);
   };
 
   const {
