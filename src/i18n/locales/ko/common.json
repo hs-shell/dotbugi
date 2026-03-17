@@ -2,6 +2,7 @@
   "vod": "강의",
   "assign": "과제",
   "quiz": "퀴즈",
+  "setting": "설정",
   "dashboard": "대시보드",
   "close": "닫기",
   "clearAll": "모두 지우기",
@@ -61,5 +62,30 @@
   "progress": "진도율",
   "attendancePeriod": "출석인정기간",
   "filterSet": "필터 설정됨",
-  "language": "언어"
+  "language": "언어",
+  "contact": "문의하기",
+  "calendar": {
+    "bannerTitle": "Google Calendar 연동",
+    "bannerDesc": "돋부기를 통해 강의, 과제, 퀴즈 일정을 Google Calendar로 관리하세요",
+    "login": "로그인",
+    "sync": "태스크 동기화",
+    "syncShort": "동기화",
+    "logout": "로그아웃",
+    "syncing": "동기화 중...",
+    "syncSuccess": "{{count}}개 일정이 추가되었어요",
+    "syncNoNew": "이미 최신 상태예요",
+    "syncFailed": "{{failed}}개 일정 추가에 실패했어요",
+    "syncPartial": "{{added}}개 추가, {{failed}}개 실패",
+    "tokenExpired": "Google 로그인이 만료되었어요",
+    "tokenExpiredAction": "다시 로그인"
+  },
+  "refresh": "새로고침",
+  "bubble": {
+    "tasks": "아직 {{count}}개 남았어요!",
+    "updatedAgo": "{{time}} 기준"
+  },
+  "github": {
+    "likeProject": "이 프로젝트가 마음에 드시나요?",
+    "starOnGithub": "GitHub에서 스타를 눌러주세요!"
+  }
 }

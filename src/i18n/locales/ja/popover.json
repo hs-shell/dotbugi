@@ -2,7 +2,8 @@
   "header": {
     "vodList": "オンライン講義一覧",
     "assignList": "課題一覧",
-    "quizList": "クイズ一覧"
+    "quizList": "クイズ一覧",
+    "setting": "設定"
   },
   "pending": {
     "title": "リクエスト処理中",

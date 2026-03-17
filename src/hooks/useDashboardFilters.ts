@@ -13,6 +13,7 @@ const INITIAL_FILTERS: Record<TAB_TYPE, Filters> = {
   VIDEO: { courseTitles: [], attendanceStatuses: [] },
   ASSIGN: { courseTitles: [], submitStatuses: [] },
   QUIZ: { courseTitles: [] },
+  SETTING: { courseTitles: [] },
 };
 
 function uniqueTitles(items: { courseTitle: string }[]): string[] {
@@ -34,6 +35,7 @@ export function useDashboardFilters({ vods, assigns, quizzes, activeTab }: UseDa
       VIDEO: uniqueTitles(vods),
       ASSIGN: uniqueTitles(assigns),
       QUIZ: uniqueTitles(quizzes),
+      SETTING: [],
     }),
     [vods, assigns, quizzes]
   );

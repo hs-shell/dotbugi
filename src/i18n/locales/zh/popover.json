@@ -2,7 +2,8 @@
   "header": {
     "vodList": "在线课程列表",
     "assignList": "作业列表",
-    "quizList": "测验列表"
+    "quizList": "测验列表",
+    "setting": "设置"
   },
   "pending": {
     "title": "请求处理中",

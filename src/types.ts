@@ -55,4 +55,5 @@ export enum TAB_TYPE {
   VIDEO = 'VIDEO',
   ASSIGN = 'ASSIGN',
   QUIZ = 'QUIZ',
+  SETTING = 'SETTING',
 }

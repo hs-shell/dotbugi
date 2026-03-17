@@ -2,6 +2,7 @@
   "vod": "講義",
   "assign": "課題",
   "quiz": "クイズ",
+  "setting": "設定",
   "dashboard": "ダッシュボード",
   "close": "閉じる",
   "clearAll": "すべてクリア",
@@ -61,5 +62,30 @@
   "progress": "進捗率",
   "attendancePeriod": "出席認定期間",
   "filterSet": "フィルター適用中",
-  "language": "言語"
+  "language": "言語",
+  "contact": "お問い合わせ",
+  "calendar": {
+    "bannerTitle": "Google Calendar 連携",
+    "bannerDesc": "Dotbugiで講義・課題・クイズの日程をGoogle Calendarで管理しましょう",
+    "login": "ログイン",
+    "sync": "タスク同期",
+    "syncShort": "同期",
+    "logout": "ログアウト",
+    "syncing": "同期中...",
+    "syncSuccess": "{{count}}件の予定を追加しました",
+    "syncNoNew": "すでに最新です",
+    "syncFailed": "{{failed}}件の追加に失敗しました",
+    "syncPartial": "{{added}}件追加、{{failed}}件失敗",
+    "tokenExpired": "Googleログインの期限が切れました",
+    "tokenExpiredAction": "再ログイン"
+  },
+  "refresh": "更新",
+  "bubble": {
+    "tasks": "あと{{count}}件あるよ！",
+    "updatedAgo": "{{time}} 時点"
+  },
+  "github": {
+    "likeProject": "このプロジェクトが気に入りましたか？",
+    "starOnGithub": "GitHubでスターをお願いします！"
+  }
 }

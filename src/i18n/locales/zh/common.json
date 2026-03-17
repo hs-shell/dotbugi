@@ -2,6 +2,8 @@
   "vod": "课程",
   "assign": "作业",
   "quiz": "测验",
+
+  "setting": "设置",
   "dashboard": "仪表盘",
   "close": "关闭",
   "clearAll": "全部清除",
@@ -61,5 +63,30 @@
   "progress": "进度",
   "attendancePeriod": "出勤认定期间",
   "filterSet": "已设置筛选",
-  "language": "语言"
+  "language": "语言",
+  "contact": "联系我们",
+  "calendar": {
+    "bannerTitle": "Google Calendar 同步",
+    "bannerDesc": "通过Dotbugi在Google Calendar上管理课程、作业和测验日程",
+    "login": "登录",
+    "sync": "同步任务",
+    "syncShort": "同步",
+    "logout": "退出登录",
+    "syncing": "同步中...",
+    "syncSuccess": "已添加{{count}}个日程",
+    "syncNoNew": "已是最新状态",
+    "syncFailed": "{{failed}}个日程添加失败",
+    "syncPartial": "已添加{{added}}个，{{failed}}个失败",
+    "tokenExpired": "Google登录已过期",
+    "tokenExpiredAction": "重新登录"
+  },
+  "refresh": "刷新",
+  "bubble": {
+    "tasks": "还剩{{count}}个哦！",
+    "updatedAgo": "{{time}}基准"
+  },
+  "github": {
+    "likeProject": "喜欢这个项目吗？",
+    "starOnGithub": "在GitHub上给我们加星！"
+  }
 }

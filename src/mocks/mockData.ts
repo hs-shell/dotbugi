@@ -120,6 +120,28 @@ export const mockVods: Vod[] = [
 ];
 
 export const mockAssigns: Assign[] = [
+  // 오늘 마감 (캘린더 동기화 + 중복 테스트용)
+  {
+    courseId: '1001',
+    courseTitle: '자료구조',
+    prof: '김교수',
+    subject: '7주차',
+    title: '오늘 마감 과제 A',
+    url: '#',
+    isSubmit: false,
+    dueDate: offsetDate(0),
+  },
+  // 중복 테스트: 동일 제목/날짜
+  {
+    courseId: '1001',
+    courseTitle: '자료구조',
+    prof: '김교수',
+    subject: '7주차',
+    title: '오늘 마감 과제 A',
+    url: '#',
+    isSubmit: false,
+    dueDate: offsetDate(0),
+  },
   // 미제출 + 마감 임박 (내일)
   {
     courseId: '1001',
@@ -211,6 +233,16 @@ export const mockAssigns: Assign[] = [
 ];
 
 export const mockQuizes: Quiz[] = [
+  // 오늘 마감 (캘린더 동기화 테스트용)
+  {
+    courseId: '1002',
+    courseTitle: '운영체제',
+    prof: '이교수',
+    subject: '6주차',
+    title: '오늘 마감 퀴즈',
+    url: '#',
+    dueDate: offsetDate(0),
+  },
   // 마감 임박 (내일)
   {
     courseId: '1001',

@@ -1,5 +1,5 @@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import icon from '@/assets/icon.png';
 import exit from '@/assets/exit.png';
 import { TAB_TYPE } from '@/types';
@@ -9,23 +9,203 @@ import { useGetCourses } from '@/hooks/useGetCourses';
 import VodList from './components/VodList';
 import AssignList from './components/AssignList';
 import QuizList from './components/QuizList';
-import PendingDialog from './components/PendingDialog';
 import { useCourseData } from '@/hooks/useCourseData';
 import { useDashboardFilters } from '@/hooks/useDashboardFilters';
 import TabNavigation from './components/TabNavigation';
 import StickyPopoverTrigger from './components/StickyPopoverTrigger';
 import DashboardHeader from './components/DashboardHeader';
+import InfoBubble from './components/InfoBubble';
+import NotificationBubble, { type Notification } from './components/NotificationBubble';
 import { useTranslation } from 'react-i18next';
+import { isAttended } from '@/lib/utils';
+import { makeVodGroupKey } from '@/lib/generateKey';
+import Setting from './components/Setting';
+import {
+  getOAuthToken,
+  removeCachedAuthToken,
+  getCalendarEvents,
+  addCalendarEventsBatch,
+  convertCalendarEventsToGoogleEvents,
+} from '@/lib/calendarUtils';
+import { vodGroupsToEvents, dueDateItemToEvent } from '@/lib/transformCalendarEvents';
+
+const BUBBLE_DISMISS_KEY = 'dotbugi_bubble_dismissed';
+const BUBBLE_DISMISS_DURATION = import.meta.env.VITE_MOCK ? 1000 * 30 : 1000 * 60 * 60; // mock: 30초, prod: 1시간
+
+function isBubbleDismissed(): boolean {
+  const raw = localStorage.getItem(BUBBLE_DISMISS_KEY);
+  if (!raw) return false;
+  return Date.now() - parseInt(raw, 10) < BUBBLE_DISMISS_DURATION;
+}
+
+let notifIdCounter = 0;
 
 export default function Dashboard() {
   const { t } = useTranslation('common');
   const { courses } = useGetCourses();
 
-  const { vods, assigns, quizzes, isPending, remainingTime, isError, refreshCourseData, setIsPending } =
+  const { vods, assigns, quizzes, isPending, remainingTime, isError, refreshCourseData } =
     useCourseData(courses);
 
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
   const [isOpen, setIsOpen] = useState(false);
+  const [bubbleDismissed, setBubbleDismissed] = useState(isBubbleDismissed);
+  const [bubbleHiddenByOpen, setBubbleHiddenByOpen] = useState(false);
+  const [calendarToken, setCalendarToken] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifHiddenByOpen, setNotifHiddenByOpen] = useState(false);
+  const bubbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const notifTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tokenExpiredNotifRef = useRef<string | null>(null);
+
+  const isCalendarConnected = calendarToken !== null;
+
+  const pushNotification = useCallback((n: Omit<Notification, 'id'>) => {
+    const id = `notif-${++notifIdCounter}`;
+    setNotifications((prev) => [...prev, { ...n, id }]);
+    return id;
+  }, []);
+
+  const dismissNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
+  const updateNotification = useCallback((id: string, updates: Partial<Omit<Notification, 'id'>>) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)));
+  }, []);
+
+  const showTokenExpiredNotif = useCallback(() => {
+    if (tokenExpiredNotifRef.current) return;
+    const id = pushNotification({
+      type: 'warning',
+      messageKey: 'calendar.tokenExpired',
+      action: {
+        labelKey: 'calendar.tokenExpiredAction',
+        onClick: async () => {
+          const token = await getOAuthToken(true);
+          if (token) setCalendarToken(token);
+        },
+      },
+    });
+    tokenExpiredNotifRef.current = id;
+  }, [pushNotification]);
+
+  const clearTokenExpiredNotif = useCallback(() => {
+    if (tokenExpiredNotifRef.current) {
+      dismissNotification(tokenExpiredNotifRef.current);
+      tokenExpiredNotifRef.current = null;
+    }
+  }, [dismissNotification]);
+
+  const handleTokenExpired = useCallback(async () => {
+    if (calendarToken) {
+      await removeCachedAuthToken(calendarToken);
+    }
+    setCalendarToken(null);
+    showTokenExpiredNotif();
+  }, [calendarToken, showTokenExpiredNotif]);
+
+  // 로그인 성공 시 만료 알림 제거
+  useEffect(() => {
+    if (calendarToken) {
+      clearTokenExpiredNotif();
+    }
+  }, [calendarToken, clearTokenExpiredNotif]);
+
+  useEffect(() => {
+    if (import.meta.env.VITE_MOCK) {
+      removeCachedAuthToken('').catch(() => {});
+      setCalendarToken(null);
+      showTokenExpiredNotif();
+    } else {
+      getOAuthToken(false).then((token) => {
+        if (token) setCalendarToken(token);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleCalendarLogin = async () => {
+    const token = await getOAuthToken(true);
+    if (token) {
+      setCalendarToken(token);
+    }
+  };
+
+  const handleCalendarLogout = async () => {
+    if (calendarToken) {
+      try {
+        await removeCachedAuthToken(calendarToken);
+      } catch (e) {
+        console.warn('[Dotbugi] removeCachedAuthToken failed:', e);
+      }
+    }
+    setCalendarToken(null);
+  };
+
+  const handleCalendarSync = async () => {
+    const token = calendarToken ?? (await getOAuthToken(true));
+    if (!token) return;
+
+    const syncId = pushNotification({ type: 'loading', messageKey: 'calendar.syncing' });
+
+    const calendarEvents = [
+      ...vodGroupsToEvents(vods),
+      ...assigns.map((a) => dueDateItemToEvent(a, 'assign')),
+      ...quizzes.map((q) => dueDateItemToEvent(q, 'quiz')),
+    ];
+
+    const { events: existingEvents, tokenExpired: fetchExpired } = await getCalendarEvents(token);
+    if (fetchExpired) {
+      dismissNotification(syncId);
+      await handleTokenExpired();
+      return;
+    }
+
+    const newEventsData = convertCalendarEventsToGoogleEvents(calendarEvents);
+
+    const eventKey = (event: { summary?: string; start: { dateTime?: string; date?: string }; end: { dateTime?: string; date?: string } }) =>
+      `${(event.summary || '').trim().toLowerCase()}|${new Date(event.start.dateTime || event.start.date || '').getTime()}|${new Date(event.end.dateTime || event.end.date || '').getTime()}`;
+
+    const existingKeys = new Set(existingEvents.map(eventKey));
+    const uniqueNewEvents = newEventsData.filter((e) => !existingKeys.has(eventKey(e)));
+
+    if (uniqueNewEvents.length === 0) {
+      updateNotification(syncId, { type: 'success', messageKey: 'calendar.syncNoNew', autoDismiss: true });
+      return;
+    }
+
+    const result = await addCalendarEventsBatch(uniqueNewEvents, token);
+
+    if (result.tokenExpired) {
+      dismissNotification(syncId);
+      await handleTokenExpired();
+      return;
+    }
+
+    if (result.failed === 0) {
+      updateNotification(syncId, {
+        type: 'success',
+        messageKey: 'calendar.syncSuccess',
+        messageParams: { count: result.added },
+        autoDismiss: true,
+      });
+    } else if (result.added === 0) {
+      updateNotification(syncId, {
+        type: 'error',
+        messageKey: 'calendar.syncFailed',
+        messageParams: { failed: result.failed },
+        autoDismiss: true,
+      });
+    } else {
+      updateNotification(syncId, {
+        type: 'warning',
+        messageKey: 'calendar.syncPartial',
+        messageParams: { added: result.added, failed: result.failed },
+        autoDismiss: true,
+      });
+    }
+  };
 
   const {
     searchTerm,
@@ -43,22 +223,100 @@ export default function Dashboard() {
     clearFilters,
   } = useDashboardFilters({ vods, assigns, quizzes, activeTab });
 
+  const taskCount = useMemo(() => {
+    const unattendedGroups = new Set<string>();
+    for (const v of vods) {
+      if (!isAttended(v.weeklyAttendance)) {
+        unattendedGroups.add(makeVodGroupKey(v.courseId, v.subject, v.range));
+      }
+    }
+    const unsubmittedAssigns = assigns.filter((a) => !a.isSubmit).length;
+    return unattendedGroups.size + unsubmittedAssigns + quizzes.length;
+  }, [vods, assigns, quizzes]);
+
+  const hasIncomplete = useMemo(() => ({
+    [TAB_TYPE.VIDEO]: vods.some((v) => !isAttended(v.weeklyAttendance)),
+    [TAB_TYPE.ASSIGN]: assigns.some((a) => !a.isSubmit),
+    [TAB_TYPE.QUIZ]: quizzes.length > 0,
+  }), [vods, assigns, quizzes]);
+
   const handleToggleOpen = (e: React.MouseEvent) => {
-    setIsOpen((prev) => !prev);
+    setIsOpen((prev) => {
+      if (!prev) {
+        setBubbleHiddenByOpen(true);
+        setNotifHiddenByOpen(true);
+        if (bubbleTimerRef.current) { clearTimeout(bubbleTimerRef.current); bubbleTimerRef.current = null; }
+        if (notifTimerRef.current) { clearTimeout(notifTimerRef.current); notifTimerRef.current = null; }
+      } else {
+        bubbleTimerRef.current = setTimeout(() => {
+          setBubbleHiddenByOpen(false);
+          bubbleTimerRef.current = null;
+        }, 500);
+        notifTimerRef.current = setTimeout(() => {
+          setNotifHiddenByOpen(false);
+          notifTimerRef.current = null;
+        }, 500);
+      }
+      return !prev;
+    });
     e.preventDefault();
   };
 
+  useEffect(() => {
+    return () => {
+      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+      if (notifTimerRef.current) clearTimeout(notifTimerRef.current);
+    };
+  }, []);
+
   const handleRefresh = () => {
     if (isPending || remainingTime <= 1) return;
-    setIsPending(true);
     refreshCourseData();
+  };
+
+  const handleDismissBubble = () => {
+    setBubbleDismissed(true);
+    localStorage.setItem(BUBBLE_DISMISS_KEY, Date.now().toString());
+  };
+
+  const showBubble = !isOpen && !bubbleDismissed && !bubbleHiddenByOpen && !isPending && taskCount > 0;
+
+  const filterHandlers = {
+    searchTerm,
+    onSearchChange: setSearchTerm,
+    filters,
+    isFilterOpen,
+    onFilterToggle: () => setIsFilterOpen((prev: boolean) => !prev),
+    courseTitlesMap,
+    onCourseTitleChange: handleCourseTitleChange,
+    onAttendanceFilterChange: handleAttendanceFilterChange,
+    onSubmitFilterChange: handleSubmitFilterChange,
+    onClearFilters: clearFilters,
+  };
+
+  const headerActions = {
+    remainingTime,
+    isPending,
+    onRefresh: handleRefresh,
+    onOpenSetting: () => setActiveTab(TAB_TYPE.SETTING),
+    isCalendarConnected,
+    onCalendarSync: handleCalendarSync,
   };
 
   return (
     <>
-      <PendingDialog isPending={isPending} onClose={() => {}} />
       <Popover open={isOpen}>
         <StickyPopoverTrigger>
+          {!isOpen && (
+            <div className="absolute bottom-full right-0 mb-2 flex flex-col items-end gap-2">
+              {!notifHiddenByOpen && notifications.length > 0 && (
+                <NotificationBubble notifications={notifications} onDismiss={dismissNotification} />
+              )}
+              {showBubble && (
+                <InfoBubble taskCount={taskCount} remainingTime={remainingTime} onDismiss={handleDismissBubble} />
+              )}
+            </div>
+          )}
           <PopoverTrigger asChild className="transition-all duration-1000 justify-self-end">
             <img
               src={isOpen ? exit : icon}
@@ -74,22 +332,12 @@ export default function Dashboard() {
           side="top"
           sideOffset={8}
         >
-          <DashboardHeader
-            activeTab={activeTab}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filters={filters}
-            isFilterOpen={isFilterOpen}
-            onFilterToggle={() => setIsFilterOpen((prev) => !prev)}
-            courseTitlesMap={courseTitlesMap}
-            onCourseTitleChange={handleCourseTitleChange}
-            onAttendanceFilterChange={handleAttendanceFilterChange}
-            onSubmitFilterChange={handleSubmitFilterChange}
-            onClearFilters={clearFilters}
-            remainingTime={remainingTime}
-            isPending={isPending}
-            onRefresh={handleRefresh}
-          />
+          {isOpen && notifications.length > 0 && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 flex flex-col gap-2">
+              <NotificationBubble notifications={notifications} onDismiss={dismissNotification} />
+            </div>
+          )}
+          <DashboardHeader activeTab={activeTab} filter={filterHandlers} actions={headerActions} />
           <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full px-5 py-4 overflow-y-scroll overscroll-none h-[480px]">
             {isPending ? (
               <div className="flex justify-center items-center h-full">
@@ -111,10 +359,17 @@ export default function Dashboard() {
                 {activeTab === 'VIDEO' && <VodList courseData={filteredVods} />}
                 {activeTab === 'ASSIGN' && <AssignList courseData={filteredAssigns} />}
                 {activeTab === 'QUIZ' && <QuizList courseData={filteredQuizzes} />}
+                {activeTab === 'SETTING' && (
+                  <Setting
+                    isCalendarConnected={isCalendarConnected}
+                    onCalendarLogin={handleCalendarLogin}
+                    onCalendarLogout={handleCalendarLogout}
+                  />
+                )}
               </>
             )}
           </div>
-          <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} hasIncomplete={hasIncomplete} />
         </PopoverContent>
       </Popover>
     </>

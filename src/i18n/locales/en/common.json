@@ -2,6 +2,7 @@
   "vod": "Lectures",
   "assign": "Assignments",
   "quiz": "Quizzes",
+  "setting": "Setting",
   "dashboard": "Dashboard",
   "close": "Close",
   "clearAll": "Clear All",
@@ -61,5 +62,30 @@
   "progress": "Progress",
   "attendancePeriod": "Attendance Period",
   "filterSet": "Filter Applied",
-  "language": "Language"
+  "language": "Language",
+  "contact": "Contact Us",
+  "calendar": {
+    "bannerTitle": "Google Calendar Sync",
+    "bannerDesc": "Manage your lectures, assignments, and quizzes on Google Calendar with Dotbugi",
+    "login": "Log In",
+    "sync": "Sync Tasks",
+    "syncShort": "Sync",
+    "logout": "Log Out",
+    "syncing": "Syncing...",
+    "syncSuccess": "{{count}} events added",
+    "syncNoNew": "Already up to date",
+    "syncFailed": "Failed to add {{failed}} events",
+    "syncPartial": "{{added}} added, {{failed}} failed",
+    "tokenExpired": "Google login has expired",
+    "tokenExpiredAction": "Log in again"
+  },
+  "refresh": "Refresh",
+  "bubble": {
+    "tasks": "{{count}} left to go!",
+    "updatedAgo": "As of {{time}}"
+  },
+  "github": {
+    "likeProject": "Like this project?",
+    "starOnGithub": "Star us on GitHub!"
+  }
 }
