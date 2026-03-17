@@ -74,8 +74,8 @@
   },
   "refresh": "更新",
   "bubble": {
-    "tasks": "未完了 {{count}}件",
-    "updatedAgo": "{{time}} 更新"
+    "tasks": "あと{{count}}件あるよ！",
+    "updatedAgo": "{{time}} 時点"
   },
   "github": {
     "likeProject": "このプロジェクトが気に入りましたか？",

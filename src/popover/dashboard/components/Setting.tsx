@@ -10,7 +10,7 @@ import GoogleCalendar from '@/assets/calendar.png';
 import GmailIcon from '@/assets/gmail.png';
 
 const CONTACT_EMAIL = 'hsu.dotbugi@gmail.com';
-const KAKAO_LINK = 'https://open.kakao.com/o/sExample';
+const KAKAO_LINK = 'https://open.kakao.com/o/sZBnxllh';
 const CALENDAR_LINK = 'https://calendar.google.com/calendar';
 
 interface SettingProps {

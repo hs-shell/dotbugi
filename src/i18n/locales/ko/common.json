@@ -74,8 +74,8 @@
   },
   "refresh": "새로고침",
   "bubble": {
-    "tasks": "미완료 {{count}}건",
-    "updatedAgo": "{{time}} 최신화"
+    "tasks": "아직 {{count}}개 남았어요!",
+    "updatedAgo": "{{time}} 기준"
   },
   "github": {
     "likeProject": "이 프로젝트가 마음에 드시나요?",

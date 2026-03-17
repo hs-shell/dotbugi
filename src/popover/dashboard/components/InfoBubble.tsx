@@ -11,6 +11,7 @@ interface InfoBubbleProps {
 export default function InfoBubble({ taskCount, remainingTime, onDismiss }: InfoBubbleProps) {
   const { t } = useTranslation('common');
 
+  const isStale = remainingTime >= 30;
   const timeText =
     remainingTime < 60
       ? t('date.minutesAgoShort', { minutes: Math.round(remainingTime) })
@@ -22,14 +23,14 @@ export default function InfoBubble({ taskCount, remainingTime, onDismiss }: Info
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="bg-white rounded-3xl px-5 py-4 mb-3 min-w-[270px] min-h-[70px]"
-      style={{ boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)' }}
+      style={{ boxShadow: '0 8px 30px rgba(0, 0, 0, 0.25)' }}
     >
       <div className="flex items-start gap-3 p-2">
         <div className="flex-1 min-w-0">
           <div className="font-extrabold text-2xl text-zinc-800 leading-tight">
             {t('bubble.tasks', { count: taskCount })}
           </div>
-          <div className="flex items-center gap-2 mt-2 text-zinc-500 text-lg">
+          <div className={`flex items-center gap-2 mt-2 text-lg ${isStale ? 'text-orange-500' : 'text-zinc-500'}`}>
             <Clock className="w-4 h-4" />
             <span>{t('bubble.updatedAgo', { time: timeText })}</span>
           </div>

@@ -9,7 +9,6 @@ import { useGetCourses } from '@/hooks/useGetCourses';
 import VodList from './components/VodList';
 import AssignList from './components/AssignList';
 import QuizList from './components/QuizList';
-import PendingDialog from './components/PendingDialog';
 import { useCourseData } from '@/hooks/useCourseData';
 import { useDashboardFilters } from '@/hooks/useDashboardFilters';
 import TabNavigation from './components/TabNavigation';
@@ -18,6 +17,7 @@ import DashboardHeader from './components/DashboardHeader';
 import InfoBubble from './components/InfoBubble';
 import { useTranslation } from 'react-i18next';
 import { isAttended } from '@/lib/utils';
+import { makeVodGroupKey } from '@/lib/generateKey';
 import Setting from './components/Setting';
 import {
   getOAuthToken,
@@ -42,7 +42,7 @@ export default function Dashboard() {
   const { t } = useTranslation('common');
   const { courses } = useGetCourses();
 
-  const { vods, assigns, quizzes, isPending, remainingTime, isError, refreshCourseData, setIsPending } =
+  const { vods, assigns, quizzes, isPending, remainingTime, isError, refreshCourseData } =
     useCourseData(courses);
 
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
@@ -120,14 +120,25 @@ export default function Dashboard() {
   } = useDashboardFilters({ vods, assigns, quizzes, activeTab });
 
   const taskCount = useMemo(() => {
-    const unattendedVods = vods.filter((v) => !isAttended(v.weeklyAttendance)).length;
+    const unattendedGroups = new Set<string>();
+    for (const v of vods) {
+      if (!isAttended(v.weeklyAttendance)) {
+        unattendedGroups.add(makeVodGroupKey(v.courseId, v.subject, v.range));
+      }
+    }
     const unsubmittedAssigns = assigns.filter((a) => !a.isSubmit).length;
-    return unattendedVods + unsubmittedAssigns + quizzes.length;
+    return unattendedGroups.size + unsubmittedAssigns + quizzes.length;
   }, [vods, assigns, quizzes]);
 
   const handleToggleOpen = (e: React.MouseEvent) => {
     setIsOpen((prev) => {
-      if (!prev) setBubbleHiddenByOpen(true);
+      if (!prev) {
+        setBubbleHiddenByOpen(true);
+      } else {
+        setTimeout(() => {
+          setBubbleHiddenByOpen(false);
+        }, 500)
+      }
       return !prev;
     });
     e.preventDefault();
@@ -135,7 +146,6 @@ export default function Dashboard() {
 
   const handleRefresh = () => {
     if (isPending || remainingTime <= 1) return;
-    setIsPending(true);
     refreshCourseData();
   };
 
@@ -148,7 +158,6 @@ export default function Dashboard() {
 
   return (
     <>
-      <PendingDialog isPending={isPending} onClose={() => {}} />
       <Popover open={isOpen}>
         <StickyPopoverTrigger>
           {showBubble && (

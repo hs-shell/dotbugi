@@ -75,8 +75,8 @@
   },
   "refresh": "刷新",
   "bubble": {
-    "tasks": "{{count}}项未完成",
-    "updatedAgo": "{{time}}更新"
+    "tasks": "还剩{{count}}个哦！",
+    "updatedAgo": "{{time}}基准"
   },
   "github": {
     "likeProject": "喜欢这个项目吗？",

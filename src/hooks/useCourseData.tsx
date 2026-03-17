@@ -161,6 +161,5 @@ export function useCourseData(courses: CourseBase[]) {
     refreshTime,
     isError,
     refreshCourseData,
-    setIsPending,
   };
 }

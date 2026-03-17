@@ -74,8 +74,8 @@
   },
   "refresh": "Refresh",
   "bubble": {
-    "tasks": "{{count}} incomplete",
-    "updatedAgo": "Updated {{time}}"
+    "tasks": "{{count}} left to go!",
+    "updatedAgo": "As of {{time}}"
   },
   "github": {
     "likeProject": "Like this project?",
