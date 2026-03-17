@@ -70,7 +70,14 @@
     "login": "로그인",
     "sync": "태스크 동기화",
     "syncShort": "동기화",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "syncing": "동기화 중...",
+    "syncSuccess": "{{count}}개 일정이 추가되었어요",
+    "syncNoNew": "이미 최신 상태예요",
+    "syncFailed": "{{failed}}개 일정 추가에 실패했어요",
+    "syncPartial": "{{added}}개 추가, {{failed}}개 실패",
+    "tokenExpired": "Google 로그인이 만료되었어요",
+    "tokenExpiredAction": "다시 로그인"
   },
   "refresh": "새로고침",
   "bubble": {

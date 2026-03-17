@@ -22,8 +22,7 @@ const submitOptions = [
   { value: false, internalLabel: 'needed' as const },
 ];
 
-interface DashboardHeaderProps {
-  activeTab: TAB_TYPE;
+export interface FilterHandlers {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   filters: Record<TAB_TYPE, Filters>;
@@ -34,6 +33,9 @@ interface DashboardHeaderProps {
   onAttendanceFilterChange: (status: string) => void;
   onSubmitFilterChange: (isSubmit: boolean) => void;
   onClearFilters: () => void;
+}
+
+export interface HeaderActions {
   remainingTime: number;
   isPending: boolean;
   onRefresh: () => void;
@@ -42,25 +44,13 @@ interface DashboardHeaderProps {
   onCalendarSync: () => void;
 }
 
-export default function DashboardHeader({
-  activeTab,
-  searchTerm,
-  onSearchChange,
-  filters,
-  isFilterOpen,
-  onFilterToggle,
-  courseTitlesMap,
-  onCourseTitleChange,
-  onAttendanceFilterChange,
-  onSubmitFilterChange,
-  onClearFilters,
-  remainingTime,
-  isPending,
-  onRefresh,
-  onOpenSetting,
-  isCalendarConnected,
-  onCalendarSync,
-}: DashboardHeaderProps) {
+interface DashboardHeaderProps {
+  activeTab: TAB_TYPE;
+  filter: FilterHandlers;
+  actions: HeaderActions;
+}
+
+export default function DashboardHeader({ activeTab, filter: f, actions: a }: DashboardHeaderProps) {
   const { t } = useTranslation(['popover', 'common']);
 
   const TAB_TITLES: Record<TAB_TYPE, string> = {
@@ -77,16 +67,16 @@ export default function DashboardHeader({
   }));
 
   const isFilterSet = useMemo(() => {
-    const currentFilters = filters[activeTab];
+    const currentFilters = f.filters[activeTab];
     const { courseTitles, attendanceStatuses, submitStatuses } = currentFilters;
     return (
       (courseTitles && courseTitles.length > 0) ||
       (attendanceStatuses && attendanceStatuses.length > 0) ||
       (submitStatuses && submitStatuses.length > 0)
     );
-  }, [filters, activeTab]);
+  }, [f.filters, activeTab]);
 
-  const refreshDisabled = isPending || remainingTime <= 1;
+  const refreshDisabled = a.isPending || a.remainingTime <= 1;
 
   return (
     <div className="bg-white w-full rounded-3xl z-10">
@@ -96,31 +86,31 @@ export default function DashboardHeader({
           <DropdownMenuTrigger asChild>
             <button className="relative flex rounded-lg bg-white hover:bg-zinc-100 transition-all duration-200 p-2">
               <EllipsisVertical className="w-7 h-7" />
-              {remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 60) && (
+              {a.remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 60) && (
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
               )}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-xl min-w-0 w-[100px]">
             <DropdownMenuItem
-              onClick={onRefresh}
+              onClick={a.onRefresh}
               disabled={refreshDisabled}
               className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5"
             >
               <RefreshCw />
               <span className="flex-1">{t('common:refresh')}</span>
               <span
-                className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 60) ? 'bg-red-500' : 'bg-green-500'}`}
+                className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${a.remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 60) ? 'bg-red-500' : 'bg-green-500'}`}
               />
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onOpenSetting} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
+            <DropdownMenuItem onClick={a.onOpenSetting} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
               <Settings />
               {t('common:setting')}
             </DropdownMenuItem>
-            {isCalendarConnected && (
+            {a.isCalendarConnected && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onCalendarSync} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
+                <DropdownMenuItem onClick={a.onCalendarSync} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
                   <img src={GoogleCalendar} className="w-5 h-5" alt="" />
                   {t('common:calendar.syncShort')}
                 </DropdownMenuItem>
@@ -136,39 +126,39 @@ export default function DashboardHeader({
             <input
               type="text"
               placeholder={t('common:search')}
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
+              value={f.searchTerm}
+              onChange={(e) => f.onSearchChange(e.target.value)}
               autoFocus={true}
               className="bg-zinc-50 rounded-xl border border-zinc-300 w-full text-lg h-12 pl-12 pr-4 placeholder-gray-400 font-medium py-0 outline-none focus:ring-0 focus:border-zinc-300 focus:bg-slate-50 transition-all duration-200"
             />
           </div>
           <div className="flex w-full items-center pl-5 my-1">
             <div className="whitespace-nowrap space-x-2 overflow-x-auto flex-1 min-w-0 flex overscroll-none">
-              {filters[activeTab].courseTitles.map((title) => (
-                <FilterBadge key={`course-${title}`} label={title} onRemove={() => onCourseTitleChange(title)} />
+              {f.filters[activeTab].courseTitles.map((title) => (
+                <FilterBadge key={`course-${title}`} label={title} onRemove={() => f.onCourseTitleChange(title)} />
               ))}
               {activeTab === 'VIDEO' &&
-                filters[activeTab].attendanceStatuses?.map((status) => (
+                f.filters[activeTab].attendanceStatuses?.map((status) => (
                   <FilterBadge
                     key={`attendance-${status}`}
                     label={status}
-                    onRemove={() => onAttendanceFilterChange(status)}
+                    onRemove={() => f.onAttendanceFilterChange(status)}
                   />
                 ))}
               {activeTab === 'ASSIGN' &&
-                filters[activeTab].submitStatuses?.map((status) => (
+                f.filters[activeTab].submitStatuses?.map((status) => (
                   <FilterBadge
                     key={`submit-${status}`}
                     label={status ? t('common:submit.done') : t('common:submit.needed')}
-                    onRemove={() => onSubmitFilterChange(status)}
+                    onRemove={() => f.onSubmitFilterChange(status)}
                   />
                 ))}
             </div>
             <div className="flex flex-shrink-0 ml-2">
-              <Popover open={isFilterOpen}>
+              <Popover open={f.isFilterOpen}>
                 <PopoverTrigger asChild>
                   <button
-                    onClick={onFilterToggle}
+                    onClick={f.onFilterToggle}
                     className="flex justify-self-end rounded-lg gap-1 bg-white hover:bg-zinc-100 transition-all duration-200 mb-2 mr-5 ml-2 p-2"
                   >
                     {isFilterSet ? (
@@ -180,19 +170,19 @@ export default function DashboardHeader({
                 </PopoverTrigger>
                 <PopoverContent className="w-64 shadow-md rounded-xl p-4 space-y-2">
                   <FilterPanel
-                    filters={filters}
+                    filters={f.filters}
                     activeTab={activeTab}
-                    courseTitlesMap={courseTitlesMap}
-                    handleCourseTitleChange={onCourseTitleChange}
-                    handleAttendanceFilterChange={onAttendanceFilterChange}
-                    handleSubmitFilterChange={onSubmitFilterChange}
+                    courseTitlesMap={f.courseTitlesMap}
+                    handleCourseTitleChange={f.onCourseTitleChange}
+                    handleAttendanceFilterChange={f.onAttendanceFilterChange}
+                    handleSubmitFilterChange={f.onSubmitFilterChange}
                     attendanceOptions={attendanceOptions}
                     submitOptions={submitOptionsTranslated}
                   />
-                  <Button className="w-full text-xl h-12 font-semibold" variant="outline" onClick={onClearFilters}>
+                  <Button className="w-full text-xl h-12 font-semibold" variant="outline" onClick={f.onClearFilters}>
                     {t('common:clearAll')}
                   </Button>
-                  <Button className="w-full text-xl h-12 font-semibold" variant="default" onClick={onFilterToggle}>
+                  <Button className="w-full text-xl h-12 font-semibold" variant="default" onClick={f.onFilterToggle}>
                     {t('common:close')}
                   </Button>
                 </PopoverContent>

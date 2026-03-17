@@ -70,7 +70,14 @@
     "login": "Log In",
     "sync": "Sync Tasks",
     "syncShort": "Sync",
-    "logout": "Log Out"
+    "logout": "Log Out",
+    "syncing": "Syncing...",
+    "syncSuccess": "{{count}} events added",
+    "syncNoNew": "Already up to date",
+    "syncFailed": "Failed to add {{failed}} events",
+    "syncPartial": "{{added}} added, {{failed}} failed",
+    "tokenExpired": "Google login has expired",
+    "tokenExpiredAction": "Log in again"
   },
   "refresh": "Refresh",
   "bubble": {

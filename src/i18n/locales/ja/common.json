@@ -70,7 +70,14 @@
     "login": "ログイン",
     "sync": "タスク同期",
     "syncShort": "同期",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "syncing": "同期中...",
+    "syncSuccess": "{{count}}件の予定を追加しました",
+    "syncNoNew": "すでに最新です",
+    "syncFailed": "{{failed}}件の追加に失敗しました",
+    "syncPartial": "{{added}}件追加、{{failed}}件失敗",
+    "tokenExpired": "Googleログインの期限が切れました",
+    "tokenExpiredAction": "再ログイン"
   },
   "refresh": "更新",
   "bubble": {

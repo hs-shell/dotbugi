@@ -71,7 +71,14 @@
     "login": "登录",
     "sync": "同步任务",
     "syncShort": "同步",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "syncing": "同步中...",
+    "syncSuccess": "已添加{{count}}个日程",
+    "syncNoNew": "已是最新状态",
+    "syncFailed": "{{failed}}个日程添加失败",
+    "syncPartial": "已添加{{added}}个，{{failed}}个失败",
+    "tokenExpired": "Google登录已过期",
+    "tokenExpiredAction": "重新登录"
   },
   "refresh": "刷新",
   "bubble": {

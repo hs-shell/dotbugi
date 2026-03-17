@@ -111,7 +111,7 @@ export function useCourseData(courses: CourseBase[]) {
     } finally {
       setIsPending(false);
     }
-  }, [courses, applyMock]);
+  }, [courses, applyMock, useMockData]);
 
   // 캐시 TTL 기반 자동 갱신 타이머
   useEffect(() => {
