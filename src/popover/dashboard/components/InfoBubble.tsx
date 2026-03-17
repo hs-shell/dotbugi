@@ -1,4 +1,5 @@
 import { Clock, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 interface InfoBubbleProps {
@@ -16,7 +17,10 @@ export default function InfoBubble({ taskCount, remainingTime, onDismiss }: Info
       : t('date.hoursAgoShort', { hours: Math.floor(remainingTime / 60) });
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
       className="bg-white rounded-3xl px-5 py-4 mb-3 min-w-[270px] min-h-[70px]"
       style={{ boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)' }}
     >
@@ -40,6 +44,6 @@ export default function InfoBubble({ taskCount, remainingTime, onDismiss }: Info
           <X className="w-5 h-5 text-white" />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
