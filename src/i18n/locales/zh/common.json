@@ -102,5 +102,30 @@
   "github": {
     "likeProject": "喜欢这个项目吗？",
     "starOnGithub": "在GitHub上给我们加星！"
+  },
+  "courseStatus": {
+    "vod": {
+      "completed": "已观看",
+      "absent": "缺勤",
+      "pending": "未观看"
+    },
+    "assign": {
+      "completed": "已提交",
+      "absent": "未提交",
+      "pending": "未提交"
+    },
+    "quiz": {
+      "completed": "已参加",
+      "absent": "未参加",
+      "pending": "未参加"
+    },
+    "hidden": "已隐藏",
+    "currentWeek": "本周",
+    "goToCurrentWeek": "跳转到本周",
+    "bar": {
+      "loading": "正在加载信息...",
+      "success": "信息加载完成",
+      "error": "信息加载失败"
+    }
   }
 }

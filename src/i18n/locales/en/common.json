@@ -101,5 +101,30 @@
   "github": {
     "likeProject": "Like this project?",
     "starOnGithub": "Star us on GitHub!"
+  },
+  "courseStatus": {
+    "vod": {
+      "completed": "Watched",
+      "absent": "Absent",
+      "pending": "Not Watched"
+    },
+    "assign": {
+      "completed": "Submitted",
+      "absent": "Not Submitted",
+      "pending": "Not Submitted"
+    },
+    "quiz": {
+      "completed": "Taken",
+      "absent": "Not Taken",
+      "pending": "Not Taken"
+    },
+    "hidden": "Hidden",
+    "currentWeek": "This Week",
+    "goToCurrentWeek": "Go to this week",
+    "bar": {
+      "loading": "Loading info...",
+      "success": "Info loaded",
+      "error": "Failed to load info"
+    }
   }
 }

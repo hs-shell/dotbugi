@@ -101,5 +101,30 @@
   "github": {
     "likeProject": "このプロジェクトが気に入りましたか？",
     "starOnGithub": "GitHubでスターをお願いします！"
+  },
+  "courseStatus": {
+    "vod": {
+      "completed": "視聴完了",
+      "absent": "欠席",
+      "pending": "未視聴"
+    },
+    "assign": {
+      "completed": "提出済み",
+      "absent": "未提出",
+      "pending": "未提出"
+    },
+    "quiz": {
+      "completed": "受験済み",
+      "absent": "未受験",
+      "pending": "未受験"
+    },
+    "hidden": "非表示",
+    "currentWeek": "今週",
+    "goToCurrentWeek": "今週へ移動",
+    "bar": {
+      "loading": "情報を読み込み中...",
+      "success": "情報の読み込み完了",
+      "error": "情報の読み込みに失敗しました"
+    }
   }
 }

@@ -101,5 +101,30 @@
   "github": {
     "likeProject": "이 프로젝트가 마음에 드시나요?",
     "starOnGithub": "GitHub에서 스타를 눌러주세요!"
+  },
+  "courseStatus": {
+    "vod": {
+      "completed": "시청 완료",
+      "absent": "결석",
+      "pending": "미시청"
+    },
+    "assign": {
+      "completed": "제출완료",
+      "absent": "미제출",
+      "pending": "미제출"
+    },
+    "quiz": {
+      "completed": "응시완료",
+      "absent": "미응시",
+      "pending": "미응시"
+    },
+    "hidden": "숨김",
+    "currentWeek": "현재 주차",
+    "goToCurrentWeek": "현재 주차로 이동",
+    "bar": {
+      "loading": "정보 불러오는 중...",
+      "success": "정보 불러오기 완료",
+      "error": "정보를 불러오지 못했습니다"
+    }
   }
 }
