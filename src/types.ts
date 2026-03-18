@@ -2,6 +2,7 @@ export type CourseBase = {
   courseId: string;
   courseTitle: string;
   prof: string;
+  isCommunity?: boolean;
 };
 
 export type Vod = CourseBase & {

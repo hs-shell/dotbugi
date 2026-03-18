@@ -80,9 +80,16 @@
     "tokenExpiredAction": "再ログイン"
   },
   "refresh": "更新",
+  "refreshing": "更新中...",
+  "refreshSuccess": "更新完了",
   "bubble": {
     "tasks": "あと{{count}}件あるよ！",
     "updatedAgo": "{{time}} 時点"
+  },
+  "courses": {
+    "title": "受講科目管理",
+    "desc": "追跡する科目を選択してください",
+    "community": "コミュニティ"
   },
   "github": {
     "likeProject": "このプロジェクトが気に入りましたか？",

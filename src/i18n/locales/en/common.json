@@ -80,9 +80,16 @@
     "tokenExpiredAction": "Log in again"
   },
   "refresh": "Refresh",
+  "refreshing": "Refreshing...",
+  "refreshSuccess": "Refresh complete",
   "bubble": {
     "tasks": "{{count}} left to go!",
     "updatedAgo": "As of {{time}}"
+  },
+  "courses": {
+    "title": "Manage Courses",
+    "desc": "Select which courses to track",
+    "community": "Community"
   },
   "github": {
     "likeProject": "Like this project?",
