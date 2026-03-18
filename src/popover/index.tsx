@@ -8,6 +8,7 @@ import { ShadowRootContext } from '@/popover/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import PlayerApp from '@/popover/player/App';
 import { injectCourseToggles } from '@/lib/injectCourseToggles';
+import { injectCourseStatus } from '@/lib/courseStatus';
 
 const HANSUNG_URL = 'https://learn.hansung.ac.kr/';
 const footer = document.getElementById('page-footer');
@@ -52,6 +53,11 @@ if (footer && url === HANSUNG_URL) {
       </React.StrictMode>
     </ShadowRootContext.Provider>
   );
+}
+
+// 강의 페이지에서 트래킹 상태 배지 주입
+if (url.includes('/course/view.php?id=') && url.startsWith(HANSUNG_URL)) {
+  injectCourseStatus();
 }
 
 if (leftMenus.length === 2 && url.startsWith(HANSUNG_URL)) {
