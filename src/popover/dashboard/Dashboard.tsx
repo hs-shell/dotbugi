@@ -70,26 +70,24 @@ export default function Dashboard() {
   const isCalendarConnected = calendarToken !== null;
 
   // DOM 토글에서 trackedCourseIds 변경 시 데이터 추가/삭제
-  const prevTrackedIdsRef = useRef<string[]>(trackedCourseIds);
+  const prevTrackedIdsRef = useRef<Set<string>>(new Set(trackedCourseIds));
   useEffect(() => {
-    const prevIds = prevTrackedIdsRef.current;
-    prevTrackedIdsRef.current = trackedCourseIds;
-
-    if (prevIds.length === 0 || prevIds === trackedCourseIds) return;
-
-    const prevSet = new Set(prevIds);
+    const prevSet = prevTrackedIdsRef.current;
     const currSet = new Set(trackedCourseIds);
+    prevTrackedIdsRef.current = currSet;
 
-    // 새로 추가된 강의
+    if (prevSet.size === 0) return;
+
+    const allCourseIds = new Set(allCourses.map((c) => c.courseId));
+
     for (const id of trackedCourseIds) {
-      if (!prevSet.has(id)) {
+      if (!prevSet.has(id) && allCourseIds.has(id)) {
         const course = allCourses.find((c) => c.courseId === id);
         if (course) addCourseData(course);
       }
     }
 
-    // 삭제된 강의
-    for (const id of prevIds) {
+    for (const id of prevSet) {
       if (!currSet.has(id)) {
         removeCourseData(id);
       }
