@@ -15,11 +15,12 @@ function parseCourseFromElement(li: Element): CourseBase | null {
   const courseTitle = rawTitle ? removeSquareBrackets(rawTitle) : '';
 
   if (!courseId || !courseTitle || !prof) return null;
-  return { courseId, courseTitle, prof };
+
+  const isCommunity = li.classList.contains(COMMUNITY_CLASS);
+  return { courseId, courseTitle, prof, isCommunity };
 }
 
 export function parseCoursesFromDOM(): CourseBase[] {
   return Array.from(document.querySelectorAll('.my-course-lists > li'))
-    .filter((li) => !li.classList.contains(COMMUNITY_CLASS))
     .flatMap((li) => parseCourseFromElement(li) ?? []);
 }

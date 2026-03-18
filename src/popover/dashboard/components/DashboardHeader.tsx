@@ -76,7 +76,7 @@ export default function DashboardHeader({ activeTab, filter: f, actions: a }: Da
     );
   }, [f.filters, activeTab]);
 
-  const refreshDisabled = a.isPending || a.remainingTime <= 1;
+  const refreshDisabled = a.isPending;
 
   return (
     <div className="bg-white w-full rounded-3xl z-10">

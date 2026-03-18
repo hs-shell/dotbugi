@@ -42,10 +42,19 @@ let notifIdCounter = 0;
 
 export default function Dashboard() {
   const { t } = useTranslation('common');
-  const { courses } = useGetCourses();
+  const { allCourses, trackedCourses, trackedCourseIds } = useGetCourses();
 
-  const { vods, assigns, quizzes, isPending, remainingTime, isError, refreshCourseData } =
-    useCourseData(courses);
+  const {
+    vods,
+    assigns,
+    quizzes,
+    isPending,
+    remainingTime,
+    isError,
+    refreshCourseData,
+    addCourseData,
+    removeCourseData,
+  } = useCourseData(trackedCourses);
 
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
   const [isOpen, setIsOpen] = useState(false);
@@ -60,6 +69,31 @@ export default function Dashboard() {
 
   const isCalendarConnected = calendarToken !== null;
 
+  // DOM 토글에서 trackedCourseIds 변경 시 데이터 추가/삭제
+  const prevTrackedIdsRef = useRef<Set<string>>(new Set(trackedCourseIds));
+  useEffect(() => {
+    const prevSet = prevTrackedIdsRef.current;
+    const currSet = new Set(trackedCourseIds);
+    prevTrackedIdsRef.current = currSet;
+
+    if (prevSet.size === 0) return;
+
+    const allCourseIds = new Set(allCourses.map((c) => c.courseId));
+
+    for (const id of trackedCourseIds) {
+      if (!prevSet.has(id) && allCourseIds.has(id)) {
+        const course = allCourses.find((c) => c.courseId === id);
+        if (course) addCourseData(course);
+      }
+    }
+
+    for (const id of prevSet) {
+      if (!currSet.has(id)) {
+        removeCourseData(id);
+      }
+    }
+  }, [trackedCourseIds, allCourses, addCourseData, removeCourseData]);
+
   const pushNotification = useCallback((n: Omit<Notification, 'id'>) => {
     const id = `notif-${++notifIdCounter}`;
     setNotifications((prev) => [...prev, { ...n, id }]);
@@ -73,6 +107,24 @@ export default function Dashboard() {
   const updateNotification = useCallback((id: string, updates: Partial<Omit<Notification, 'id'>>) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)));
   }, []);
+
+  // 새로고침 시작/완료 시 NotificationBubble 표시
+  const refreshNotifRef = useRef<string | null>(null);
+  const prevIsPendingRef = useRef(false);
+  useEffect(() => {
+    if (isPending && !prevIsPendingRef.current) {
+      if (refreshNotifRef.current) dismissNotification(refreshNotifRef.current);
+      refreshNotifRef.current = pushNotification({ type: 'loading', messageKey: 'refreshing' });
+    } else if (!isPending && prevIsPendingRef.current && refreshNotifRef.current) {
+      updateNotification(refreshNotifRef.current, {
+        type: 'success',
+        messageKey: 'refreshSuccess',
+        autoDismiss: true,
+      });
+      refreshNotifRef.current = null;
+    }
+    prevIsPendingRef.current = isPending;
+  }, [isPending, pushNotification, dismissNotification, updateNotification]);
 
   const showTokenExpiredNotif = useCallback(() => {
     if (tokenExpiredNotifRef.current) return;
@@ -164,7 +216,11 @@ export default function Dashboard() {
 
     const newEventsData = convertCalendarEventsToGoogleEvents(calendarEvents);
 
-    const eventKey = (event: { summary?: string; start: { dateTime?: string; date?: string }; end: { dateTime?: string; date?: string } }) =>
+    const eventKey = (event: {
+      summary?: string;
+      start: { dateTime?: string; date?: string };
+      end: { dateTime?: string; date?: string };
+    }) =>
       `${(event.summary || '').trim().toLowerCase()}|${new Date(event.start.dateTime || event.start.date || '').getTime()}|${new Date(event.end.dateTime || event.end.date || '').getTime()}`;
 
     const existingKeys = new Set(existingEvents.map(eventKey));
@@ -234,19 +290,28 @@ export default function Dashboard() {
     return unattendedGroups.size + unsubmittedAssigns + quizzes.length;
   }, [vods, assigns, quizzes]);
 
-  const hasIncomplete = useMemo(() => ({
-    [TAB_TYPE.VIDEO]: vods.some((v) => !isAttended(v.weeklyAttendance)),
-    [TAB_TYPE.ASSIGN]: assigns.some((a) => !a.isSubmit),
-    [TAB_TYPE.QUIZ]: quizzes.length > 0,
-  }), [vods, assigns, quizzes]);
+  const hasIncomplete = useMemo(
+    () => ({
+      [TAB_TYPE.VIDEO]: vods.some((v) => !isAttended(v.weeklyAttendance)),
+      [TAB_TYPE.ASSIGN]: assigns.some((a) => !a.isSubmit),
+      [TAB_TYPE.QUIZ]: quizzes.length > 0,
+    }),
+    [vods, assigns, quizzes]
+  );
 
   const handleToggleOpen = (e: React.MouseEvent) => {
     setIsOpen((prev) => {
       if (!prev) {
         setBubbleHiddenByOpen(true);
         setNotifHiddenByOpen(true);
-        if (bubbleTimerRef.current) { clearTimeout(bubbleTimerRef.current); bubbleTimerRef.current = null; }
-        if (notifTimerRef.current) { clearTimeout(notifTimerRef.current); notifTimerRef.current = null; }
+        if (bubbleTimerRef.current) {
+          clearTimeout(bubbleTimerRef.current);
+          bubbleTimerRef.current = null;
+        }
+        if (notifTimerRef.current) {
+          clearTimeout(notifTimerRef.current);
+          notifTimerRef.current = null;
+        }
       } else {
         bubbleTimerRef.current = setTimeout(() => {
           setBubbleHiddenByOpen(false);
@@ -270,7 +335,7 @@ export default function Dashboard() {
   }, []);
 
   const handleRefresh = () => {
-    if (isPending || remainingTime <= 1) return;
+    if (isPending) return;
     refreshCourseData();
   };
 
@@ -338,7 +403,7 @@ export default function Dashboard() {
             </div>
           )}
           <DashboardHeader activeTab={activeTab} filter={filterHandlers} actions={headerActions} />
-          <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full px-5 py-4 overflow-y-scroll overscroll-none h-[480px]">
+          <div className="grid grid-cols-1 bg-slate-100 opacity-100 w-full pl-4 pr-0 py-4 overflow-y-scroll overscroll-none h-[480px]">
             {isPending ? (
               <div className="flex justify-center items-center h-full">
                 <Spinner className="h-8 w-8" />

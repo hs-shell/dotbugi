@@ -61,10 +61,12 @@ export default function Setting({ isCalendarConnected, onCalendarLogin, onCalend
       {/* 언어 설정 */}
       <Card className="bg-white rounded-2xl w-full border-0 shadow-none px-1.5 py-1.5">
         <Select value={i18n.language} onValueChange={(value) => changeLanguage(value as LanguageCode)}>
-          <SelectTrigger className="w-full h-14 border-0 shadow-none rounded-xl px-4 py-3 gap-x-3 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500 focus:ring-0 [&>svg:last-child]:hidden">
+          <SelectTrigger className="w-full h-14 border-0 shadow-none rounded-2xl px-4 py-3 gap-x-3 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500 focus:ring-0 [&>svg:last-child]:hidden">
             <Globe className="w-5 h-5 text-zinc-500 flex-shrink-0" />
             <span className="flex-1 text-lg font-semibold text-zinc-600 text-left">{t('language')}</span>
-            <span className="text-lg"><SelectValue /></span>
+            <span className="text-lg">
+              <SelectValue />
+            </span>
           </SelectTrigger>
           <SelectContent position="item-aligned" className="text-xl rounded-xl min-w-0 w-[140px]">
             {SUPPORTED_LANGUAGES.map((lang) => (
@@ -121,7 +123,7 @@ function GitHubStarBanner() {
         onClick={() => window.open('https://github.com/hs-shell/dotbugi', '_blank')}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="flex flex-col items-center text-center w-full rounded-xl px-4 py-4 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500 group"
+        className="flex flex-col items-center text-center w-full rounded-2xl px-4 py-4 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500 group"
       >
         <div className="flex items-center justify-center mb-2 space-x-2">
           <Github size={26} className="text-zinc-600 group-hover:text-zinc-900" />

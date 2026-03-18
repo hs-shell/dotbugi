@@ -1,7 +1,7 @@
 import { CourseBase } from '@/types';
-import { saveDataToStorage } from '@/lib/storage';
+import { saveDataToStorage, loadDataFromStorage } from '@/lib/storage';
 import { parseCoursesFromDOM } from '@/lib/parseCourses';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 function getMockCourses(): CourseBase[] | null {
   const raw = import.meta.env.VITE_MOCK_COURSES;
@@ -16,29 +16,68 @@ function getMockCourses(): CourseBase[] | null {
 }
 
 export const useGetCourses = () => {
-  const [courses, setCourses] = useState<CourseBase[]>([]);
+  const [allCourses, setAllCourses] = useState<CourseBase[]>([]);
+  const [trackedCourseIds, setTrackedCourseIdsState] = useState<string[] | null>(null);
+
+  const setTrackedCourseIds = useCallback((ids: string[]) => {
+    setTrackedCourseIdsState(ids);
+    saveDataToStorage('trackedCourseIds', ids);
+  }, []);
 
   useEffect(() => {
+    const initCourses = (courses: CourseBase[]) => {
+      setAllCourses(courses);
+      saveDataToStorage('courses', JSON.stringify(courses));
+
+      loadDataFromStorage<string[]>('trackedCourseIds', (savedIds) => {
+        if (savedIds && savedIds.length > 0) {
+          setTrackedCourseIdsState(savedIds);
+        } else {
+          // 최초 사용: 비교과(커뮤니티) 제외하고 전부 트래킹
+          const defaultIds = courses
+            .filter((c) => !c.isCommunity)
+            .map((c) => c.courseId);
+          setTrackedCourseIdsState(defaultIds);
+          saveDataToStorage('trackedCourseIds', defaultIds);
+        }
+      });
+    };
+
     if (import.meta.env.VITE_MOCK) {
       const envCourses = getMockCourses();
       if (envCourses) {
-        // env에 과목이 지정되어 있으면 실제 fetch용으로 사용
-        setCourses(envCourses);
-        saveDataToStorage('courses', JSON.stringify(envCourses));
+        initCourses(envCourses);
         return;
       }
-      // 없으면 기존 하드코딩 mock 사용
       import('@/mocks/mockData').then(({ mockCourses }) => {
-        setCourses(mockCourses);
-        saveDataToStorage('courses', JSON.stringify(mockCourses));
+        initCourses(mockCourses);
       });
       return;
     }
 
     const parsed = parseCoursesFromDOM();
-    setCourses(parsed);
-    saveDataToStorage('courses', JSON.stringify(parsed));
+    initCourses(parsed);
   }, []);
 
-  return { courses };
+  // DOM 토글에서 trackedCourseIds가 변경되면 React 상태 동기화
+  useEffect(() => {
+    const listener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if (changes.trackedCourseIds) {
+        const newIds = changes.trackedCourseIds.newValue as string[] | undefined;
+        if (newIds) {
+          setTrackedCourseIdsState(newIds);
+        }
+      }
+    };
+    chrome.storage.onChanged.addListener(listener);
+    return () => chrome.storage.onChanged.removeListener(listener);
+  }, []);
+
+  const trackedCourses = useMemo(() => {
+    if (!trackedCourseIds) return [];
+    const idSet = new Set(trackedCourseIds);
+    return allCourses.filter((c) => idSet.has(c.courseId));
+  }, [allCourses, trackedCourseIds]);
+
+  return { allCourses, trackedCourses, trackedCourseIds: trackedCourseIds ?? [], setTrackedCourseIds };
 };

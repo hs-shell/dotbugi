@@ -7,6 +7,7 @@ import { createShadowRoot } from '@/popover/lib/createShadowRoot';
 import { ShadowRootContext } from '@/popover/lib/ShadowRootContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import PlayerApp from '@/popover/player/App';
+import { injectCourseToggles } from '@/lib/injectCourseToggles';
 
 const HANSUNG_URL = 'https://learn.hansung.ac.kr/';
 const footer = document.getElementById('page-footer');
@@ -15,6 +16,7 @@ const leftMenus = document.getElementsByClassName('left-menus');
 const url = window.location.href;
 
 if (footer && url === HANSUNG_URL) {
+  injectCourseToggles();
   const backtop = document.getElementById('back-top') as HTMLDivElement;
   if (backtop) backtop.remove();
 

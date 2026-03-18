@@ -166,6 +166,28 @@
   :host .overscroll-none {
     overscroll-behavior: none;
   }
+
+  /* macOS 스타일 스크롤바 (플랫폼 통일, 오버레이) */
+  :host .overflow-y-scroll,
+  :host .overflow-y-auto {
+    overflow-y: overlay;
+  }
+  :host *::-webkit-scrollbar {
+    width: 16px;
+  }
+  :host *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  :host *::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    border: 5px solid transparent;
+    background-clip: content-box;
+  }
+  :host *::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+    background-clip: content-box;
+  }
 }
 
 @layer base {

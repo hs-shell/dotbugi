@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Vod, Assign, Quiz, CourseBase } from '@/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 import { scrapeCourseData } from '@/lib/fetchCourseData';
@@ -24,6 +24,7 @@ export function useCourseData(courses: CourseBase[]) {
   const [isPending, setIsPending] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
   const [isError, setIsError] = useState(false);
+  const [pendingCourseIds, setPendingCourseIds] = useState<Set<string>>(new Set());
 
   const useMockData = import.meta.env.VITE_MOCK && !import.meta.env.VITE_MOCK_COURSES;
 
@@ -52,6 +53,7 @@ export function useCourseData(courses: CourseBase[]) {
       await applyMock();
       setRefreshTime(new Date().toLocaleTimeString());
       setRemainingTime(0);
+      setIsPending(false);
       return;
     }
 
@@ -113,6 +115,67 @@ export function useCourseData(courses: CourseBase[]) {
     }
   }, [courses, applyMock, useMockData]);
 
+  const addCourseData = useCallback(async (course: CourseBase) => {
+    setPendingCourseIds((prev) => new Set(prev).add(course.courseId));
+    try {
+      const scraped = await scrapeCourseData(course.courseId);
+
+      const newVods = mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray);
+      const newAssigns = mergeDueDateItems(course, scraped.assignDataArray);
+      const newQuizzes = mergeDueDateItems(course, scraped.quizDataArray);
+
+      setVods((prev) => {
+        const seen = new Set(prev.map((v) => makeVodKey(v.courseId, v.title, v.week)));
+        const merged = [...prev];
+        deduplicateInto(merged, newVods, seen, (v) => makeVodKey(v.courseId, v.title, v.week));
+        saveDataToStorage('vod', merged);
+        return merged;
+      });
+
+      setAssigns((prev) => {
+        const seen = new Set(prev.map((a) => makeItemKey(a.courseId, a.title, a.dueDate ?? '')));
+        const merged = [...prev];
+        deduplicateInto(merged, newAssigns, seen, (a) => makeItemKey(a.courseId, a.title, a.dueDate ?? ''));
+        saveDataToStorage('assign', merged);
+        return merged;
+      });
+
+      setQuizzes((prev) => {
+        const seen = new Set(prev.map((q) => makeItemKey(q.courseId, q.title, q.dueDate ?? '')));
+        const merged = [...prev];
+        deduplicateInto(merged, newQuizzes, seen, (q) => makeItemKey(q.courseId, q.title, q.dueDate ?? ''));
+        saveDataToStorage('quiz', merged);
+        return merged;
+      });
+    } catch (error) {
+      console.warn('[Dotbugi] 강의 추가 데이터 fetch 실패:', error);
+    } finally {
+      setPendingCourseIds((prev) => {
+        const next = new Set(prev);
+        next.delete(course.courseId);
+        return next;
+      });
+    }
+  }, []);
+
+  const removeCourseData = useCallback((courseId: string) => {
+    setVods((prev) => {
+      const filtered = prev.filter((v) => v.courseId !== courseId);
+      saveDataToStorage('vod', filtered);
+      return filtered;
+    });
+    setAssigns((prev) => {
+      const filtered = prev.filter((a) => a.courseId !== courseId);
+      saveDataToStorage('assign', filtered);
+      return filtered;
+    });
+    setQuizzes((prev) => {
+      const filtered = prev.filter((q) => q.courseId !== courseId);
+      saveDataToStorage('quiz', filtered);
+      return filtered;
+    });
+  }, []);
+
   // 캐시 TTL 기반 자동 갱신 타이머
   useEffect(() => {
     if (remainingTime >= CACHE_TTL_MINUTES) {
@@ -123,9 +186,29 @@ export function useCourseData(courses: CourseBase[]) {
     return () => clearTimeout(timer);
   }, [remainingTime, refreshCourseData]);
 
-  // 초기 로드: 캐시 확인 후 fetch 또는 캐시 사용
+  // 탭이 다시 보일 때 캐시 만료 확인 후 즉시 갱신
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
+      const lastRequest = getLastRequestTime();
+      if (!lastRequest) return;
+      const elapsed = Date.now() - lastRequest;
+      if (elapsed >= CACHE_TTL_MS) {
+        refreshCourseData();
+      } else {
+        setRemainingTime(elapsed / REFRESH_INTERVAL_MS);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [refreshCourseData]);
+
+  // 초기 로드: 캐시 확인 후 fetch 또는 캐시 사용 (최초 1회만 실행)
+  const initialLoadDone = useRef(false);
   useEffect(() => {
     if (!courses || courses.length === 0) return;
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
 
     const lastRequest = getLastRequestTime();
     const now = Date.now();
@@ -150,7 +233,8 @@ export function useCourseData(courses: CourseBase[]) {
         if (data) setQuizzes(skipFilter ? data : data.filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
       });
     }
-  }, [courses, refreshCourseData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courses]);
 
   return {
     vods,
@@ -161,5 +245,8 @@ export function useCourseData(courses: CourseBase[]) {
     refreshTime,
     isError,
     refreshCourseData,
+    addCourseData,
+    removeCourseData,
+    pendingCourseIds,
   };
 }

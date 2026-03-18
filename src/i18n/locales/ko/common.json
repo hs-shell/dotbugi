@@ -80,9 +80,16 @@
     "tokenExpiredAction": "다시 로그인"
   },
   "refresh": "새로고침",
+  "refreshing": "새로고침 중...",
+  "refreshSuccess": "새로고침 완료",
   "bubble": {
     "tasks": "아직 {{count}}개 남았어요!",
     "updatedAgo": "{{time}} 기준"
+  },
+  "courses": {
+    "title": "수강 과목 관리",
+    "desc": "추적할 과목을 선택하세요",
+    "community": "비교과"
   },
   "github": {
     "likeProject": "이 프로젝트가 마음에 드시나요?",
