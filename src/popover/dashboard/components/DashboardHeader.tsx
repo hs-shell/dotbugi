@@ -145,7 +145,7 @@ export default function DashboardHeader({ activeTab, filter: f, actions: a }: Da
                     onRemove={() => f.onAttendanceFilterChange(status)}
                   />
                 ))}
-              {activeTab === 'ASSIGN' &&
+              {(activeTab === 'ASSIGN' || activeTab === 'QUIZ') &&
                 f.filters[activeTab].submitStatuses?.map((status) => (
                   <FilterBadge
                     key={`submit-${status}`}
