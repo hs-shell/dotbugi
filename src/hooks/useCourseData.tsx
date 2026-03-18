@@ -20,6 +20,8 @@ export function useCourseData(courses: CourseBase[]) {
   const [vods, setVods] = useState<Vod[]>([]);
   const [assigns, setAssigns] = useState<Assign[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const quizzesRef = useRef(quizzes);
+  quizzesRef.current = quizzes;
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -69,9 +71,17 @@ export function useCourseData(courses: CourseBase[]) {
       const seenAssigns = new Set<string>();
       const seenQuizzes = new Set<string>();
 
+      // 현재 상태의 퀴즈 데이터를 courseId별로 그룹핑 (마감된 퀴즈 캐시용)
+      const cachedQuizMap = new Map<string, Quiz[]>();
+      for (const q of quizzesRef.current) {
+        const arr = cachedQuizMap.get(q.courseId) ?? [];
+        arr.push(q);
+        cachedQuizMap.set(q.courseId, arr);
+      }
+
       await Promise.all(
         courses.map(async (course) => {
-          const scraped = await scrapeCourseData(course.courseId);
+          const scraped = await scrapeCourseData(course.courseId, cachedQuizMap.get(course.courseId));
 
           deduplicateInto(
             vods,
@@ -227,10 +237,10 @@ export function useCourseData(courses: CourseBase[]) {
         if (data) setVods(skipFilter ? data : data.filter((vod) => isCurrentDateInRange(vod.range)));
       });
       loadDataFromStorage<Assign[]>('assign', (data) => {
-        if (data) setAssigns(skipFilter ? data : data.filter((assign) => isCurrentDateByDate(assign.dueDate)));
+        if (data) setAssigns(skipFilter ? data : data.filter((assign) => assign.dueDate === null || isCurrentDateByDate(assign.dueDate)));
       });
       loadDataFromStorage<Quiz[]>('quiz', (data) => {
-        if (data) setQuizzes(skipFilter ? data : data.filter((quiz) => isCurrentDateByDate(quiz.dueDate)));
+        if (data) setQuizzes(skipFilter ? data : data.filter((quiz) => quiz.dueDate === null || isCurrentDateByDate(quiz.dueDate)));
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

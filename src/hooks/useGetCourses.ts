@@ -46,7 +46,10 @@ export const useGetCourses = () => {
     if (import.meta.env.VITE_MOCK) {
       const envCourses = getMockCourses();
       if (envCourses) {
-        initCourses(envCourses);
+        // MOCK_COURSES 모드: chrome.storage 없이 전부 트래킹
+        setAllCourses(envCourses);
+        const defaultIds = envCourses.map((c) => c.courseId);
+        setTrackedCourseIdsState(defaultIds);
         return;
       }
       import('@/mocks/mockData').then(({ mockCourses }) => {

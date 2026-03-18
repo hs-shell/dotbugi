@@ -57,7 +57,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
       )}
 
-      {activeTab === 'ASSIGN' && (
+      {(activeTab === 'ASSIGN' || activeTab === 'QUIZ') && (
         <div>
           <div className="space-y-3">
             {submitOptions.map((option) => (

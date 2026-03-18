@@ -39,7 +39,7 @@ export function mergeDueDateItems<T extends { title: string; dueDate: string | n
   items: T[],
 ): (CourseBase & T)[] {
   return items
-    .filter((item) => skipDateFilter || isCurrentDateByDate(item.dueDate))
+    .filter((item) => skipDateFilter || item.dueDate === null || isCurrentDateByDate(item.dueDate))
     .map((item) => ({ ...course, ...item }));
 }
 

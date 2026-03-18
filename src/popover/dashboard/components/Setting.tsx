@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, changeLanguage, type LanguageCode } from '@/i18n';
-import { Globe, Github } from 'lucide-react';
+import { Globe, Github, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,13 +13,27 @@ const CONTACT_EMAIL = 'hsu.dotbugi@gmail.com';
 const KAKAO_LINK = 'https://open.kakao.com/o/sZBnxllh';
 const CALENDAR_LINK = 'https://calendar.google.com/calendar';
 
+interface HiddenTaskInfo {
+  url: string;
+  title: string;
+  courseTitle: string;
+}
+
 interface SettingProps {
   isCalendarConnected: boolean;
   onCalendarLogin: () => void;
   onCalendarLogout: () => void;
+  hiddenTasks?: HiddenTaskInfo[];
+  onUnhideTask?: (url: string) => void;
 }
 
-export default function Setting({ isCalendarConnected, onCalendarLogin, onCalendarLogout }: SettingProps) {
+export default function Setting({
+  isCalendarConnected,
+  onCalendarLogin,
+  onCalendarLogout,
+  hiddenTasks,
+  onUnhideTask,
+}: SettingProps) {
   const { i18n, t } = useTranslation('common');
 
   return (
@@ -106,6 +120,33 @@ export default function Setting({ isCalendarConnected, onCalendarLogin, onCalend
           </div>
         </div>
       </Card>
+
+      {/* 숨긴 태스크 */}
+      {hiddenTasks && hiddenTasks.length > 0 && (
+        <Card className="bg-white rounded-2xl w-full border-0 shadow-none px-1.5 py-4">
+          <span className="text-lg font-semibold text-zinc-600 px-2.5">{t('hide.title')}</span>
+          <div className="space-y-2 mt-3">
+            {hiddenTasks.map((task) => (
+              <div
+                key={task.url}
+                className="flex items-center justify-between gap-2 px-4 py-2 rounded-lg hover:bg-zinc-100 transition-colors"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="text-lg font-medium text-zinc-700 truncate">{task.courseTitle}</div>
+                  <div className="text-base text-zinc-500 truncate">{task.title}</div>
+                </div>
+                <button
+                  onClick={() => onUnhideTask?.(task.url)}
+                  className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-zinc-300 hover:bg-zinc-500 transition-colors"
+                  title={t('hide.unhide')}
+                >
+                  <X className="w-4 h-4 text-white" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* GitHub Star 배너 */}
       <GitHubStarBanner />

@@ -36,6 +36,7 @@ export type Quiz = CourseBase & {
   title: string;
   url: string;
   dueDate: string | null;
+  isSubmit: boolean;
 };
 
 export type TimeDifferenceResult = {

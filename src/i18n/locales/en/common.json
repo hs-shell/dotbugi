@@ -84,12 +84,19 @@
   "refreshSuccess": "Refresh complete",
   "bubble": {
     "tasks": "{{count}} left to go!",
+    "allDone": "All done!",
     "updatedAgo": "As of {{time}}"
   },
   "courses": {
     "title": "Manage Courses",
     "desc": "Select which courses to track",
     "community": "Community"
+  },
+  "hide": {
+    "task": "Hide this task",
+    "title": "Hidden Tasks",
+    "empty": "No hidden tasks",
+    "unhide": "Unhide"
   },
   "github": {
     "likeProject": "Like this project?",

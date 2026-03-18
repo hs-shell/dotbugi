@@ -12,7 +12,7 @@ interface UseDashboardFiltersParams {
 const INITIAL_FILTERS: Record<TAB_TYPE, Filters> = {
   VIDEO: { courseTitles: [], attendanceStatuses: [] },
   ASSIGN: { courseTitles: [], submitStatuses: [] },
-  QUIZ: { courseTitles: [] },
+  QUIZ: { courseTitles: [], submitStatuses: [] },
   SETTING: { courseTitles: [] },
 };
 

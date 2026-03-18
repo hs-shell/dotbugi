@@ -1,6 +1,7 @@
 import { fetchHtml, getText } from './fetchHtml';
 import { BASE_LINK } from '@/constants/links';
 import { normalizeLmsDate } from './lmsKeywords';
+import { isCurrentDateByDate } from './dateUtils';
 
 // 퀴즈 테이블 컬럼 (generaltable)
 // [주(c0)] [제목(c1)] [종료 일시(c2)] [성적(c3)]
@@ -19,14 +20,44 @@ function toQuizUrl(rawHref: string): string {
   return `${BASE_LINK}/mod/quiz/${rawHref}`;
 }
 
-export const fetchQuiz = async (link: string) => {
+/**
+ * 퀴즈 상세 페이지에서 제출 여부를 확인
+ * quizattemptsummary 테이블에 행이 있으면 제출된 것으로 판단
+ */
+async function fetchQuizSubmitStatus(quizUrl: string): Promise<boolean> {
+  try {
+    const doc = await fetchHtml(quizUrl);
+    const rows = doc.querySelectorAll('table.quizattemptsummary tbody tr');
+    return rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+type QuizItem = {
+  title: string;
+  subject: string;
+  url: string;
+  dueDate: string | null;
+  isSubmit: boolean;
+};
+
+/**
+ * 퀴즈 목록 + 제출 여부 조회
+ * @param cachedSubmitMap 이전에 저장된 퀴즈별 제출 상태 (key: url)
+ *   마감된 퀴즈는 상세 페이지를 다시 fetch하지 않고 캐시된 값을 사용
+ */
+export const fetchQuiz = async (
+  link: string,
+  cachedSubmitMap?: Map<string, boolean>,
+) => {
   try {
     const doc = await fetchHtml(link);
     const rows = doc.querySelectorAll('table.generaltable tbody tr');
 
     let lastWeekLabel = '';
 
-    return Array.from(rows)
+    const quizItems: Omit<QuizItem, 'isSubmit'>[] = Array.from(rows)
       .flatMap((row) => {
         const weekLabel = getText(row, COL.WEEK);
         if (weekLabel) lastWeekLabel = weekLabel;
@@ -42,6 +73,22 @@ export const fetchQuiz = async (link: string) => {
 
         return { title, subject: lastWeekLabel, url: toQuizUrl(rawHref), dueDate };
       });
+
+    // 마감 전 퀴즈만 상세 페이지 fetch, 마감된 퀴즈는 캐시 사용
+    const results: QuizItem[] = await Promise.all(
+      quizItems.map(async (item) => {
+        const isExpired = !isCurrentDateByDate(item.dueDate);
+
+        if (isExpired && cachedSubmitMap?.has(item.url)) {
+          return { ...item, isSubmit: cachedSubmitMap.get(item.url)! };
+        }
+
+        const isSubmit = await fetchQuizSubmitStatus(item.url);
+        return { ...item, isSubmit };
+      }),
+    );
+
+    return results;
   } catch (error) {
     console.error('[Dotbugi] 퀴즈 조회 오류:', error);
     throw error;

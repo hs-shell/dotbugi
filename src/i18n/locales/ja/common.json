@@ -84,12 +84,19 @@
   "refreshSuccess": "更新完了",
   "bubble": {
     "tasks": "あと{{count}}件あるよ！",
+    "allDone": "全部完了！",
     "updatedAgo": "{{time}} 時点"
   },
   "courses": {
     "title": "受講科目管理",
     "desc": "追跡する科目を選択してください",
     "community": "コミュニティ"
+  },
+  "hide": {
+    "task": "このタスクを非表示",
+    "title": "非表示のタスク",
+    "empty": "非表示のタスクはありません",
+    "unhide": "再表示"
   },
   "github": {
     "likeProject": "このプロジェクトが気に入りましたか？",
