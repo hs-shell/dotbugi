@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { isAttended } from '@/lib/utils';
 import { makeVodGroupKey } from '@/lib/generateKey';
 import Setting from './components/Setting';
+import { useHiddenTasks } from '@/hooks/useHiddenTasks';
 import {
   getOAuthToken,
   removeCachedAuthToken,
@@ -55,6 +56,23 @@ export default function Dashboard() {
     addCourseData,
     removeCourseData,
   } = useCourseData(trackedCourses);
+
+  const { hiddenUrls, hideTask, hideTasks, unhideTask, isHidden } = useHiddenTasks();
+
+  // 숨긴 태스크 필터링
+  const visibleVods = useMemo(() => vods.filter((v) => !isHidden(v.url)), [vods, isHidden]);
+  const visibleAssigns = useMemo(() => assigns.filter((a) => !isHidden(a.url)), [assigns, isHidden]);
+  const visibleQuizzes = useMemo(() => quizzes.filter((q) => !isHidden(q.url)), [quizzes, isHidden]);
+
+  // 설정에서 숨긴 태스크 목록 표시용
+  const hiddenTaskInfos = useMemo(() => {
+    const all = [
+      ...vods.map((v) => ({ url: v.url, title: v.title, courseTitle: v.courseTitle })),
+      ...assigns.map((a) => ({ url: a.url, title: a.title, courseTitle: a.courseTitle })),
+      ...quizzes.map((q) => ({ url: q.url, title: q.title, courseTitle: q.courseTitle })),
+    ];
+    return all.filter((item) => hiddenUrls.has(item.url));
+  }, [vods, assigns, quizzes, hiddenUrls]);
 
   const [activeTab, setActiveTab] = useState<TAB_TYPE>(TAB_TYPE.VIDEO);
   const [isOpen, setIsOpen] = useState(false);
@@ -202,9 +220,9 @@ export default function Dashboard() {
     const syncId = pushNotification({ type: 'loading', messageKey: 'calendar.syncing' });
 
     const calendarEvents = [
-      ...vodGroupsToEvents(vods),
-      ...assigns.map((a) => dueDateItemToEvent(a, 'assign')),
-      ...quizzes.map((q) => dueDateItemToEvent(q, 'quiz')),
+      ...vodGroupsToEvents(visibleVods),
+      ...visibleAssigns.map((a) => dueDateItemToEvent(a, 'assign')),
+      ...visibleQuizzes.map((q) => dueDateItemToEvent(q, 'quiz')),
     ];
 
     const { events: existingEvents, tokenExpired: fetchExpired } = await getCalendarEvents(token);
@@ -277,26 +295,27 @@ export default function Dashboard() {
     handleAttendanceFilterChange,
     handleSubmitFilterChange,
     clearFilters,
-  } = useDashboardFilters({ vods, assigns, quizzes, activeTab });
+  } = useDashboardFilters({ vods: visibleVods, assigns: visibleAssigns, quizzes: visibleQuizzes, activeTab });
 
   const taskCount = useMemo(() => {
     const unattendedGroups = new Set<string>();
-    for (const v of vods) {
+    for (const v of visibleVods) {
       if (!isAttended(v.weeklyAttendance)) {
         unattendedGroups.add(makeVodGroupKey(v.courseId, v.subject, v.range));
       }
     }
-    const unsubmittedAssigns = assigns.filter((a) => !a.isSubmit).length;
-    return unattendedGroups.size + unsubmittedAssigns + quizzes.length;
-  }, [vods, assigns, quizzes]);
+    const unsubmittedAssigns = visibleAssigns.filter((a) => !a.isSubmit).length;
+    const unsubmittedQuizzes = visibleQuizzes.filter((q) => !q.isSubmit).length;
+    return unattendedGroups.size + unsubmittedAssigns + unsubmittedQuizzes;
+  }, [visibleVods, visibleAssigns, visibleQuizzes]);
 
   const hasIncomplete = useMemo(
     () => ({
-      [TAB_TYPE.VIDEO]: vods.some((v) => !isAttended(v.weeklyAttendance)),
-      [TAB_TYPE.ASSIGN]: assigns.some((a) => !a.isSubmit),
-      [TAB_TYPE.QUIZ]: quizzes.length > 0,
+      [TAB_TYPE.VIDEO]: visibleVods.some((v) => !isAttended(v.weeklyAttendance)),
+      [TAB_TYPE.ASSIGN]: visibleAssigns.some((a) => !a.isSubmit),
+      [TAB_TYPE.QUIZ]: visibleQuizzes.some((q) => !q.isSubmit),
     }),
-    [vods, assigns, quizzes]
+    [visibleVods, visibleAssigns, visibleQuizzes]
   );
 
   const handleToggleOpen = (e: React.MouseEvent) => {
@@ -344,7 +363,7 @@ export default function Dashboard() {
     localStorage.setItem(BUBBLE_DISMISS_KEY, Date.now().toString());
   };
 
-  const showBubble = !isOpen && !bubbleDismissed && !bubbleHiddenByOpen && !isPending && taskCount > 0;
+  const showBubble = !isOpen && !bubbleDismissed && !bubbleHiddenByOpen && !isPending;
 
   const filterHandlers = {
     searchTerm,
@@ -421,14 +440,16 @@ export default function Dashboard() {
               </div>
             ) : (
               <>
-                {activeTab === 'VIDEO' && <VodList courseData={filteredVods} />}
-                {activeTab === 'ASSIGN' && <AssignList courseData={filteredAssigns} />}
-                {activeTab === 'QUIZ' && <QuizList courseData={filteredQuizzes} />}
+                {activeTab === 'VIDEO' && <VodList courseData={filteredVods} onHideTask={hideTask} onHideTasks={hideTasks} />}
+                {activeTab === 'ASSIGN' && <AssignList courseData={filteredAssigns} onHideTask={hideTask} />}
+                {activeTab === 'QUIZ' && <QuizList courseData={filteredQuizzes} onHideTask={hideTask} />}
                 {activeTab === 'SETTING' && (
                   <Setting
                     isCalendarConnected={isCalendarConnected}
                     onCalendarLogin={handleCalendarLogin}
                     onCalendarLogout={handleCalendarLogout}
+                    hiddenTasks={hiddenTaskInfos}
+                    onUnhideTask={unhideTask}
                   />
                 )}
               </>

@@ -88,14 +88,19 @@ export function filterQuizzes(quizzes: Quiz[], filters: Filters, searchTerm: str
   const data = quizzes.filter((quiz) => matchesBase(quiz, courseTitles, term));
 
   return data.sort((a, b) => {
+    // 미제출 우선 배치
+    if (!a.isSubmit && b.isSubmit) return -1;
+    if (a.isSubmit && !b.isSubmit) return 1;
+
     switch (sortBy) {
       case 'title':
         return a.title.localeCompare(b.title);
-      default:
-        if (a.dueDate === null && b.dueDate !== null) return 1;
-        if (a.dueDate !== null && b.dueDate === null) return -1;
-        if (a.dueDate === null && b.dueDate === null) return 0;
-        return (a.dueDate ?? '').localeCompare(b.dueDate ?? '');
+      default: {
+        const dateA = a.dueDate === null ? Number.MAX_SAFE_INTEGER : new Date(a.dueDate).getTime();
+        const dateB = b.dueDate === null ? Number.MAX_SAFE_INTEGER : new Date(b.dueDate).getTime();
+        if (dateA !== dateB) return dateA - dateB;
+        return 0;
+      }
     }
   });
 }

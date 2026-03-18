@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 interface AssignmentProps {
   courseData: Assign[];
+  onHideTask?: (url: string) => void;
 }
 
-export default function AssignList({ courseData }: AssignmentProps) {
+export default function AssignList({ courseData, onHideTask }: AssignmentProps) {
   const { t } = useTranslation('common');
   return (
     <DueDateList
@@ -20,6 +21,7 @@ export default function AssignList({ courseData }: AssignmentProps) {
       }}
       getStatusColor={(item, timeDiff) => (item.isSubmit ? 'text-green-500' : timeDiff.textColor)}
       getStatusLabel={(item) => (item.isSubmit ? t('submit.doneSpaced') : t('submit.neededSpaced'))}
+      onHideTask={onHideTask}
     />
   );
 }

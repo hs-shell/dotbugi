@@ -242,6 +242,7 @@ export const mockQuizes: Quiz[] = [
     title: '오늘 마감 퀴즈',
     url: '#',
     dueDate: offsetDate(0),
+    isSubmit: true,
   },
   // 마감 임박 (내일)
   {
@@ -252,6 +253,7 @@ export const mockQuizes: Quiz[] = [
     title: '트리 구조 퀴즈',
     url: '#',
     dueDate: offsetDate(1),
+    isSubmit: false,
   },
   // 마감 여유 (5일)
   {
@@ -262,6 +264,7 @@ export const mockQuizes: Quiz[] = [
     title: '프로세스 관리 퀴즈',
     url: '#',
     dueDate: offsetDate(5),
+    isSubmit: false,
   },
   // 마감 몇 시간 뒤 (긴급)
   {
@@ -272,6 +275,7 @@ export const mockQuizes: Quiz[] = [
     title: 'OSI 모델 퀴즈',
     url: '#',
     dueDate: offsetDate(0, 5),
+    isSubmit: true,
   },
   // 마감 이미 지남 (새로고침 전 마감)
   {
@@ -282,6 +286,7 @@ export const mockQuizes: Quiz[] = [
     title: 'SQL 기초 퀴즈',
     url: '#',
     dueDate: offsetDate(-1),
+    isSubmit: true,
   },
   // 마감 2주 뒤
   {
@@ -292,6 +297,7 @@ export const mockQuizes: Quiz[] = [
     title: '정규화 퀴즈',
     url: '#',
     dueDate: offsetDate(14),
+    isSubmit: false,
   },
   // dueDate null 케이스
   {
@@ -302,5 +308,6 @@ export const mockQuizes: Quiz[] = [
     title: '그래프 탐색 퀴즈',
     url: '#',
     dueDate: null,
+    isSubmit: false,
   },
 ];

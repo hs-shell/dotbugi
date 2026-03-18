@@ -1,4 +1,4 @@
-import { Clock, X } from 'lucide-react';
+import { CheckCircle, Clock, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -10,6 +10,7 @@ interface InfoBubbleProps {
 
 export default function InfoBubble({ taskCount, remainingTime, onDismiss }: InfoBubbleProps) {
   const { t } = useTranslation('common');
+  const allDone = taskCount === 0;
 
   const isStale = remainingTime >= 30;
   const timeText =
@@ -27,8 +28,9 @@ export default function InfoBubble({ taskCount, remainingTime, onDismiss }: Info
     >
       <div className="flex items-start gap-3 p-2">
         <div className="flex-1 min-w-0">
-          <div className="font-extrabold text-2xl text-zinc-800 leading-tight">
-            {t('bubble.tasks', { count: taskCount })}
+          <div className="font-extrabold text-2xl text-zinc-800 leading-tight flex items-center gap-2">
+            {allDone && <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />}
+            {allDone ? t('bubble.allDone') : t('bubble.tasks', { count: taskCount })}
           </div>
           <div className={`flex items-center gap-2 mt-2 text-lg ${isStale ? 'text-orange-500' : 'text-zinc-500'}`}>
             <Clock className="w-4 h-4" />

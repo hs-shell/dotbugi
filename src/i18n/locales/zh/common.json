@@ -85,12 +85,19 @@
   "refreshSuccess": "刷新完成",
   "bubble": {
     "tasks": "还剩{{count}}个哦！",
+    "allDone": "全部完成！",
     "updatedAgo": "{{time}}基准"
   },
   "courses": {
     "title": "课程管理",
     "desc": "选择要追踪的课程",
     "community": "社区"
+  },
+  "hide": {
+    "task": "隐藏此任务",
+    "title": "已隐藏的任务",
+    "empty": "没有隐藏的任务",
+    "unhide": "取消隐藏"
   },
   "github": {
     "likeProject": "喜欢这个项目吗？",
