@@ -1,80 +1,65 @@
 ---
 layout: home
 
-head:
-  - - script
-    - {}
-    - |
-      if (!sessionStorage.getItem('lang-redirected')) {
-        const lang = navigator.language?.toLowerCase() || '';
-        const base = '/dotbugi/';
-        const map = { en: 'en/', ja: 'ja/', zh: 'zh/' };
-        const match = Object.entries(map).find(([k]) => lang.startsWith(k));
-        if (match) {
-          sessionStorage.setItem('lang-redirected', '1');
-          window.location.replace(base + match[1]);
-        }
-      }
-
 hero:
   name: 돋부기
-  tagline: 학교 LMS를 더 편리하게
+  tagline: 让大学LMS更便捷
   image:
     src: /favicon.png
     alt: 돋부기
   actions:
     - theme: brand
-      text: 사용 설명서
-      link: /guide/basic
+      text: 使用说明
+      link: /zh/guide/basic
     - theme: alt
-      text: 업데이트 로그
-      link: /updates/changelog
+      text: 更新日志
+      link: /zh/updates/changelog
 ---
 
 <div class="cards">
-  <a class="card" href="/dotbugi/guide/basic">
+  <a class="card" href="/dotbugi/zh/guide/basic">
     <div class="card-icon" style="background: #dbeafe;">📖</div>
     <div class="card-body">
-      <span class="card-title">간단 사용 설명서</span>
-      <span class="card-desc">설치부터 대시보드, 자동 재생까지 기본 사용법을 알아봅니다.</span>
+      <span class="card-title">基础使用说明</span>
+      <span class="card-desc">从安装到仪表盘、自动播放，了解基本使用方法。</span>
     </div>
   </a>
-  <a class="card" href="/dotbugi/guide/advanced">
+  <a class="card" href="/dotbugi/zh/guide/advanced">
     <div class="card-icon" style="background: #ffedd5;">⚙️</div>
     <div class="card-body">
-      <span class="card-title">고급 사용 설명서</span>
-      <span class="card-desc">필터, 배지, 숨기기 등 고급 기능을 활용해 보세요.</span>
+      <span class="card-title">高级使用说明</span>
+      <span class="card-desc">使用筛选、徽章、隐藏等高级功能。</span>
     </div>
   </a>
-  <a class="card" href="/dotbugi/guide/calendar">
+  <a class="card" href="/dotbugi/zh/guide/calendar">
     <div class="card-icon" style="background: #ede9fe;">📅</div>
     <div class="card-body">
-      <span class="card-title">Google 캘린더 연동</span>
-      <span class="card-desc">과제·퀴즈 마감일을 캘린더에 자동 등록합니다.</span>
+      <span class="card-title">Google 日历同步</span>
+      <span class="card-desc">将作业和测验截止日期自动添加到日历中。</span>
     </div>
   </a>
 </div>
 
 <div class="features">
   <div class="feature">
-    <h3>할 일 대시보드</h3>
-    <p>온라인 강의, 과제, 퀴즈를 한 화면에 모아 마감 상태를 색상으로 구분합니다.</p>
+    <h3>待办仪表盘</h3>
+    <p>将在线课程、作业、测验汇集在一个界面，通过颜色区分截止状态。</p>
   </div>
   <div class="feature">
-    <h3>자동 연속 재생</h3>
-    <p>미수강 강의를 자동으로 연속 재생하여 수강을 빠르게 완료할 수 있습니다.</p>
+    <h3>自动连续播放</h3>
+    <p>自动连续播放未观看的课程，快速完成学习。</p>
   </div>
   <div class="feature">
-    <h3>Google 캘린더 연동</h3>
-    <p>과제·퀴즈 마감일을 Google 캘린더에 자동 등록하여 일정을 놓치지 않습니다.</p>
+    <h3>Google 日历同步</h3>
+    <p>将作业和测验截止日期自动添加到 Google 日历，不再错过任何日程。</p>
   </div>
   <div class="feature">
-    <h3>강의 페이지 배지</h3>
-    <p>강의 페이지에서 각 활동의 출석/제출 상태를 배지로 한눈에 확인할 수 있습니다.</p>
+    <h3>课程页面徽章</h3>
+    <p>在课程页面上以徽章形式一目了然地查看各活动的出勤/提交状态。</p>
   </div>
   <div class="feature">
-    <h3>다국어 지원</h3>
-    <p>한국어, English, 中文, 日本語 4개 언어를 지원합니다.</p>
+    <h3>多语言支持</h3>
+    <p>支持한국어、English、中文、日本語四种语言。</p>
   </div>
 </div>
 

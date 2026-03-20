@@ -1,80 +1,65 @@
 ---
 layout: home
 
-head:
-  - - script
-    - {}
-    - |
-      if (!sessionStorage.getItem('lang-redirected')) {
-        const lang = navigator.language?.toLowerCase() || '';
-        const base = '/dotbugi/';
-        const map = { en: 'en/', ja: 'ja/', zh: 'zh/' };
-        const match = Object.entries(map).find(([k]) => lang.startsWith(k));
-        if (match) {
-          sessionStorage.setItem('lang-redirected', '1');
-          window.location.replace(base + match[1]);
-        }
-      }
-
 hero:
-  name: 돋부기
-  tagline: 학교 LMS를 더 편리하게
+  name: Dotbugi
+  tagline: Make your LMS more convenient
   image:
     src: /favicon.png
-    alt: 돋부기
+    alt: Dotbugi
   actions:
     - theme: brand
-      text: 사용 설명서
-      link: /guide/basic
+      text: User Guide
+      link: /en/guide/basic
     - theme: alt
-      text: 업데이트 로그
-      link: /updates/changelog
+      text: Update Log
+      link: /en/updates/changelog
 ---
 
 <div class="cards">
-  <a class="card" href="/dotbugi/guide/basic">
+  <a class="card" href="/dotbugi/en/guide/basic">
     <div class="card-icon" style="background: #dbeafe;">📖</div>
     <div class="card-body">
-      <span class="card-title">간단 사용 설명서</span>
-      <span class="card-desc">설치부터 대시보드, 자동 재생까지 기본 사용법을 알아봅니다.</span>
+      <span class="card-title">Basic User Guide</span>
+      <span class="card-desc">Learn the basics from installation to the dashboard and auto-play.</span>
     </div>
   </a>
-  <a class="card" href="/dotbugi/guide/advanced">
+  <a class="card" href="/dotbugi/en/guide/advanced">
     <div class="card-icon" style="background: #ffedd5;">⚙️</div>
     <div class="card-body">
-      <span class="card-title">고급 사용 설명서</span>
-      <span class="card-desc">필터, 배지, 숨기기 등 고급 기능을 활용해 보세요.</span>
+      <span class="card-title">Advanced User Guide</span>
+      <span class="card-desc">Explore advanced features like filters, badges, and hiding tasks.</span>
     </div>
   </a>
-  <a class="card" href="/dotbugi/guide/calendar">
+  <a class="card" href="/dotbugi/en/guide/calendar">
     <div class="card-icon" style="background: #ede9fe;">📅</div>
     <div class="card-body">
-      <span class="card-title">Google 캘린더 연동</span>
-      <span class="card-desc">과제·퀴즈 마감일을 캘린더에 자동 등록합니다.</span>
+      <span class="card-title">Google Calendar Integration</span>
+      <span class="card-desc">Automatically add assignment and quiz deadlines to your calendar.</span>
     </div>
   </a>
 </div>
 
 <div class="features">
   <div class="feature">
-    <h3>할 일 대시보드</h3>
-    <p>온라인 강의, 과제, 퀴즈를 한 화면에 모아 마감 상태를 색상으로 구분합니다.</p>
+    <h3>Task Dashboard</h3>
+    <p>View online lectures, assignments, and quizzes in one screen with color-coded deadline statuses.</p>
   </div>
   <div class="feature">
-    <h3>자동 연속 재생</h3>
-    <p>미수강 강의를 자동으로 연속 재생하여 수강을 빠르게 완료할 수 있습니다.</p>
+    <h3>Auto Continuous Playback</h3>
+    <p>Automatically play unwatched lectures in sequence to complete your coursework quickly.</p>
   </div>
   <div class="feature">
-    <h3>Google 캘린더 연동</h3>
-    <p>과제·퀴즈 마감일을 Google 캘린더에 자동 등록하여 일정을 놓치지 않습니다.</p>
+    <h3>Google Calendar Integration</h3>
+    <p>Automatically register assignment and quiz deadlines to Google Calendar so you never miss a due date.</p>
   </div>
   <div class="feature">
-    <h3>강의 페이지 배지</h3>
-    <p>강의 페이지에서 각 활동의 출석/제출 상태를 배지로 한눈에 확인할 수 있습니다.</p>
+    <h3>Course Page Badges</h3>
+    <p>Instantly check the attendance/submission status of each activity with badges on the course page.</p>
   </div>
   <div class="feature">
-    <h3>다국어 지원</h3>
-    <p>한국어, English, 中文, 日本語 4개 언어를 지원합니다.</p>
+    <h3>Multi-language Support</h3>
+    <p>Supports 4 languages: Korean, English, Chinese, and Japanese.</p>
   </div>
 </div>
 
