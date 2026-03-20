@@ -63,9 +63,9 @@ export const fetchQuiz = async (
         if (weekLabel) lastWeekLabel = weekLabel;
 
         const titleLink = row.querySelector<HTMLAnchorElement>(COL.TITLE_LINK);
-        const rawDueDate = getText(row, COL.DUE_DATE);
-        if (!titleLink || !rawDueDate) return [];
-        const dueDate = normalizeLmsDate(rawDueDate)!;
+        const rawDueDate = getText(row, COL.DUE_DATE)?.trim();
+        if (!titleLink) return [];
+        const dueDate = rawDueDate && rawDueDate !== '-' ? normalizeLmsDate(rawDueDate) ?? null : null;
 
         const title = titleLink.textContent?.trim();
         const rawHref = titleLink.getAttribute('href');
@@ -77,7 +77,7 @@ export const fetchQuiz = async (
     // 마감 전 퀴즈만 상세 페이지 fetch, 마감된 퀴즈는 캐시 사용
     const results: QuizItem[] = await Promise.all(
       quizItems.map(async (item) => {
-        const isExpired = !isCurrentDateByDate(item.dueDate);
+        const isExpired = item.dueDate ? !isCurrentDateByDate(item.dueDate) : false;
 
         if (isExpired && cachedSubmitMap?.has(item.url)) {
           return { ...item, isSubmit: cachedSubmitMap.get(item.url)! };

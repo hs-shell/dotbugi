@@ -11,3 +11,6 @@ export const getQuizPageLink = (courseId: string) => {
 export const getIndexPageLink = (courseId: string) => {
   return BASE_LINK + `/course/view.php?id=${courseId}`;
 };
+export const getVodProgressPageLink = (courseId: string) => {
+  return BASE_LINK + `/report/ubcompletion/user_progress.php?id=${courseId}`;
+};

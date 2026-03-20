@@ -56,16 +56,57 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     setCurrentVideoIndex((prev) => (prev + 1) % vods.length);
   }, [vods, currentVideoIndex, setIsPlaying]);
 
-  const loadUnattendedVods = useCallback(() => {
+  const skipPlayerFilter = !!import.meta.env.VITE_MOCK_COURSES;
+  const usePureMock = !!import.meta.env.VITE_MOCK && !import.meta.env.VITE_MOCK_COURSES;
+
+  const loadUnattendedVods = useCallback(async () => {
+    if (usePureMock) {
+      const { mockPlayerVodIds } = await import('@/mocks/mockData');
+      const BASE = 'https://learn.hansung.ac.kr/mod/vod/view.php?id=';
+      setVods(
+        mockPlayerVodIds.map((id, i) => ({
+          courseId: 'mock',
+          courseTitle: 'Player Test',
+          prof: '',
+          week: i + 1,
+          subject: `${i + 1}주차`,
+          title: `VOD-${id}`,
+          url: `${BASE}${id}`,
+          range: null,
+          length: '00:00',
+          isAttendance: 'X',
+          weeklyAttendance: 'X',
+        })),
+      );
+      return;
+    }
     loadDataFromStorage<Vod[]>('vod', (data) => {
       if (!data) return;
-      setVods(data.filter((vod) => isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)));
+      loadDataFromStorage<string[]>('hiddenTaskUrls', (hiddenUrls) => {
+        const hidden = new Set(hiddenUrls ?? []);
+        if (skipPlayerFilter) {
+          setVods(data.filter((vod) => !hidden.has(vod.url)));
+        } else {
+          setVods(data.filter((vod) => !hidden.has(vod.url) && isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)));
+        }
+      });
     });
-  }, []);
+  }, [skipPlayerFilter, usePureMock]);
 
   useEffect(() => {
     loadUnattendedVods();
   }, [loadUnattendedVods]);
+
+  // Dashboard에서 새로고침 시 storage 변경을 감지해서 player 목록 갱신
+  useEffect(() => {
+    const listener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if ((changes.vod || changes.hiddenTaskUrls) && !isPlaying) {
+        loadUnattendedVods();
+      }
+    };
+    chrome.storage.onChanged.addListener(listener);
+    return () => chrome.storage.onChanged.removeListener(listener);
+  }, [loadUnattendedVods, isPlaying]);
 
   useEffect(() => {
     if (isPopoverOpen && !isPlaying && vods.length === 0) {
@@ -128,7 +169,12 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
               </div>
 
               <div className="w-1/3 flex flex-col py-4 px-4 min-w-0 bg-zinc-50 rounded-xl">
-                <h3 className="text-4xl font-bold text-black mb-4 flex-shrink-0">{t('lectureList')}</h3>
+                <div className="flex items-baseline justify-between mb-4 flex-shrink-0">
+                  <h3 className="text-4xl font-bold text-black">{t('lectureList')}</h3>
+                  <span className="text-lg text-zinc-400 font-medium">
+                    {currentVideoIndex + 1} / {vods.length}
+                  </span>
+                </div>
                 <div className="overflow-y-auto flex-1 pr-2 scrollbar-hide">
                   <style>{`
                     .scrollbar-hide::-webkit-scrollbar {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const formatMMSS = (seconds: number) =>
@@ -15,44 +15,27 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const isPlayingRef = useRef(isPlaying);
   const onNextVideoRef = useRef(onNextVideo);
+  const abortRef = useRef<AbortController | null>(null);
 
   const [time, setTime] = useState({ current: 0, duration: 0 });
-
-  const setIframeRef = (node: HTMLIFrameElement | null) => {
-    iframeRef.current = node;
-    if (node) {
-      node.addEventListener('load', loadEventListener);
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const video = getVideoElement();
-      if (video) {
-        setTime({ current: video.currentTime, duration: video.duration });
-      }
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
     onNextVideoRef.current = onNextVideo;
   }, [isPlaying, onNextVideo]);
 
-  const getVideoElement = () => {
+  const getVideoElement = useCallback(() => {
     const iframe = iframeRef.current;
     if (!iframe) return null;
     try {
       const doc = iframe.contentDocument || iframe.contentWindow?.document;
       return (doc?.querySelector('video') as HTMLVideoElement | null) ?? null;
-    } catch (err) {
-      console.error('iframe access error', err);
+    } catch {
       return null;
     }
-  };
+  }, []);
 
-  const controlPlayback = (video: HTMLVideoElement | null, play: boolean) => {
+  const controlPlayback = useCallback((video: HTMLVideoElement | null, play: boolean) => {
     if (!video) return;
     if (play) {
       video.muted = false;
@@ -61,65 +44,137 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
     } else {
       video.pause();
     }
-  };
+  }, []);
 
-  const loadEventListener = () => {
-    const video = getVideoElement();
-    if (!video) return;
-
-    video.onended = null;
-    video.onended = () => onNextVideoRef.current();
-
-    controlPlayback(video, isPlayingRef.current);
-  };
-
-  useEffect(() => {
+  // iframe load 시: 메타 fetch → 스킵 or 이어보기 or 재생
+  const handleLoad = useCallback(async () => {
     const iframe = iframeRef.current;
     if (!iframe) return;
-    iframe.addEventListener('load', loadEventListener);
-    return () => iframe.removeEventListener('load', loadEventListener);
-  }, [videoSrc]);
 
-  useEffect(() => {
-    controlPlayback(getVideoElement(), isPlaying);
-  }, [isPlaying]);
+    // 이전 fetch 취소
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
+    // 메타 fetch
+    try {
+      const res = await fetch(iframe.src, { credentials: 'include', signal: controller.signal });
+      const html = await res.text();
+
+      if (controller.signal.aborted) return;
+
+      const completeMatch = html.match(/var\s+is_complete\s*=\s*(\d+)/);
+      const progressMatch = html.match(/var\s+before_progress\s*=\s*(\d+)/);
+      const isComplete = completeMatch?.[1] === '1';
+      const beforeProgress = progressMatch ? parseInt(progressMatch[1], 10) : 0;
+
+      // is_complete면 스킵
+      if (isComplete && isPlayingRef.current) {
+        onNextVideoRef.current();
+        return;
+      }
+
+      const video = getVideoElement();
+      if (!video) return;
+
+      video.onended = null;
+      video.onended = () => onNextVideoRef.current();
+
+      // 이어보기
+      if (!isComplete && beforeProgress > 0) {
+        const trySeek = () => {
+          if (controller.signal.aborted) return;
+          if (video.readyState >= 1 && video.duration > 0) {
+            video.currentTime = Math.min(beforeProgress, video.duration - 1);
+          } else {
+            setTimeout(trySeek, 500);
+          }
+        };
+        trySeek();
+      }
+
+      controlPlayback(video, isPlayingRef.current);
+    } catch {
+      // fetch 실패 시 일반 재생
+      if (controller.signal.aborted) return;
+      const video = getVideoElement();
+      if (!video) return;
+      video.onended = null;
+      video.onended = () => onNextVideoRef.current();
+      controlPlayback(video, isPlayingRef.current);
+    }
+  }, [getVideoElement, controlPlayback]);
+
+  // callback ref: iframe mount 시 즉시 load 리스너 등록
+  const setIframeRef = useCallback(
+    (node: HTMLIFrameElement | null) => {
+      if (iframeRef.current) {
+        iframeRef.current.removeEventListener('load', handleLoad);
+      }
+      iframeRef.current = node;
+      if (node) {
+        node.addEventListener('load', handleLoad);
+      }
+    },
+    [handleLoad],
+  );
+
+  // 시간 표시
   useEffect(() => {
     const interval = setInterval(() => {
       const video = getVideoElement();
-      if (video && !video.paused) {
+      if (video) {
+        setTime({ current: video.currentTime, duration: video.duration });
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [getVideoElement]);
+
+  useEffect(() => {
+    controlPlayback(getVideoElement(), isPlaying);
+  }, [isPlaying, controlPlayback, getVideoElement]);
+
+  // cleanup abort on unmount
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
+
+  // 백그라운드 탭 fallback
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const video = getVideoElement();
+      if (!video || !isPlayingRef.current) return;
+
+      if (video.paused) {
         video.play().catch(() => {});
       }
-    }, 60_000);
+
+      if (video.duration > 0 && video.currentTime >= video.duration - 0.5) {
+        onNextVideoRef.current();
+      }
+    }, 3_000);
     return () => clearInterval(interval);
-  }, []);
+  }, [getVideoElement]);
 
   return (
     <div className={`relative w-full h-full items-center justify-center rounded-xl ${!isPlaying && 'bg-black'}`}>
-      <div
-        className={`absolute inset-0 flex items-center justify-center text-white
-          text-6xl font-bold bg-transparent pointer-events-none`}
-      >
-        {isPlaying ? (
-          time.duration > 0 ? (
-            <div className="flex items-center justify-center p-8 bg-zinc-950 bg-opacity-80 rounded-xl">
-              <span className="flex items-center justify-center text-white min-w-[4ch]">
-                {formatMMSS(time.current)}{' '}
-              </span>
-              <span className="flex items-center justify-center text-zinc-300"> / </span>
-              <span className="flex items-center justify-center text-zinc-300 min-w-[4ch]">
-                {formatMMSS(time.duration)}
-              </span>
-            </div>
-          ) : (
-            <div>{t('noVideoInfo')}</div>
-          )
-        ) : (
-          <div className="flex justify-center items-center text-center text-3xl">
-            {t('startPrompt')}
+      {isPlaying ? (
+        time.duration > 0 ? (
+          <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-black/70 backdrop-blur-sm rounded-lg pointer-events-none text-xl font-medium z-10">
+            <span className="text-white">{formatMMSS(time.current)}</span>
+            <span className="text-zinc-400">/</span>
+            <span className="text-zinc-400">{formatMMSS(time.duration)}</span>
           </div>
-        )}
-      </div>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-white text-2xl font-medium pointer-events-none">
+            {t('noVideoInfo')}
+          </div>
+        )
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center text-white text-2xl font-medium pointer-events-none">
+          {t('startPrompt')}
+        </div>
+      )}
 
       {videoSrc && isPlaying && (
         <iframe

@@ -104,18 +104,20 @@
   },
   "courseStatus": {
     "vod": {
-      "completed": "시청 완료",
+      "completed": "출석",
+      "inProgress": "시청중",
       "absent": "결석",
       "pending": "미시청"
     },
     "assign": {
       "completed": "제출완료",
-      "absent": "미제출",
+      "late": "늦은 제출",
+      "absent": "미제출 (마감)",
       "pending": "미제출"
     },
     "quiz": {
       "completed": "응시완료",
-      "absent": "미응시",
+      "absent": "미응시 (마감)",
       "pending": "미응시"
     },
     "hidden": "숨김",

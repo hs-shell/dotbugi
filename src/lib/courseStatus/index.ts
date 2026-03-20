@@ -29,7 +29,7 @@ function parseCourseInfoFromDOM(courseId: string): CourseBase {
 
 // Fetch & inject
 
-async function fetchAndInject(courseId: string, course: CourseBase, isTracked: boolean) {
+async function fetchAndInject(courseId: string, course: CourseBase, isTracked: boolean, isCommunity: boolean) {
   showStatusBar('loading');
 
   const [hiddenUrls, cachedQuizzes] = await Promise.all([
@@ -38,7 +38,7 @@ async function fetchAndInject(courseId: string, course: CourseBase, isTracked: b
   ]);
 
   try {
-    const scraped = await scrapeCourseData(courseId, cachedQuizzes);
+    const scraped = await scrapeCourseData(courseId, cachedQuizzes, isCommunity);
     const newVods = mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray);
     const newAssigns = mergeDueDateItems(course, scraped.assignDataArray);
     const newQuizzes = mergeDueDateItems(course, scraped.quizDataArray);
@@ -68,8 +68,12 @@ export async function injectCourseStatus() {
   highlightCurrentWeek();
   await cleanupExpiredTempCourses();
 
-  const trackedIds = await load<string[]>('trackedCourseIds');
+  const [trackedIds, communityIds] = await Promise.all([
+    load<string[]>('trackedCourseIds'),
+    load<string[]>('communityIds'),
+  ]);
   const isTracked = trackedIds?.includes(courseId) ?? false;
+  const isCommunity = communityIds?.includes(courseId) ?? false;
 
   // 뒤로가기/앞으로가기 → 캐시 사용
   if (isFetchCacheValid(courseId)) {
@@ -87,5 +91,5 @@ export async function injectCourseStatus() {
   }
 
   // 최신 데이터 fetch
-  fetchAndInject(courseId, parseCourseInfoFromDOM(courseId), isTracked);
+  fetchAndInject(courseId, parseCourseInfoFromDOM(courseId), isTracked, isCommunity);
 }

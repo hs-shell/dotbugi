@@ -7,6 +7,10 @@ export function injectCourseToggles() {
   const allCourses = parseCoursesFromDOM();
   if (allCourses.length === 0) return;
 
+  // 커뮤니티 강좌 ID 저장 (강의 페이지 배지 주입 시 참조)
+  const communityIds = allCourses.filter((c) => c.isCommunity).map((c) => c.courseId);
+  saveDataToStorage('communityIds', communityIds);
+
   loadDataFromStorage<string[]>('trackedCourseIds', (savedIds) => {
     const trackedIds = savedIds ?? allCourses.filter((c) => !c.isCommunity).map((c) => c.courseId);
 

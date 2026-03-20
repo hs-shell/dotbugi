@@ -91,7 +91,7 @@ export function useCourseData(courses: CourseBase[]) {
 
       await Promise.all(
         courses.map(async (course) => {
-          const scraped = await scrapeCourseData(course.courseId, cachedQuizMap.get(course.courseId));
+          const scraped = await scrapeCourseData(course.courseId, cachedQuizMap.get(course.courseId), course.isCommunity);
 
           deduplicateInto(
             vods,
@@ -140,7 +140,7 @@ export function useCourseData(courses: CourseBase[]) {
   const addCourseData = useCallback(async (course: CourseBase) => {
     setPendingCourseIds((prev) => new Set(prev).add(course.courseId));
     try {
-      const scraped = await scrapeCourseData(course.courseId);
+      const scraped = await scrapeCourseData(course.courseId, undefined, course.isCommunity);
 
       const newVods = mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray);
       const newAssigns = mergeDueDateItems(course, scraped.assignDataArray);

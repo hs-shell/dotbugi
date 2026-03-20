@@ -86,7 +86,7 @@ export default function DashboardHeader({ activeTab, filter: f, actions: a }: Da
           <DropdownMenuTrigger asChild>
             <button className="relative flex rounded-lg bg-white hover:bg-zinc-100 transition-all duration-200 p-2">
               <EllipsisVertical className="w-7 h-7" />
-              {a.remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 60) && (
+              {a.remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 5) && (
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
               )}
             </button>
@@ -100,7 +100,7 @@ export default function DashboardHeader({ activeTab, filter: f, actions: a }: Da
               <RefreshCw />
               <span className="flex-1">{t('common:refresh')}</span>
               <span
-                className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${a.remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 60) ? 'bg-red-500' : 'bg-green-500'}`}
+                className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${a.remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 5) ? 'bg-red-500' : 'bg-green-500'}`}
               />
             </DropdownMenuItem>
             <DropdownMenuItem onClick={a.onOpenSetting} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">

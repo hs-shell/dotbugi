@@ -104,18 +104,20 @@
   },
   "courseStatus": {
     "vod": {
-      "completed": "Watched",
+      "completed": "Attended",
+      "inProgress": "Watching",
       "absent": "Absent",
       "pending": "Not Watched"
     },
     "assign": {
       "completed": "Submitted",
-      "absent": "Not Submitted",
+      "late": "Late Submission",
+      "absent": "Not Submitted (Closed)",
       "pending": "Not Submitted"
     },
     "quiz": {
       "completed": "Taken",
-      "absent": "Not Taken",
+      "absent": "Not Taken (Closed)",
       "pending": "Not Taken"
     },
     "hidden": "Hidden",

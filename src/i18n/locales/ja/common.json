@@ -104,18 +104,20 @@
   },
   "courseStatus": {
     "vod": {
-      "completed": "視聴完了",
+      "completed": "出席",
+      "inProgress": "視聴中",
       "absent": "欠席",
       "pending": "未視聴"
     },
     "assign": {
       "completed": "提出済み",
-      "absent": "未提出",
+      "late": "遅れた提出",
+      "absent": "未提出 (締切)",
       "pending": "未提出"
     },
     "quiz": {
       "completed": "受験済み",
-      "absent": "未受験",
+      "absent": "未受験 (締切)",
       "pending": "未受験"
     },
     "hidden": "非表示",

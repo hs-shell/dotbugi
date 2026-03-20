@@ -34,7 +34,7 @@ export function createManifest(mode?: string): ManifestV3Export {
       matches: ['*://*/*'],
     },
   ],
-  permissions: ['storage', 'notifications', 'alarms', 'identity'],
+  permissions: ['storage', 'identity'],
   host_permissions: ['https://*/*', 'http://*/*'],
   oauth2: {
     client_id: clientId,
