@@ -1,0 +1,133 @@
+{
+  "vod": "课程",
+  "assign": "作业",
+  "quiz": "测验",
+
+  "setting": "设置",
+  "dashboard": "仪表盘",
+  "close": "关闭",
+  "clearAll": "全部清除",
+  "search": "搜索",
+  "cancel": "取消",
+  "notFound": "404 Not Found",
+  "attendance": {
+    "attended": "出勤",
+    "absent": "缺勤"
+  },
+  "submit": {
+    "done": "已提交",
+    "needed": "未提交",
+    "doneSpaced": "已提交",
+    "neededSpaced": "未提交"
+  },
+  "status": {
+    "notStarted": "未学习",
+    "completed": "学习完成",
+    "inProgress": "学习中",
+    "checkManually": "手动确认",
+    "checkManuallyNoSpace": "手动确认"
+  },
+  "date": {
+    "noDeadline": "无截止日",
+    "noInfo": "无信息",
+    "expired": "已截止",
+    "daysLater": "{{days}}天后",
+    "hoursLater": "{{hours}}小时后",
+    "minutesLater": "{{minutes}}分钟后",
+    "remaining": "剩余{{days}}天{{hours}}小时{{minutes}}分钟",
+    "remainingHoursMinutes": "剩余{{hours}}小时{{minutes}}分钟",
+    "remainingMinutes": "剩余{{minutes}}分钟",
+    "justNow": "刚刚",
+    "daysAgo": "{{days}}天{{hours}}小时{{minutes}}分钟前",
+    "hoursAgo": "{{hours}}小时{{minutes}}分钟前",
+    "minutesAgo": "{{minutes}}分钟前",
+    "ago": "前",
+    "minutesAgoShort": "{{minutes}}分钟前",
+    "hoursAgoShort": "{{hours}}小时前",
+    "monthYear": "yyyy年 MM月",
+    "weekdays": ["日", "一", "二", "三", "四", "五", "六"]
+  },
+  "count": "{{count}} 个",
+  "countZero": "0 个",
+  "percentComplete": "{{percent}}% 完成",
+  "error": {
+    "occurred": "发生了错误。",
+    "refreshPage": "刷新页面"
+  },
+  "noRecords": "没有记录。",
+  "empty": {
+    "vod": "没有课程",
+    "assign": "没有作业",
+    "quiz": "没有测验"
+  },
+  "progress": "进度",
+  "attendancePeriod": "出勤认定期间",
+  "filterSet": "已设置筛选",
+  "language": "语言",
+  "contact": "联系我们",
+  "calendar": {
+    "bannerTitle": "Google Calendar 同步",
+    "bannerDesc": "通过Dotbugi在Google Calendar上管理课程、作业和测验日程",
+    "login": "登录",
+    "sync": "同步任务",
+    "syncShort": "同步",
+    "logout": "退出登录",
+    "syncing": "同步中...",
+    "syncSuccess": "已添加{{count}}个日程",
+    "syncNoNew": "已是最新状态",
+    "syncFailed": "{{failed}}个日程添加失败",
+    "syncPartial": "已添加{{added}}个，{{failed}}个失败",
+    "tokenExpired": "Google登录已过期",
+    "tokenExpiredAction": "重新登录"
+  },
+  "refresh": "刷新",
+  "refreshing": "刷新中...",
+  "refreshSuccess": "刷新完成",
+  "bubble": {
+    "tasks": "还剩{{count}}个哦！",
+    "allDone": "全部完成！",
+    "updatedAgo": "{{time}}基准"
+  },
+  "courses": {
+    "title": "课程管理",
+    "desc": "选择要追踪的课程",
+    "community": "社区"
+  },
+  "hide": {
+    "task": "隐藏此任务",
+    "title": "已隐藏的任务",
+    "empty": "没有隐藏的任务",
+    "unhide": "取消隐藏"
+  },
+  "github": {
+    "likeProject": "喜欢这个项目吗？",
+    "starOnGithub": "在GitHub上给我们加星！"
+  },
+  "courseStatus": {
+    "vod": {
+      "completed": "出勤",
+      "inProgress": "观看中",
+      "absent": "缺勤",
+      "pending": "未观看"
+    },
+    "assign": {
+      "completed": "已提交",
+      "late": "逾期提交",
+      "absent": "未提交 (截止)",
+      "pending": "未提交"
+    },
+    "quiz": {
+      "completed": "已参加",
+      "absent": "未参加 (截止)",
+      "pending": "未参加"
+    },
+    "hidden": "已隐藏",
+    "currentWeek": "本周",
+    "goToCurrentWeek": "跳转到本周",
+    "bar": {
+      "loading": "正在加载信息...",
+      "success": "信息加载完成",
+      "error": "信息加载失败"
+    }
+  }
+}

@@ -1,10 +1,18 @@
 import { ManifestV3Export } from '@crxjs/vite-plugin';
+import packageJson from './package.json' with { type: 'json' };
 
-const manifest = {
+const PROD_CLIENT_ID = '804067218183-3pev3tppten6i94lrfvmk729hmbdejqb.apps.googleusercontent.com';
+const DEV_CLIENT_ID = '981860765955-t69elhj8osi7vdp84m5bf8b9hdib44kr.apps.googleusercontent.com';
+
+export function createManifest(mode?: string): ManifestV3Export {
+  const clientId = mode === 'mock' ? DEV_CLIENT_ID : PROD_CLIENT_ID;
+
+  return {
   manifest_version: 3,
-  name: 'HSU 돋부기 🔎',
-  version: '4.0.5',
-  description: '한성대학교 LMS 강의, 과제, 퀴즈를 한 눈에!',
+  name: '__MSG_extName__',
+  version: packageJson.version,
+  description: '__MSG_extDescription__',
+  default_locale: 'ko',
   action: {},
   icons: {
     '16': 'images/icon/icon-16.png',
@@ -18,7 +26,7 @@ const manifest = {
   content_scripts: [
     {
       matches: ['https://learn.hansung.ac.kr/**'],
-      js: ['src/content/index.tsx'],
+      js: ['src/popover/index.tsx'],
     },
   ],
   web_accessible_resources: [
@@ -27,13 +35,11 @@ const manifest = {
       matches: ['*://*/*'],
     },
   ],
-  options_page: 'option.html',
-  permissions: ['storage', 'notifications', 'alarms', 'identity'],
+  permissions: ['storage', 'identity'],
   host_permissions: ['https://*/*', 'http://*/*'],
   oauth2: {
-    client_id: '804067218183-3pev3tppten6i94lrfvmk729hmbdejqb.apps.googleusercontent.com',
+    client_id: clientId,
     scopes: ['https://www.googleapis.com/auth/calendar.events'],
   },
-} as ManifestV3Export;
-
-export default manifest;
+  };
+}

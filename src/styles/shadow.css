@@ -2,32 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/**
- * Shadow DOM 전용 base 레이어:
- * - body, :root 등 전역 셀렉터를 :host 로 교체
- * - 전역 .dark 클래스를 감지하려면 :host-context(.dark) 사용
- */
 @layer base {
-  /* ====== 전역 스타일이었던 부분을 모두 :host로 치환 ====== */
   :host {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", "Yu Gothic", system-ui, sans-serif;
     line-height: 1.5;
     font-weight: 400;
 
-    /* color-scheme도 ShadowRoot에 적용 가능 */
     color-scheme: light dark;
     color: rgba(255, 255, 255, 0.87);
     background-color: #242424;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-
-    /* Tailwind 변수를 적용하기 위해 아래에서 선언한 CSS 변수들도 참조함 */
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
 
-  /* 전역 a, h1, button, etc. → :host a, :host h1, ... */
   :host a {
     font-weight: 500;
     color: #646cff;
@@ -42,9 +32,6 @@
     line-height: 1.1;
   }
 
-  /* ============================================= */
-  /*  1) prefers-color-scheme: light 일 때 재정의 */
-  /* ============================================= */
   @media (prefers-color-scheme: light) {
     :host {
       color: #213547;
@@ -58,14 +45,8 @@
     }
   }
 
-  /* ============================================= */
-  /*  2) prefers-color-scheme: dark 일 때 재정의  */
-  /* (기본적으로 :host가 다크이긴 하지만,        */
-  /*  혹시 버튼 색 등 추가로 수정하고 싶다면 여기에) */
-  /* ============================================= */
   @media (prefers-color-scheme: dark) {
     :host {
-      /* 시스템이 다크 모드일 때 명시적으로 */
       color: rgba(255, 255, 255, 0.87);
       background-color: #242424;
     }
@@ -73,11 +54,10 @@
       color: #535bf2;
     }
     :host button {
-      background-color: #2f2f2f; /* 예시 */
+      background-color: #2f2f2f;
     }
   }
 
-  /* ====== Tailwind 변수들을 :host에서 선언 ====== */
   :host {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
@@ -106,7 +86,6 @@
     --radius: 0.5rem;
   }
 
-  /* ====== 전역 .dark 모드를 ShadowRoot에서 감지하려면 :host-context(.dark) ====== */
   :host-context(.dark) {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -134,17 +113,14 @@
     --chart-5: 340 75% 55%;
   }
 
-  /* 기존에 * { @apply border-border } → :host * 로 변경 */
   :host * {
     @apply border-border;
   }
 
-  /* body { @apply bg-background text-foreground } → :host */
   :host {
     @apply bg-background text-foreground;
   }
 
-  /* tab-trigger가 ShadowRoot 내부 요소라면 :host .tab-trigger[...] 로 적용 */
   :host .tab-trigger[data-state='active'] {
     background-color: white;
   }
@@ -155,16 +131,35 @@
   .overscroll-contain {
     overscroll-behavior: contain;
   }
-
   .overscroll-none {
     overscroll-behavior: none;
   }
   :host .overscroll-contain {
     overscroll-behavior: contain;
   }
-
   :host .overscroll-none {
     overscroll-behavior: none;
+  }
+
+  :host .overflow-y-scroll,
+  :host .overflow-y-auto {
+    overflow-y: overlay;
+  }
+  :host *::-webkit-scrollbar {
+    width: 16px;
+  }
+  :host *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  :host *::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    border: 5px solid transparent;
+    background-clip: content-box;
+  }
+  :host *::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+    background-clip: content-box;
   }
 }
 

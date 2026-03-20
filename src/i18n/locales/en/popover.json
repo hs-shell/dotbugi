@@ -1,0 +1,13 @@
+{
+  "header": {
+    "vodList": "Online Lectures",
+    "assignList": "Assignments",
+    "quizList": "Quizzes",
+    "setting": "Setting"
+  },
+  "pending": {
+    "title": "Request in Progress",
+    "message": "Please wait while the request is being processed.",
+    "autoClose": "This window will close automatically when done."
+  }
+}

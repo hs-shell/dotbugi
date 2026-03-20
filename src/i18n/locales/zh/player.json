@@ -1,0 +1,13 @@
+{
+  "noVideoInfo": "没有视频信息",
+  "startPrompt": "请按开始按钮开始自动播放",
+  "stopWatching": "停止学习",
+  "expectedEnd": "预计{{time}}完成",
+  "doneWatching": "学习完成",
+  "startWatching": "开始学习",
+  "lectureList": "课程列表",
+  "noVideos": "没有可观看的视频",
+  "refreshPrompt": "点击Dotbugi刷新课程",
+  "appIcon": "Dotbugi图标",
+  "appName": "Dotbugi 🔎"
+}

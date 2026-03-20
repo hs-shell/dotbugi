@@ -1,0 +1,13 @@
+{
+  "header": {
+    "vodList": "在线课程列表",
+    "assignList": "作业列表",
+    "quizList": "测验列表",
+    "setting": "设置"
+  },
+  "pending": {
+    "title": "请求处理中",
+    "message": "正在处理请求，请稍候。",
+    "autoClose": "完成后窗口将自动关闭。"
+  }
+}

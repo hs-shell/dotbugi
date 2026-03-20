@@ -12,6 +12,7 @@ dist/
 
 # 환경 설정 파일 (환경에 따라 사용)
 .env
+.env.*
 .env.local
 .env.development.local
 .env.test.local
@@ -47,3 +48,8 @@ dist
 
 *.md
 !README.md
+!docs/**/*.md
+
+# VitePress
+docs/.vitepress/dist/
+docs/.vitepress/cache/

@@ -1,0 +1,13 @@
+{
+  "noVideoInfo": "No video information",
+  "startPrompt": "Press the Start button to begin auto-play",
+  "stopWatching": "Stop",
+  "expectedEnd": "Done by {{time}}",
+  "doneWatching": "Completed",
+  "startWatching": "Start",
+  "lectureList": "Lecture List",
+  "noVideos": "No videos to watch",
+  "refreshPrompt": "Click Dotbugi to refresh lectures",
+  "appIcon": "Dotbugi Icon",
+  "appName": "Dotbugi 🔎"
+}

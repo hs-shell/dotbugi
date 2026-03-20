@@ -1,4 +1,4 @@
-import { CourseBase, Vod, Assign, Quiz } from '@/content/types';
+import { CourseBase, Vod, Assign, Quiz } from '@/types';
 
 function offsetDate(days: number, hours = 0): string {
   const d = new Date();
@@ -20,6 +20,19 @@ export const mockCourses: CourseBase[] = [
 ];
 
 export const mockVods: Vod[] = [
+  {
+    courseId: '1001',
+    courseTitle: '자료구조',
+    prof: '김교수',
+    week: 7,
+    subject: '7주차',
+    title: '힙과 우선순위 큐',
+    url: '#mock-vod-2',
+    range: makeRange(-5, 0),
+    length: '38:00',
+    isAttendance: 'X',
+    weeklyAttendance: '0/1',
+  },
   // 출석 완료 + 기간 내
   {
     courseId: '1001',
@@ -28,26 +41,13 @@ export const mockVods: Vod[] = [
     week: 7,
     subject: '7주차',
     title: '이진 탐색 트리',
-    url: '#',
+    url: '#mock-vod-1',
     range: makeRange(-3, 5),
     length: '45:00',
     isAttendance: 'O',
     weeklyAttendance: '1/1',
   },
   // 결석 + 마감 임박 (오늘 안에 끝남)
-  {
-    courseId: '1001',
-    courseTitle: '자료구조',
-    prof: '김교수',
-    week: 7,
-    subject: '7주차',
-    title: '힙과 우선순위 큐',
-    url: '#',
-    range: makeRange(-5, 0, ),
-    length: '38:00',
-    isAttendance: 'X',
-    weeklyAttendance: '0/1',
-  },
   // 결석 + 기간 여유
   {
     courseId: '1002',
@@ -56,7 +56,7 @@ export const mockVods: Vod[] = [
     week: 6,
     subject: '6주차',
     title: '프로세스 동기화',
-    url: '#',
+    url: '#mock-vod-3',
     range: makeRange(-2, 7),
     length: '50:00',
     isAttendance: 'X',
@@ -70,7 +70,7 @@ export const mockVods: Vod[] = [
     week: 6,
     subject: '6주차',
     title: '데드락',
-    url: '#',
+    url: '#mock-vod-4',
     range: makeRange(-2, 7),
     length: '42:00',
     isAttendance: 'O',
@@ -84,7 +84,7 @@ export const mockVods: Vod[] = [
     week: 5,
     subject: '5주차',
     title: 'TCP/IP 프로토콜',
-    url: '#',
+    url: '#mock-vod-5',
     range: makeRange(-6, 0),
     length: '55:00',
     isAttendance: 'X',
@@ -97,7 +97,7 @@ export const mockVods: Vod[] = [
     week: 5,
     subject: '5주차',
     title: 'UDP와 소켓 프로그래밍',
-    url: '#',
+    url: '#mock-vod-6',
     range: makeRange(-6, 0),
     length: '35:00',
     isAttendance: 'O',
@@ -111,7 +111,7 @@ export const mockVods: Vod[] = [
     week: 4,
     subject: '4주차',
     title: '정규화 이론',
-    url: '#',
+    url: '#mock-vod-7',
     range: makeRange(-1, 14),
     length: '60:00',
     isAttendance: 'O',
@@ -120,6 +120,28 @@ export const mockVods: Vod[] = [
 ];
 
 export const mockAssigns: Assign[] = [
+  // 오늘 마감 (캘린더 동기화 + 중복 테스트용)
+  {
+    courseId: '1001',
+    courseTitle: '자료구조',
+    prof: '김교수',
+    subject: '7주차',
+    title: '오늘 마감 과제 A',
+    url: '#mock-assign-1',
+    isSubmit: false,
+    dueDate: offsetDate(0),
+  },
+  // 중복 테스트: 동일 제목/날짜
+  {
+    courseId: '1001',
+    courseTitle: '자료구조',
+    prof: '김교수',
+    subject: '7주차',
+    title: '오늘 마감 과제 A',
+    url: '#mock-assign-2',
+    isSubmit: false,
+    dueDate: offsetDate(0),
+  },
   // 미제출 + 마감 임박 (내일)
   {
     courseId: '1001',
@@ -127,7 +149,7 @@ export const mockAssigns: Assign[] = [
     prof: '김교수',
     subject: '7주차',
     title: '이진 트리 구현 과제',
-    url: '#',
+    url: '#mock-assign-3',
     isSubmit: false,
     dueDate: offsetDate(1),
   },
@@ -138,7 +160,7 @@ export const mockAssigns: Assign[] = [
     prof: '이교수',
     subject: '6주차',
     title: '프로세스 스케줄링 시뮬레이션',
-    url: '#',
+    url: '#mock-assign-4',
     isSubmit: false,
     dueDate: offsetDate(3),
   },
@@ -149,7 +171,7 @@ export const mockAssigns: Assign[] = [
     prof: '김교수',
     subject: '6주차',
     title: '스택/큐 구현 과제',
-    url: '#',
+    url: '#mock-assign-5',
     isSubmit: true,
     dueDate: offsetDate(5),
   },
@@ -160,7 +182,7 @@ export const mockAssigns: Assign[] = [
     prof: '박교수',
     subject: '5주차',
     title: '소켓 프로그래밍 실습',
-    url: '#',
+    url: '#mock-assign-6',
     isSubmit: false,
     dueDate: offsetDate(7),
   },
@@ -171,7 +193,7 @@ export const mockAssigns: Assign[] = [
     prof: '최교수',
     subject: '4주차',
     title: 'SQL 쿼리 작성',
-    url: '#',
+    url: '#mock-assign-7',
     isSubmit: true,
     dueDate: offsetDate(-1),
   },
@@ -182,7 +204,7 @@ export const mockAssigns: Assign[] = [
     prof: '최교수',
     subject: '5주차',
     title: 'ERD 설계 과제',
-    url: '#',
+    url: '#mock-assign-8',
     isSubmit: false,
     dueDate: offsetDate(0, 3),
   },
@@ -193,7 +215,7 @@ export const mockAssigns: Assign[] = [
     prof: '이교수',
     subject: '5주차',
     title: '메모리 관리 보고서',
-    url: '#',
+    url: '#mock-assign-9',
     isSubmit: false,
     dueDate: offsetDate(-2),
   },
@@ -204,13 +226,27 @@ export const mockAssigns: Assign[] = [
     prof: '박교수',
     subject: '6주차',
     title: '네트워크 분석 레포트',
-    url: '#',
+    url: '#mock-assign-10',
     isSubmit: false,
     dueDate: null,
   },
 ];
 
+// Player 테스트용 mock VOD (실제 LMS VOD ID)
+export const mockPlayerVodIds = ['1086348', '1088220', '1130884'];
+
 export const mockQuizes: Quiz[] = [
+  // 오늘 마감 (캘린더 동기화 테스트용)
+  {
+    courseId: '1002',
+    courseTitle: '운영체제',
+    prof: '이교수',
+    subject: '6주차',
+    title: '오늘 마감 퀴즈',
+    url: '#mock-quiz-1',
+    dueDate: offsetDate(0),
+    isSubmit: true,
+  },
   // 마감 임박 (내일)
   {
     courseId: '1001',
@@ -218,8 +254,9 @@ export const mockQuizes: Quiz[] = [
     prof: '김교수',
     subject: '7주차',
     title: '트리 구조 퀴즈',
-    url: '#',
+    url: '#mock-quiz-2',
     dueDate: offsetDate(1),
+    isSubmit: false,
   },
   // 마감 여유 (5일)
   {
@@ -228,8 +265,9 @@ export const mockQuizes: Quiz[] = [
     prof: '이교수',
     subject: '6주차',
     title: '프로세스 관리 퀴즈',
-    url: '#',
+    url: '#mock-quiz-3',
     dueDate: offsetDate(5),
+    isSubmit: false,
   },
   // 마감 몇 시간 뒤 (긴급)
   {
@@ -238,8 +276,9 @@ export const mockQuizes: Quiz[] = [
     prof: '박교수',
     subject: '5주차',
     title: 'OSI 모델 퀴즈',
-    url: '#',
+    url: '#mock-quiz-4',
     dueDate: offsetDate(0, 5),
+    isSubmit: true,
   },
   // 마감 이미 지남 (새로고침 전 마감)
   {
@@ -248,8 +287,9 @@ export const mockQuizes: Quiz[] = [
     prof: '최교수',
     subject: '4주차',
     title: 'SQL 기초 퀴즈',
-    url: '#',
+    url: '#mock-quiz-5',
     dueDate: offsetDate(-1),
+    isSubmit: true,
   },
   // 마감 2주 뒤
   {
@@ -258,8 +298,9 @@ export const mockQuizes: Quiz[] = [
     prof: '최교수',
     subject: '5주차',
     title: '정규화 퀴즈',
-    url: '#',
+    url: '#mock-quiz-6',
     dueDate: offsetDate(14),
+    isSubmit: false,
   },
   // dueDate null 케이스
   {
@@ -268,7 +309,8 @@ export const mockQuizes: Quiz[] = [
     prof: '김교수',
     subject: '8주차',
     title: '그래프 탐색 퀴즈',
-    url: '#',
+    url: '#mock-quiz-7',
     dueDate: null,
+    isSubmit: false,
   },
 ];
