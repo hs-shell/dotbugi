@@ -1,4 +1,4 @@
-name: 버전 관리
+name: 버전 관리 및 릴리즈
 
 on:
   pull_request:
@@ -11,169 +11,112 @@ permissions:
   pull-requests: read
 
 jobs:
-  bump-version:
+  release:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true # PR이 병합된 경우에만 실행
+    if: github.event.pull_request.merged == true
 
     steps:
-      # 1단계: 리포지토리 체크아웃
       - name: 리포지토리 체크아웃
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 모든 히스토리와 태그를 가져옴
+          fetch-depth: 0
 
-      # 2단계: Node.js 설정
       - name: Node.js 설정
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18' # Node.js 18 이상으로 설정
+          node-version: '20'
 
-      # 3단계: 의존성 설치
       - name: 의존성 설치
         run: npm install
 
-      # 4단계: PR 번호 가져오기
-      - name: PR 번호 가져오기
-        id: get_pr_number
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const pr = context.payload.pull_request;
-            if (!pr) {
-              throw new Error('해당 커밋과 연관된 PR을 찾을 수 없습니다.');
-            }
-            return pr.number;
-
-      # 5단계: PR 라벨 가져오기 (콤마로 구분된 문자열로 반환)
-      - name: PR 라벨 가져오기
-        id: get_labels
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const prNumber = ${{ steps.get_pr_number.outputs.result }};
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-            });
-            const labels = pr.data.labels.map(label => label.name).join(',');
-            return labels;
-
-      # 6단계: PR 라벨 출력하기
-      - name: PR 라벨 출력하기
-        run: |
-          echo "PR 라벨: ${{ steps.get_labels.outputs.result }}"
-
-      # 7단계: 파일 존재 확인 및 목록 출력
-      - name: List files to verify manifest.config.ts
-        run: |
-          echo "현재 작업 디렉토리: $(pwd)"
-          ls -al
-          find . -name "manifest.config.ts"
-
-      # 8단계: 다음 버전 결정
-      - name: 다음 버전 결정
+      - name: PR 라벨에서 버전 범프 결정
         id: version
-        run: |
-          set -euo pipefail
-          IFS=$'\n\t'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            let bump = 'patch';
+            if (labels.includes('🔖 major')) bump = 'major';
+            else if (labels.includes('🔖 minor')) bump = 'minor';
 
-          # 최신 태그 가져오기
-          LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null || echo "v0.0.0")
-          echo "최신 태그: $LATEST_TAG"
+            // 최신 태그에서 현재 버전 추출
+            const { execSync } = require('child_process');
+            let currentVersion;
+            try {
+              const latestTag = execSync('git describe --tags --abbrev=0', { encoding: 'utf-8' }).trim();
+              currentVersion = latestTag.replace(/^v/, '');
+            } catch {
+              currentVersion = '0.0.0';
+            }
 
-          # 현재 버전 추출
-          CURRENT_VERSION=${LATEST_TAG#v}
-          echo "현재 버전: $CURRENT_VERSION"
+            const [major, minor, patch] = currentVersion.split('.').map(Number);
+            let newVersion;
+            if (bump === 'major') newVersion = `${major + 1}.0.0`;
+            else if (bump === 'minor') newVersion = `${major}.${minor + 1}.0`;
+            else newVersion = `${major}.${minor}.${patch + 1}`;
 
-          # 버전 분할
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+            core.setOutput('new_version', newVersion);
+            core.setOutput('bump', bump);
 
-          # PR 라벨 가져오기 (콤마로 구분된 문자열)
-          LABELS=$(echo "${{ steps.get_labels.outputs.result }}" | tr -d '"')
-          echo "PR 라벨: $LABELS"
+      - name: package.json 버전 업데이트
+        run: npm version ${{ steps.version.outputs.new_version }} --no-git-tag-version
 
-          # 콤마를 기준으로 배열로 변환
-          IFS=',' read -r -a LABEL_ARRAY <<< "$LABELS"
+      - name: 프로덕션 빌드
+        run: npm run build
 
-          # 라벨에 따라 버전 증가 (우선순위: major > minor > patch)
-          NEW_VERSION=""
-          for label in "${LABEL_ARRAY[@]}"; do
-            label=$(echo "$label" | xargs) # 공백 제거
-            if [[ "$label" == "🔖 major" ]]; then
-              NEW_MAJOR=$((MAJOR + 1))
-              NEW_VERSION="$NEW_MAJOR.0.0"
-              break
-            elif [[ "$label" == "🔖 minor" ]]; then
-              NEW_MINOR=$((MINOR + 1))
-              NEW_VERSION="$MAJOR.$NEW_MINOR.0"
-              break
-            elif [[ "$label" == "🔖 patch" ]]; then
-              NEW_PATCH=$((PATCH + 1))
-              NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
-              break
-            fi
-          done
+      - name: dist 압축
+        run: cd dist && zip -r ../dotbugi-v${{ steps.version.outputs.new_version }}.zip .
 
-          # 라벨이 없거나 인식할 수 없는 경우 패치 버전 증가
-          if [[ -z "$NEW_VERSION" ]]; then
-            echo "라벨이 지정되지 않았거나 인식할 수 없습니다. 기본적으로 패치 버전을 증가시킵니다."
-            NEW_PATCH=$((PATCH + 1))
-            NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
-          fi
-
-          echo "새 버전: $NEW_VERSION"
-
-          # 출력 설정
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-      # 9단계: package.json 및 manifest.config.ts 버전 업데이트
-      - name: package.json 및 manifest.config.ts 버전 업데이트
-        run: |
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-          echo "새 버전: $NEW_VERSION"
-
-          # package.json 업데이트
-          echo "package.json을 버전 $NEW_VERSION으로 업데이트합니다."
-          npm version $NEW_VERSION --no-git-tag-version
-
-          # manifest.config.ts 업데이트
-          FILE_PATH="manifest.config.ts"
-          if [ -f "$FILE_PATH" ]; then
-            echo "manifest.config.ts를 버전 $NEW_VERSION으로 업데이트합니다."
-            sed -i "s/\(version: '\)[0-9]\+\.[0-9]\+\.[0-9]\+'/\1$NEW_VERSION'/" "$FILE_PATH"
-            echo "🔄 업데이트된 manifest.config.ts 내용:"
-            cat "$FILE_PATH"
-          else
-            echo "❌ manifest.config.ts 파일을 찾을 수 없습니다!"
-            exit 1
-          fi
-
-      # 10단계: 변경 사항 커밋 및 푸시
-      - name: 변경 사항 커밋 및 푸시
+      - name: 변경사항 커밋 및 태그
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json manifest.config.ts
-          git commit -m "🔖 chore: bump version to v${{ steps.version.outputs.new_version }}"
-          git push origin main
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to v${{ steps.version.outputs.new_version }}"
+          git tag v${{ steps.version.outputs.new_version }}
+          git push origin main --follow-tags
 
-      # 11단계: 새 태그 생성 및 푸시
-      - name: 새 태그 생성 및 푸시
-        run: |
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-          git tag -a v$NEW_VERSION -m "Release v$NEW_VERSION"
-          git push origin v$NEW_VERSION
+      - name: 릴리즈 노트 생성
+        id: changelog
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
 
-      # 12단계: 릴리스 생성
-      - name: 릴리스 생성
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            // 이전 태그 찾기
+            let prevTag;
+            try {
+              prevTag = execSync('git describe --tags --abbrev=0 HEAD~1', { encoding: 'utf-8' }).trim();
+            } catch {
+              prevTag = execSync('git rev-list --max-parents=0 HEAD', { encoding: 'utf-8' }).trim();
+            }
+
+            const newVersion = '${{ steps.version.outputs.new_version }}';
+
+            // PR에 포함된 커밋 가져오기
+            const commits = execSync(
+              `git log ${prevTag}..HEAD --pretty=format:"- %s (%h)" --no-merges`,
+              { encoding: 'utf-8' }
+            ).trim();
+
+            const pr = context.payload.pull_request;
+            const body = [
+              `## What's Changed`,
+              ``,
+              `**PR:** #${pr.number} ${pr.title}`,
+              ``,
+              `### Commits`,
+              commits,
+              ``,
+              `**Full Changelog:** https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${prevTag}...v${newVersion}`,
+            ].join('\n');
+
+            core.setOutput('body', body);
+
+      - name: GitHub 릴리즈 생성
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.new_version }}
-          release_name: Release v${{ steps.version.outputs.new_version }}
-          body: 'Release v${{ steps.version.outputs.new_version }}'
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+          name: v${{ steps.version.outputs.new_version }}
+          body: ${{ steps.changelog.outputs.body }}
+          files: dotbugi-v${{ steps.version.outputs.new_version }}.zip

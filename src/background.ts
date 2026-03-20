@@ -16,6 +16,12 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   }
 });
 
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    chrome.tabs.create({ url: 'https://hs-shell.github.io/dotbugi/' });
+  }
+});
+
 chrome.action.onClicked.addListener(() => {
   chrome.runtime.openOptionsPage();
 });

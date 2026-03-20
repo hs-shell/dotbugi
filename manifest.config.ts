@@ -1,4 +1,5 @@
 import { ManifestV3Export } from '@crxjs/vite-plugin';
+import packageJson from './package.json' with { type: 'json' };
 
 const PROD_CLIENT_ID = '804067218183-3pev3tppten6i94lrfvmk729hmbdejqb.apps.googleusercontent.com';
 const DEV_CLIENT_ID = '981860765955-t69elhj8osi7vdp84m5bf8b9hdib44kr.apps.googleusercontent.com';
@@ -9,7 +10,7 @@ export function createManifest(mode?: string): ManifestV3Export {
   return {
   manifest_version: 3,
   name: '__MSG_extName__',
-  version: '4.0.5',
+  version: packageJson.version,
   description: '__MSG_extDescription__',
   default_locale: 'ko',
   action: {},
