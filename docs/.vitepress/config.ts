@@ -1,10 +1,11 @@
 import { defineConfig, type DefaultTheme } from 'vitepress';
 
-function guideSidebar(basic: string, advanced: string, calendar: string, label: string, prefix = ''): DefaultTheme.SidebarItem[] {
+function guideSidebar(basic: string, advanced: string, calendar: string, faq: string, label: string, prefix = ''): DefaultTheme.SidebarItem[] {
   return [{ text: label, items: [
     { text: basic, link: `${prefix}/guide/basic` },
     { text: advanced, link: `${prefix}/guide/advanced` },
     { text: calendar, link: `${prefix}/guide/calendar` },
+    { text: faq, link: `${prefix}/guide/faq` },
   ]}];
 }
 
@@ -32,7 +33,7 @@ export default defineConfig({
           { text: '업데이트', link: '/updates/changelog' },
         ],
         sidebar: {
-          '/guide/': guideSidebar('간단 사용 설명서', '고급 사용 설명서', 'Google 캘린더 연동', '가이드'),
+          '/guide/': guideSidebar('간단 사용 설명서', '고급 사용 설명서', 'Google 캘린더 연동', 'FAQ', '가이드'),
           '/updates/': updatesSidebar('업데이트', '업데이트 로그'),
         },
         outline: { label: '목차' },
@@ -48,7 +49,7 @@ export default defineConfig({
           { text: 'Updates', link: '/en/updates/changelog' },
         ],
         sidebar: {
-          '/en/guide/': guideSidebar('Quick Start', 'Advanced Guide', 'Google Calendar', 'Guide', '/en'),
+          '/en/guide/': guideSidebar('Quick Start', 'Advanced Guide', 'Google Calendar', 'FAQ', 'Guide', '/en'),
           '/en/updates/': updatesSidebar('Updates', 'Changelog', '/en'),
         },
         outline: { label: 'On this page' },
@@ -64,7 +65,7 @@ export default defineConfig({
           { text: '更新履歴', link: '/ja/updates/changelog' },
         ],
         sidebar: {
-          '/ja/guide/': guideSidebar('簡単ガイド', '詳細ガイド', 'Google カレンダー連携', 'ガイド', '/ja'),
+          '/ja/guide/': guideSidebar('簡単ガイド', '詳細ガイド', 'Google カレンダー連携', 'よくある質問', 'ガイド', '/ja'),
           '/ja/updates/': updatesSidebar('更新履歴', '更新ログ', '/ja'),
         },
         outline: { label: '目次' },
@@ -80,7 +81,7 @@ export default defineConfig({
           { text: '更新日志', link: '/zh/updates/changelog' },
         ],
         sidebar: {
-          '/zh/guide/': guideSidebar('快速入门', '高级指南', 'Google 日历', '指南', '/zh'),
+          '/zh/guide/': guideSidebar('快速入门', '高级指南', 'Google 日历', '常见问题', '指南', '/zh'),
           '/zh/updates/': updatesSidebar('更新日志', '更新记录', '/zh'),
         },
         outline: { label: '目录' },

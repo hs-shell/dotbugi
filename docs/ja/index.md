@@ -12,6 +12,9 @@ hero:
       text: 使い方ガイド
       link: /ja/guide/basic
     - theme: alt
+      text: よくある質問
+      link: /ja/guide/faq
+    - theme: alt
       text: アップデートログ
       link: /ja/updates/changelog
 ---

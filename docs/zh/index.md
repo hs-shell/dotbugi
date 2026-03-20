@@ -12,6 +12,9 @@ hero:
       text: 使用说明
       link: /zh/guide/basic
     - theme: alt
+      text: 常见问题
+      link: /zh/guide/faq
+    - theme: alt
       text: 更新日志
       link: /zh/updates/changelog
 ---

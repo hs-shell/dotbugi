@@ -27,6 +27,9 @@ hero:
       text: 사용 설명서
       link: /guide/basic
     - theme: alt
+      text: FAQ
+      link: /guide/faq
+    - theme: alt
       text: 업데이트 로그
       link: /updates/changelog
 ---

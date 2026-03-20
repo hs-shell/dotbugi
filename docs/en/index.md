@@ -12,6 +12,9 @@ hero:
       text: User Guide
       link: /en/guide/basic
     - theme: alt
+      text: FAQ
+      link: /en/guide/faq
+    - theme: alt
       text: Update Log
       link: /en/updates/changelog
 ---
