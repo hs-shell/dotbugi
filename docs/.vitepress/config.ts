@@ -31,6 +31,7 @@ export default defineConfig({
         nav: [
           { text: '가이드', link: '/guide/basic' },
           { text: '업데이트', link: '/updates/changelog' },
+          { text: '설치', link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch' },
         ],
         sidebar: {
           '/guide/': guideSidebar('간단 사용 설명서', '고급 사용 설명서', 'Google 캘린더 연동', 'FAQ', '가이드'),
@@ -47,6 +48,7 @@ export default defineConfig({
         nav: [
           { text: 'Guide', link: '/en/guide/basic' },
           { text: 'Updates', link: '/en/updates/changelog' },
+          { text: 'Install', link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch' },
         ],
         sidebar: {
           '/en/guide/': guideSidebar('Quick Start', 'Advanced Guide', 'Google Calendar', 'FAQ', 'Guide', '/en'),
@@ -63,6 +65,7 @@ export default defineConfig({
         nav: [
           { text: 'ガイド', link: '/ja/guide/basic' },
           { text: '更新履歴', link: '/ja/updates/changelog' },
+          { text: 'インストール', link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch' },
         ],
         sidebar: {
           '/ja/guide/': guideSidebar('簡単ガイド', '詳細ガイド', 'Google カレンダー連携', 'よくある質問', 'ガイド', '/ja'),
@@ -79,6 +82,7 @@ export default defineConfig({
         nav: [
           { text: '指南', link: '/zh/guide/basic' },
           { text: '更新日志', link: '/zh/updates/changelog' },
+          { text: '安装', link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch' },
         ],
         sidebar: {
           '/zh/guide/': guideSidebar('快速入门', '高级指南', 'Google 日历', '常见问题', '指南', '/zh'),
