@@ -1,7 +1,7 @@
 import { Vod } from '@/types';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef } from 'react';
 
 interface SortableItemProps {
   vod: Vod;
@@ -14,6 +14,15 @@ export default function SortableItem({ vod, idx, currentVideoIndex, setCurrentVi
     id: `${vod.week}-${vod.title}`,
   });
 
+  const itemRef = useRef<HTMLDivElement>(null);
+  const isCurrent = idx === currentVideoIndex;
+
+  useEffect(() => {
+    if (isCurrent && itemRef.current) {
+      itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [isCurrent]);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -23,23 +32,33 @@ export default function SortableItem({ vod, idx, currentVideoIndex, setCurrentVi
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        (itemRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+      }}
       style={style}
       {...attributes}
       {...listeners}
       onClick={() => setCurrentVideoIndex(idx)}
       className={`p-3 rounded-lg transition-all flex-shrink-0 ${
-        idx === currentVideoIndex
-          ? 'bg-white border border-blue-400'
-          : 'bg-zinc-50 border border-transparent hover:border-zinc-200'
+        isCurrent
+          ? 'bg-blue-50 border-l-4 border-blue-500 border-y border-r border-y-transparent border-r-transparent'
+          : 'bg-zinc-50 border-l-4 border-transparent hover:bg-zinc-100'
       }`}
     >
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-2.5">
+        <span className={`text-lg font-bold mt-0.5 flex-shrink-0 ${isCurrent ? 'text-blue-500' : 'text-zinc-400'}`}>
+          {idx + 1}
+        </span>
         <div className="flex-1 min-w-0">
-          <p className="text-xl font-semibold text-black truncate">{vod.title}</p>
-          <p className="text-lg text-zinc-600 truncate">
-            {vod.courseTitle} - {vod.prof}
-          </p>
+          <p className={`text-xl font-semibold truncate ${isCurrent ? 'text-blue-700' : 'text-black'}`}>{vod.title}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-lg text-zinc-500 truncate">
+              {vod.courseTitle}
+            </p>
+            <span className="text-zinc-300">·</span>
+            <span className="text-lg text-zinc-400 flex-shrink-0">{vod.length.trim()}</span>
+          </div>
         </div>
       </div>
     </div>

@@ -14,6 +14,8 @@ export type Vod = CourseBase & {
   length: string;
   isAttendance: string;
   weeklyAttendance: string;
+  requiredTime?: string;
+  watchedTime?: string;
 };
 
 export interface VodAttendanceData {
@@ -21,6 +23,8 @@ export interface VodAttendanceData {
   isAttendance: string;
   weeklyAttendance: string;
   week: number;
+  requiredTime?: string;
+  watchedTime?: string;
 }
 
 export type Assign = CourseBase & {

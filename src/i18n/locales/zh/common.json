@@ -105,18 +105,20 @@
   },
   "courseStatus": {
     "vod": {
-      "completed": "已观看",
+      "completed": "出勤",
+      "inProgress": "观看中",
       "absent": "缺勤",
       "pending": "未观看"
     },
     "assign": {
       "completed": "已提交",
-      "absent": "未提交",
+      "late": "逾期提交",
+      "absent": "未提交 (截止)",
       "pending": "未提交"
     },
     "quiz": {
       "completed": "已参加",
-      "absent": "未参加",
+      "absent": "未参加 (截止)",
       "pending": "未参加"
     },
     "hidden": "已隐藏",
