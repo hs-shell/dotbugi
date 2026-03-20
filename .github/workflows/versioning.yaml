@@ -67,11 +67,14 @@ jobs:
       - name: dist 압축
         run: cd dist && zip -r ../dotbugi-v${{ steps.version.outputs.new_version }}.zip .
 
+      - name: README 배지 버전 업데이트
+        run: sed -i "s/Chrome_Web_Store-v[0-9]\+\.[0-9]\+\.[0-9]\+/Chrome_Web_Store-v${{ steps.version.outputs.new_version }}/" README.md
+
       - name: 변경사항 커밋 및 태그
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
+          git add package.json package-lock.json README.md
           git commit -m "chore: bump version to v${{ steps.version.outputs.new_version }}"
           git tag v${{ steps.version.outputs.new_version }}
           git push origin main --follow-tags
