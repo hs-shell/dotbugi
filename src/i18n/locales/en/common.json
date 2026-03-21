@@ -91,7 +91,10 @@
   "courses": {
     "title": "Manage Courses",
     "desc": "Select which courses to track",
-    "community": "Community"
+    "community": "Community",
+    "adding": "Adding {{name}}...",
+    "added": "{{name}} added",
+    "removed": "{{name}} removed"
   },
   "hide": {
     "task": "Hide this task",

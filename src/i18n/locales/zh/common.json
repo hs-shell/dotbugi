@@ -92,7 +92,10 @@
   "courses": {
     "title": "课程管理",
     "desc": "选择要追踪的课程",
-    "community": "社区"
+    "community": "社区",
+    "adding": "正在添加 {{name}}...",
+    "added": "已添加 {{name}}",
+    "removed": "已移除 {{name}}"
   },
   "hide": {
     "task": "隐藏此任务",

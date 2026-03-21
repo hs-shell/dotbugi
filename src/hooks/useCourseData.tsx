@@ -121,9 +121,20 @@ export function useCourseData(courses: CourseBase[]) {
       saveDataToStorage('quiz', quizzes);
 
       // State: 대시보드 표시용 날짜 필터링 적용
-      setVods(filterVodsForDisplay(vods));
-      setAssigns(filterItemsForDisplay(assigns));
-      setQuizzes(filterItemsForDisplay(quizzes));
+      // refreshCourseData 실행 중 addCourseData로 추가된 다른 과목 데이터를 보존
+      const refreshedCourseIds = new Set(courses.map((c) => c.courseId));
+      setVods((prev) => {
+        const kept = prev.filter((v) => !refreshedCourseIds.has(v.courseId));
+        return [...kept, ...filterVodsForDisplay(vods)];
+      });
+      setAssigns((prev) => {
+        const kept = prev.filter((a) => !refreshedCourseIds.has(a.courseId));
+        return [...kept, ...filterItemsForDisplay(assigns)];
+      });
+      setQuizzes((prev) => {
+        const kept = prev.filter((q) => !refreshedCourseIds.has(q.courseId));
+        return [...kept, ...filterItemsForDisplay(quizzes)];
+      });
 
       setRefreshTime(new Date(fetchedAt).toLocaleTimeString());
       setRemainingTime(0);

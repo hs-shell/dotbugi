@@ -30,7 +30,8 @@ export const useGetCourses = () => {
       saveDataToStorage('courses', JSON.stringify(courses));
 
       loadDataFromStorage<string[]>('trackedCourseIds', (savedIds) => {
-        if (savedIds && savedIds.length > 0) {
+        if (savedIds) {
+          // 빈 배열([])도 유효한 저장 상태로 취급 (사용자가 의도적으로 모두 해제한 경우)
           setTrackedCourseIdsState(savedIds);
         } else {
           // 최초 사용: 비교과(커뮤니티)와 이전 학기 과목 제외하고 전부 트래킹
@@ -82,5 +83,7 @@ export const useGetCourses = () => {
     return allCourses.filter((c) => idSet.has(c.courseId));
   }, [allCourses, trackedCourseIds]);
 
-  return { allCourses, trackedCourses, trackedCourseIds: trackedCourseIds ?? [], setTrackedCourseIds };
+  const isInitialized = trackedCourseIds !== null;
+
+  return { allCourses, trackedCourses, trackedCourseIds: trackedCourseIds ?? [], isInitialized, setTrackedCourseIds };
 };

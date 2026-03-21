@@ -44,7 +44,7 @@ let notifIdCounter = 0;
 
 export default function Dashboard() {
   const { t } = useTranslation('common');
-  const { allCourses, trackedCourses, trackedCourseIds } = useGetCourses();
+  const { allCourses, trackedCourses, trackedCourseIds, isInitialized } = useGetCourses();
 
   const {
     vods,
@@ -56,6 +56,7 @@ export default function Dashboard() {
     refreshCourseData,
     addCourseData,
     removeCourseData,
+    pendingCourseIds,
   } = useCourseData(trackedCourses);
 
   const { hiddenUrls, hideTask, hideTasks, unhideTask, isHidden } = useHiddenTasks();
@@ -88,36 +89,6 @@ export default function Dashboard() {
 
   const isCalendarConnected = calendarToken !== null;
 
-  // DOM 토글에서 trackedCourseIds 변경 시 데이터 추가/삭제
-  const prevTrackedIdsRef = useRef<Set<string>>(new Set(trackedCourseIds));
-  const isFirstLoadRef = useRef(true);
-  useEffect(() => {
-    const prevSet = prevTrackedIdsRef.current;
-    const currSet = new Set(trackedCourseIds);
-    prevTrackedIdsRef.current = currSet;
-
-    // 최초 스토리지 로드 시에만 건너뛰기 (useCourseData의 초기 로드가 처리)
-    if (prevSet.size === 0 && isFirstLoadRef.current) {
-      if (currSet.size > 0) isFirstLoadRef.current = false;
-      return;
-    }
-
-    const allCourseIds = new Set(allCourses.map((c) => c.courseId));
-
-    for (const id of trackedCourseIds) {
-      if (!prevSet.has(id) && allCourseIds.has(id)) {
-        const course = allCourses.find((c) => c.courseId === id);
-        if (course) addCourseData(course);
-      }
-    }
-
-    for (const id of prevSet) {
-      if (!currSet.has(id)) {
-        removeCourseData(id);
-      }
-    }
-  }, [trackedCourseIds, allCourses, addCourseData, removeCourseData]);
-
   const pushNotification = useCallback((n: Omit<Notification, 'id'>) => {
     const id = `notif-${++notifIdCounter}`;
     setNotifications((prev) => [...prev, { ...n, id }]);
@@ -131,6 +102,70 @@ export default function Dashboard() {
   const updateNotification = useCallback((id: string, updates: Partial<Omit<Notification, 'id'>>) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)));
   }, []);
+
+  // DOM 토글에서 trackedCourseIds 변경 시 데이터 추가/삭제
+  const prevTrackedIdsRef = useRef<Set<string> | null>(null);
+  const courseNotifMapRef = useRef<Map<string, string>>(new Map());
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const currSet = new Set(trackedCourseIds);
+
+    if (prevTrackedIdsRef.current === null) {
+      // 최초 스토리지 로드 완료 — useCourseData의 초기 로드가 처리
+      prevTrackedIdsRef.current = currSet;
+      return;
+    }
+
+    const prevSet = prevTrackedIdsRef.current;
+    prevTrackedIdsRef.current = currSet;
+
+    const allCourseIds = new Set(allCourses.map((c) => c.courseId));
+
+    for (const id of trackedCourseIds) {
+      if (!prevSet.has(id) && allCourseIds.has(id)) {
+        const course = allCourses.find((c) => c.courseId === id);
+        if (course) {
+          addCourseData(course);
+          const notifId = pushNotification({
+            type: 'loading',
+            messageKey: 'courses.adding',
+            messageParams: { name: course.courseTitle },
+          });
+          courseNotifMapRef.current.set(id, notifId);
+        }
+      }
+    }
+
+    for (const id of prevSet) {
+      if (!currSet.has(id)) {
+        removeCourseData(id);
+        const course = allCourses.find((c) => c.courseId === id);
+        if (course) {
+          pushNotification({
+            type: 'warning',
+            messageKey: 'courses.removed',
+            messageParams: { name: course.courseTitle },
+            autoDismiss: true,
+          });
+        }
+      }
+    }
+  }, [isInitialized, trackedCourseIds, allCourses, addCourseData, removeCourseData, pushNotification]);
+
+  // 과목 추가 fetch 완료 시 알림을 loading → success로 전환
+  useEffect(() => {
+    courseNotifMapRef.current.forEach((notifId, courseId) => {
+      if (!pendingCourseIds.has(courseId)) {
+        updateNotification(notifId, {
+          type: 'success',
+          messageKey: 'courses.added',
+          autoDismiss: true,
+        });
+        courseNotifMapRef.current.delete(courseId);
+      }
+    });
+  }, [pendingCourseIds, updateNotification]);
 
   // 새로고침 시작/완료 시 NotificationBubble 표시
   const refreshNotifRef = useRef<string | null>(null);

@@ -91,7 +91,10 @@
   "courses": {
     "title": "受講科目管理",
     "desc": "追跡する科目を選択してください",
-    "community": "コミュニティ"
+    "community": "コミュニティ",
+    "adding": "{{name}} を追加中...",
+    "added": "{{name}} を追加しました",
+    "removed": "{{name}} を削除しました"
   },
   "hide": {
     "task": "このタスクを非表示",
