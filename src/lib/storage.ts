@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 /**
  * @param key   chrome.storage에 저장할 때 사용할 key(문자열)
  * @param data  저장할 데이터. 타입은 제네릭 T로 자유롭게 지정 가능
@@ -38,7 +40,7 @@ export function loadAndTransform<T, R>(
       try {
         parsedData = JSON.parse(data);
       } catch (error) {
-        console.error(`JSON 파싱 에러 (${storageKey}):`, error);
+        logger.error(`JSON 파싱 에러 (${storageKey}):`, error);
         return;
       }
     } else {

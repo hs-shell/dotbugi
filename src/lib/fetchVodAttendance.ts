@@ -102,13 +102,12 @@ export const fetchVodAttendance = async (link: string) => {
 
         results.push({ title, isAttendance, weeklyAttendance, week: currentWeek });
       } catch (error) {
-        console.error(`[Dotbugi] 출석부 행 파싱 오류: ${link}`, error);
+        // 개별 행 파싱 실패는 무시하고 계속 진행
       }
     });
 
     return results;
   } catch (error) {
-    console.error('[Dotbugi] 출석부 조회 오류:', error);
-    throw error;
+    throw new Error(`출석부 조회 실패`, { cause: error });
   }
 };

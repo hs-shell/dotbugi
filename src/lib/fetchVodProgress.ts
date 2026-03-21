@@ -89,7 +89,7 @@ export const fetchVodProgress = async (link: string) => {
           watchedTime,
         });
       } catch (error) {
-        console.error(`[Dotbugi] 진도 행 파싱 오류: ${link}`, error);
+        // 개별 행 파싱 실패는 무시하고 계속 진행
       }
     });
 
@@ -111,7 +111,6 @@ export const fetchVodProgress = async (link: string) => {
 
     return results;
   } catch (error) {
-    console.error('[Dotbugi] VOD 진도 조회 오류:', error);
-    throw error;
+    throw new Error(`VOD 진도 조회 실패`, { cause: error });
   }
 };

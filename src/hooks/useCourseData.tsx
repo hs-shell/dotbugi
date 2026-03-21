@@ -7,6 +7,7 @@ import { makeItemKey, makeVodKey } from '@/lib/generateKey';
 import { mergeVodWithAttendance, mergeDueDateItems } from '@/lib/transformCourseData';
 import { deduplicateInto } from '@/lib/deduplicateInto';
 import { loadMockData } from '@/mocks/loadMockData';
+import { logger } from '@/lib/logger';
 import {
   REFRESH_INTERVAL_MS,
   CACHE_TTL_MINUTES,
@@ -129,7 +130,7 @@ export function useCourseData(courses: CourseBase[]) {
       setLastRequestTime(fetchedAt);
       saveDataToStorage('lastRequestTime', fetchedAt.toString());
     } catch (error) {
-      console.warn(error);
+      logger.error('강의 데이터 새로고침 실패:', error);
       clearLastRequestTime();
       setIsError(true);
     } finally {
@@ -192,7 +193,7 @@ export function useCourseData(courses: CourseBase[]) {
         return merged;
       });
     } catch (error) {
-      console.warn('[Dotbugi] 강의 추가 데이터 fetch 실패:', error);
+      logger.warn('강의 추가 데이터 fetch 실패:', error);
     } finally {
       setPendingCourseIds((prev) => {
         const next = new Set(prev);
@@ -265,15 +266,19 @@ export function useCourseData(courses: CourseBase[]) {
       setIsPending(true);
       refreshCourseData();
     } else {
+      const trackedIds = new Set(courses.map((c) => c.courseId));
+      const byTracked = <T extends { courseId: string }>(items: T[]) =>
+        items.filter((item) => trackedIds.has(item.courseId));
+
       setRemainingTime((now - lastRequest) / REFRESH_INTERVAL_MS);
       loadDataFromStorage<Vod[]>('vod', (data) => {
-        if (data) setVods(filterVodsForDisplay(data));
+        if (data) setVods(filterVodsForDisplay(byTracked(data)));
       });
       loadDataFromStorage<Assign[]>('assign', (data) => {
-        if (data) setAssigns(filterItemsForDisplay(data));
+        if (data) setAssigns(filterItemsForDisplay(byTracked(data)));
       });
       loadDataFromStorage<Quiz[]>('quiz', (data) => {
-        if (data) setQuizzes(filterItemsForDisplay(data));
+        if (data) setQuizzes(filterItemsForDisplay(byTracked(data)));
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

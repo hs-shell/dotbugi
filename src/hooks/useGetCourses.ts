@@ -10,7 +10,7 @@ function getMockCourses(): CourseBase[] | null {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) return parsed;
   } catch {
-    console.error('[Dotbugi] VITE_MOCK_COURSES 파싱 실패');
+    // VITE_MOCK_COURSES 파싱 실패 (개발 환경에서만 발생)
   }
   return null;
 }
@@ -33,9 +33,9 @@ export const useGetCourses = () => {
         if (savedIds && savedIds.length > 0) {
           setTrackedCourseIdsState(savedIds);
         } else {
-          // 최초 사용: 비교과(커뮤니티) 제외하고 전부 트래킹
+          // 최초 사용: 비교과(커뮤니티)와 이전 학기 과목 제외하고 전부 트래킹
           const defaultIds = courses
-            .filter((c) => !c.isCommunity)
+            .filter((c) => !c.isCommunity && c.isCurrentSemester !== false)
             .map((c) => c.courseId);
           setTrackedCourseIdsState(defaultIds);
           saveDataToStorage('trackedCourseIds', defaultIds);

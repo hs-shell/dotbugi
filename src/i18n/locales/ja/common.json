@@ -64,6 +64,7 @@
   "filterSet": "フィルター適用中",
   "language": "言語",
   "contact": "お問い合わせ",
+  "downloadLogs": "ログダウンロード",
   "calendar": {
     "bannerTitle": "Google Calendar 連携",
     "bannerDesc": "Dotbugiで講義・課題・クイズの日程をGoogle Calendarで管理しましょう",

@@ -65,6 +65,7 @@
   "filterSet": "已设置筛选",
   "language": "语言",
   "contact": "联系我们",
+  "downloadLogs": "下载日志",
   "calendar": {
     "bannerTitle": "Google Calendar 同步",
     "bannerDesc": "通过Dotbugi在Google Calendar上管理课程、作业和测验日程",

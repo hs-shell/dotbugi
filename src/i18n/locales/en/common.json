@@ -64,6 +64,7 @@
   "filterSet": "Filter Applied",
   "language": "Language",
   "contact": "Contact Us",
+  "downloadLogs": "Download Logs",
   "calendar": {
     "bannerTitle": "Google Calendar Sync",
     "bannerDesc": "Manage your lectures, assignments, and quizzes on Google Calendar with Dotbugi",

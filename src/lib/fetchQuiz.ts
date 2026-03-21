@@ -90,7 +90,6 @@ export const fetchQuiz = async (
 
     return results;
   } catch (error) {
-    console.error('[Dotbugi] 퀴즈 조회 오류:', error);
-    throw error;
+    throw new Error(`퀴즈 조회 실패`, { cause: error });
   }
 };

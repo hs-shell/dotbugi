@@ -1,4 +1,5 @@
 import { CalendarEvent } from '@/lib/transformCalendarEvents';
+import { logger } from '@/lib/logger';
 
 export type GoogleCalendarEvent = {
   summary: string;
@@ -32,9 +33,9 @@ export const getOAuthToken = async (interactive = false): Promise<string | null>
     if (response?.token) {
       return response.token;
     }
-    console.error('OAuth 토큰 획득 실패:', response?.error);
+    logger.error('OAuth 토큰 획득 실패:', response?.error);
   } catch (e) {
-    console.error('OAuth 메시지 전송 실패:', e);
+    logger.error('OAuth 메시지 전송 실패:', e);
   }
   return null;
 };
@@ -43,7 +44,7 @@ export const removeCachedAuthToken = async (token: string): Promise<void> => {
   try {
     await chrome.runtime.sendMessage({ action: 'removeCachedAuthToken', token });
   } catch (e) {
-    console.error('토큰 제거 메시지 전송 실패:', e);
+    logger.error('토큰 제거 메시지 전송 실패:', e);
   }
 };
 
@@ -69,12 +70,12 @@ export async function addCalendarEvent(
     }
     if (!response.ok) {
       const errorBody = await response.json();
-      console.error('이벤트 추가 실패:', response.status, errorBody);
+      logger.error('이벤트 추가 실패:', response.status, errorBody);
       return { ok: false, tokenExpired: false };
     }
     return { ok: true, tokenExpired: false };
   } catch (error) {
-    console.error('Error adding calendar event:', error);
+    logger.error('캘린더 이벤트 추가 오류:', error);
     return { ok: false, tokenExpired: false };
   }
 }
@@ -184,7 +185,7 @@ export async function getCalendarEvents(
 
     return { events: allEvents, tokenExpired: false };
   } catch (error) {
-    console.error('캘린더 이벤트 가져오기 실패:', error);
+    logger.error('캘린더 이벤트 가져오기 실패:', error);
     return { events: [], tokenExpired: false };
   }
 }

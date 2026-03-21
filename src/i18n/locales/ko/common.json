@@ -64,6 +64,7 @@
   "filterSet": "필터 설정됨",
   "language": "언어",
   "contact": "문의하기",
+  "downloadLogs": "로그 다운로드",
   "calendar": {
     "bannerTitle": "Google Calendar 연동",
     "bannerDesc": "돋부기를 통해 강의, 과제, 퀴즈 일정을 Google Calendar로 관리하세요",

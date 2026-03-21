@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, changeLanguage, type LanguageCode } from '@/i18n';
-import { Globe, Github, X } from 'lucide-react';
+import { Globe, Github, X, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import GoogleCalendar from '@/assets/calendar.png';
 import GmailIcon from '@/assets/gmail.png';
+import { downloadLogs } from '@/lib/logger';
 
 const CONTACT_EMAIL = 'hsu.dotbugi@gmail.com';
 const KAKAO_LINK = 'https://open.kakao.com/o/sZBnxllh';
@@ -119,6 +120,17 @@ export default function Setting({
             </a>
           </div>
         </div>
+      </Card>
+
+      {/* 로그 다운로드 */}
+      <Card className="bg-white rounded-2xl w-full border-0 shadow-none px-1.5 py-1.5">
+        <button
+          onClick={() => downloadLogs()}
+          className="flex items-center w-full h-14 rounded-2xl px-4 py-3 gap-x-3 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500"
+        >
+          <Download className="w-5 h-5 text-zinc-500 flex-shrink-0" />
+          <span className="flex-1 text-lg font-semibold text-zinc-600 text-left">{t('downloadLogs')}</span>
+        </button>
       </Card>
 
       {/* 숨긴 태스크 */}

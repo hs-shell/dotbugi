@@ -33,7 +33,6 @@ export const fetchAssign = async (link: string) => {
       return { subject: lastWeekLabel, title, url, dueDate, isSubmit };
     });
   } catch (error) {
-    console.error('[Dotbugi] 과제 조회 오류:', error);
-    throw error;
+    throw new Error(`과제 조회 실패`, { cause: error });
   }
 };

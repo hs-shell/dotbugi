@@ -29,6 +29,7 @@ import {
   convertCalendarEventsToGoogleEvents,
 } from '@/lib/calendarUtils';
 import { vodGroupsToEvents, dueDateItemToEvent } from '@/lib/transformCalendarEvents';
+import { logger } from '@/lib/logger';
 
 const BUBBLE_DISMISS_KEY = 'dotbugi_bubble_dismissed';
 const BUBBLE_DISMISS_DURATION = import.meta.env.VITE_MOCK ? 1000 * 30 : 1000 * 60 * 60; // mock: 30초, prod: 1시간
@@ -89,12 +90,17 @@ export default function Dashboard() {
 
   // DOM 토글에서 trackedCourseIds 변경 시 데이터 추가/삭제
   const prevTrackedIdsRef = useRef<Set<string>>(new Set(trackedCourseIds));
+  const isFirstLoadRef = useRef(true);
   useEffect(() => {
     const prevSet = prevTrackedIdsRef.current;
     const currSet = new Set(trackedCourseIds);
     prevTrackedIdsRef.current = currSet;
 
-    if (prevSet.size === 0) return;
+    // 최초 스토리지 로드 시에만 건너뛰기 (useCourseData의 초기 로드가 처리)
+    if (prevSet.size === 0 && isFirstLoadRef.current) {
+      if (currSet.size > 0) isFirstLoadRef.current = false;
+      return;
+    }
 
     const allCourseIds = new Set(allCourses.map((c) => c.courseId));
 
@@ -207,7 +213,7 @@ export default function Dashboard() {
       try {
         await removeCachedAuthToken(calendarToken);
       } catch (e) {
-        console.warn('[Dotbugi] removeCachedAuthToken failed:', e);
+        logger.warn('removeCachedAuthToken failed:', e);
       }
     }
     setCalendarToken(null);

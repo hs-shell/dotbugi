@@ -17,7 +17,8 @@ function parseCourseFromElement(li: Element): CourseBase | null {
   if (!courseId || !courseTitle || !prof) return null;
 
   const isCommunity = li.classList.contains(COMMUNITY_CLASS);
-  return { courseId, courseTitle, prof, isCommunity };
+  const isCurrentSemester = isCommunity || !!li.querySelector('.course_box_current');
+  return { courseId, courseTitle, prof, isCommunity, isCurrentSemester };
 }
 
 export function parseCoursesFromDOM(): CourseBase[] {

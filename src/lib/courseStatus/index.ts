@@ -1,6 +1,7 @@
 import { CourseBase, Quiz } from '@/types';
 import { scrapeCourseData } from '@/lib/fetchCourseData';
 import { mergeVodWithAttendance, mergeDueDateItems } from '@/lib/transformCourseData';
+import { logger } from '@/lib/logger';
 
 import {
   load,
@@ -52,7 +53,7 @@ async function fetchAndInject(courseId: string, course: CourseBase, isTracked: b
     setFetchCache(courseId);
     showStatusBar('success');
   } catch (error) {
-    console.error('[Dotbugi] 강의 데이터 로드 오류:', error);
+    logger.error('강의 데이터 로드 오류:', error);
     showStatusBar('error');
   }
 }

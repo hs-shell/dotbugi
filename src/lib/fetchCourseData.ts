@@ -6,6 +6,7 @@ import { getAssignPageLink, getVodProgressPageLink, getIndexPageLink, getQuizPag
 import { fetchAssign } from './fetchAssign';
 import { fetchQuiz } from './fetchQuiz';
 import { Quiz } from '@/types';
+import { logger } from './logger';
 
 /**
  * 일반 강좌: user_progress_a.php 출석 데이터에 user_progress.php 시간 데이터를 병합
@@ -31,6 +32,12 @@ function mergeTimeData(
   });
 }
 
+function settled<T>(result: PromiseSettledResult<T>, fallback: T): T {
+  if (result.status === 'fulfilled') return result.value;
+  logger.warn(result.reason?.message ?? result.reason);
+  return fallback;
+}
+
 export const scrapeCourseData = async (
   courseId: string,
   cachedQuizzes?: Quiz[],
@@ -41,32 +48,38 @@ export const scrapeCourseData = async (
     ? new Map(cachedQuizzes.map((q) => [q.url, q.isSubmit]))
     : undefined;
 
-  try {
-    // 커뮤니티: user_progress.php만 사용
-    // 일반: user_progress_a.php(출석) + user_progress.php(시간 데이터) 병합
-    const progressLink = getVodProgressPageLink(courseId);
+  // 커뮤니티: user_progress.php만 사용
+  // 일반: user_progress_a.php(출석) + user_progress.php(시간 데이터) 병합
+  const progressLink = getVodProgressPageLink(courseId);
 
-    const [vodAttendanceRaw, vodProgress, vodList, assignList, quizList] = await Promise.all([
-      isCommunity ? Promise.resolve(null) : fetchVodAttendance(getVodPageLink(courseId)),
-      fetchVodProgress(progressLink),
-      fetchVodList(getIndexPageLink(courseId)),
-      fetchAssign(getAssignPageLink(courseId)),
-      fetchQuiz(getQuizPageLink(courseId), cachedSubmitMap),
-    ]);
+  const results = await Promise.allSettled([
+    isCommunity ? Promise.resolve(null) : fetchVodAttendance(getVodPageLink(courseId)),
+    fetchVodProgress(progressLink),
+    fetchVodList(getIndexPageLink(courseId)),
+    fetchAssign(getAssignPageLink(courseId)),
+    fetchQuiz(getQuizPageLink(courseId), cachedSubmitMap),
+  ]);
 
-    const vodAttendance = isCommunity || !vodAttendanceRaw
-      ? vodProgress
-      : mergeTimeData(vodAttendanceRaw, vodProgress);
+  const vodAttendanceRaw = settled(results[0], null);
+  const vodProgress = settled(results[1], []);
+  const vodList = settled(results[2], []);
+  const assignList = settled(results[3], []);
+  const quizList = settled(results[4], []);
 
-    console.info('[Dotbugi]', vodAttendance, vodList, assignList, quizList);
-    return {
-      vodAttendanceArray: vodAttendance,
-      vodDataArray: vodList,
-      assignDataArray: assignList,
-      quizDataArray: quizList,
-    };
-  } catch (error) {
-    console.error('[Dotbugi] 강의 데이터 스크래핑 오류:', error);
-    throw error;
+  // 모든 요청이 실패하면 에러로 처리
+  const allFailed = results.every((r) => r.status === 'rejected');
+  if (allFailed) {
+    throw new Error('모든 강의 데이터 요청 실패');
   }
+
+  const vodAttendance = isCommunity || !vodAttendanceRaw
+    ? vodProgress
+    : mergeTimeData(vodAttendanceRaw, vodProgress);
+
+  return {
+    vodAttendanceArray: vodAttendance,
+    vodDataArray: vodList,
+    assignDataArray: assignList,
+    quizDataArray: quizList,
+  };
 };

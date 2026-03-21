@@ -88,12 +88,8 @@ describe('loadAndTransform', () => {
   it('잘못된 JSON이면 콜백 호출 안 함', () => {
     mockStorage['bad'] = '{invalid json';
     const callback = vi.fn();
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     loadAndTransform('bad', (data) => data, callback);
     expect(callback).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalled();
-
-    consoleSpy.mockRestore();
   });
 });

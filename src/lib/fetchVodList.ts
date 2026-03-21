@@ -36,7 +36,6 @@ export const fetchVodList = async (link: string) => {
       });
     });
   } catch (error) {
-    console.error('[Dotbugi] VOD 목록 조회 오류:', error);
-    throw error;
+    throw new Error(`VOD 목록 조회 실패`, { cause: error });
   }
 };

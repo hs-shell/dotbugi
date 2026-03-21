@@ -12,7 +12,9 @@ export function injectCourseToggles() {
   saveDataToStorage('communityIds', communityIds);
 
   loadDataFromStorage<string[]>('trackedCourseIds', (savedIds) => {
-    const trackedIds = savedIds ?? allCourses.filter((c) => !c.isCommunity).map((c) => c.courseId);
+    const trackedIds = savedIds ?? allCourses
+      .filter((c) => !c.isCommunity && c.isCurrentSemester !== false)
+      .map((c) => c.courseId);
 
     if (!savedIds) {
       saveDataToStorage('trackedCourseIds', trackedIds);
