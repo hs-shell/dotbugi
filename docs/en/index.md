@@ -50,7 +50,7 @@ hero:
   </div>
   <div class="feature">
     <h3>Auto Continuous Playback</h3>
-    <p>Automatically play unwatched lectures in sequence to complete your coursework quickly.</p>
+    <p>Automatically plays unwatched lectures in sequence at normal speed (1x) without any speed manipulation. Fully complies with attendance requirements.</p>
   </div>
   <div class="feature">
     <h3>Google Calendar Integration</h3>

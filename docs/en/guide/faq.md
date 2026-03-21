@@ -26,6 +26,10 @@ Yes. Enable the tracking toggle for community courses on the LMS main page. They
 
 ## Auto Player
 
+::: details Will using auto-play cause my attendance to be rejected?
+No. Dotbugi plays lectures at **normal speed (1x) without any speed manipulation or playback time tampering**. Unlike external speed-up programs, it does not change the video speed, so the playback time and study time recorded in the LMS are identical. It fully meets the attendance criteria (90% or more of playback time) and operates exactly as if you manually pressed the play button.
+:::
+
 ::: details Auto playback won't start
 The player only appears on course pages (course/view.php). Click the Dotbugi icon in the left sidebar, then press "Start Watching".
 :::

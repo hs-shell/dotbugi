@@ -67,6 +67,10 @@ The sidebar that appears on the left side of the course page lets you automatica
 2. Press the **Start Playing** button to begin auto-playing from the first unwatched lecture.
 3. When all lectures are finished, it will be marked as "Completed".
 
+::: tip Does this affect attendance recognition?
+Dotbugi's auto-play works at **normal speed (1x) without any speed manipulation or video tampering**. It operates exactly the same as manually pressing the play button, so it fully meets the LMS attendance criteria (90% or more of playback time). It is fundamentally different from external speed-up programs, so you can use it with confidence.
+:::
+
 ![Dashboard](/images/player.png)
 
 ## Change Language

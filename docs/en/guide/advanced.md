@@ -105,6 +105,10 @@ The watching badge calculates and displays progress based on the study time data
 
 ![Player](/images/player.png)
 
+::: tip How is this different from speed-up programs?
+Dotbugi's auto-play does not change video speed or manipulate playback time. It **plays at normal speed (1x)** and simply provides the convenience of playing multiple lectures in sequence without manual clicks. Since the playback time and study time recorded in the LMS are identical, it has no impact on attendance criteria.
+:::
+
 ::: info Smart Playback
 - Lectures already marked as attended are automatically skipped.
 - If there is a previous watch position, playback resumes from that point.
