@@ -1,6 +1,6 @@
 # Update Log
 
-## v5.0.1
+## v5.0.2
 
 - Fixed bug where courses were not auto-tracked on first install/update
 - Auto-track newly added courses, auto-remove courses no longer in the list
