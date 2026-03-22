@@ -12,13 +12,36 @@ export function injectCourseToggles() {
   saveDataToStorage('communityIds', communityIds);
 
   loadDataFromStorage<string[]>('trackedCourseIds', (savedIds) => {
-    const trackedIds = savedIds ?? allCourses
-      .filter((c) => !c.isCommunity && c.isCurrentSemester !== false)
-      .map((c) => c.courseId);
+    loadDataFromStorage<string[]>('knownCourseIds', (knownIds) => {
+    const knownSet = new Set(knownIds ?? []);
 
-    if (!savedIds) {
+    const currentCourseIds = new Set(allCourses.map((c) => c.courseId));
+
+    let trackedIds: string[];
+    let changed = false;
+    if (savedIds) {
+      // 현재 강의 목록에 없는 과목은 추적에서 제거
+      const filtered = savedIds.filter((id) => currentCourseIds.has(id));
+      // 새로 추가된 과목 자동 추가
+      const newTrackableIds = allCourses
+        .filter((c) => !knownSet.has(c.courseId) && !c.isCommunity)
+        .map((c) => c.courseId);
+      trackedIds = [...filtered, ...newTrackableIds];
+      changed = filtered.length !== savedIds.length || newTrackableIds.length > 0;
+    } else {
+      trackedIds = allCourses
+        .filter((c) => !c.isCommunity)
+        .map((c) => c.courseId);
+      changed = true;
+    }
+
+    if (changed) {
       saveDataToStorage('trackedCourseIds', trackedIds);
     }
+
+    // knownCourseIds 업데이트
+    const updatedKnown = [...new Set([...knownSet, ...currentCourseIds])];
+    saveDataToStorage('knownCourseIds', updatedKnown);
 
     const trackedSet = new Set(trackedIds);
     const listItems = document.querySelectorAll('.my-course-lists > li');
@@ -47,6 +70,7 @@ export function injectCourseToggles() {
         (courseBox as HTMLElement).style.position = 'relative';
         courseBox.appendChild(toggle);
       }
+    });
     });
   });
 }

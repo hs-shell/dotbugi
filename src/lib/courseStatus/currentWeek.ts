@@ -63,6 +63,9 @@ function parseSectionDateRange(text: string, year: number): { start: Date; end: 
 // ── Highlight & scroll button ───────────────────────────────────────
 
 export function highlightCurrentWeek() {
+  // .course_box_current는 현재 학기 강의에서만 존재
+  if (!document.querySelector('.course_box_current')) return;
+
   const now = new Date();
   const sections = document.querySelectorAll('li[id^="section-"]');
   const fallbackYear = inferYear(sections);
