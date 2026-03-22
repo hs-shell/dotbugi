@@ -159,4 +159,26 @@ hero:
   color: var(--vp-c-text-2);
   line-height: 1.6;
 }
+@media (max-width: 768px) {
+  .vp-doc .cards {
+    grid-template-columns: 1fr;
+    padding: 0 20px 32px;
+  }
+  .vp-doc .features {
+    grid-template-columns: 1fr;
+    padding: 0 20px 48px;
+  }
+  .vp-doc .card-icon {
+    padding: 40px 0;
+    font-size: 36px;
+  }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .vp-doc .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .vp-doc .features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 </style>
