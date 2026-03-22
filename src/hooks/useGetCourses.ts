@@ -30,17 +30,39 @@ export const useGetCourses = () => {
       saveDataToStorage('courses', JSON.stringify(courses));
 
       loadDataFromStorage<string[]>('trackedCourseIds', (savedIds) => {
-        if (savedIds) {
-          // 빈 배열([])도 유효한 저장 상태로 취급 (사용자가 의도적으로 모두 해제한 경우)
-          setTrackedCourseIdsState(savedIds);
-        } else {
-          // 최초 사용: 비교과(커뮤니티)와 이전 학기 과목 제외하고 전부 트래킹
-          const defaultIds = courses
-            .filter((c) => !c.isCommunity && c.isCurrentSemester !== false)
-            .map((c) => c.courseId);
-          setTrackedCourseIdsState(defaultIds);
-          saveDataToStorage('trackedCourseIds', defaultIds);
-        }
+        if (!savedIds && courses.length === 0) return;
+
+        loadDataFromStorage<string[]>('knownCourseIds', (knownIds) => {
+          const knownSet = new Set(knownIds ?? []);
+
+          if (savedIds) {
+            const currentCourseIds = new Set(courses.map((c) => c.courseId));
+            // 현재 강의 목록에 없는 과목은 추적에서 제거
+            const filtered = savedIds.filter((id) => currentCourseIds.has(id));
+            // 새로 추가된 과목 자동 추가
+            const newTrackableIds = courses
+              .filter((c) => !knownSet.has(c.courseId) && !c.isCommunity)
+              .map((c) => c.courseId);
+            const mergedIds = [...filtered, ...newTrackableIds];
+            setTrackedCourseIdsState(mergedIds);
+            if (filtered.length !== savedIds.length || newTrackableIds.length > 0) {
+              saveDataToStorage('trackedCourseIds', mergedIds);
+            }
+          } else if (courses.length > 0) {
+            // 최초 사용: 비교과(커뮤니티)와 이전 학기 과목 제외하고 전부 트래킹
+            const defaultIds = courses
+              .filter((c) => !c.isCommunity)
+              .map((c) => c.courseId);
+            setTrackedCourseIdsState(defaultIds);
+            saveDataToStorage('trackedCourseIds', defaultIds);
+          }
+
+          // 현재 과목 목록을 knownCourseIds로 저장
+          if (courses.length > 0) {
+            const updatedKnown = [...new Set([...knownSet, ...courses.map((c) => c.courseId)])];
+            saveDataToStorage('knownCourseIds', updatedKnown);
+          }
+        });
       });
     };
 

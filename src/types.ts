@@ -3,7 +3,6 @@ export type CourseBase = {
   courseTitle: string;
   prof: string;
   isCommunity?: boolean;
-  isCurrentSemester?: boolean;
 };
 
 export type Vod = CourseBase & {
