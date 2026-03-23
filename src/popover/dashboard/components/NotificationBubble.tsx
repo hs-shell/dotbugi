@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, XCircle, AlertTriangle, Loader2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
