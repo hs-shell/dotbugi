@@ -6,8 +6,8 @@ import { motion } from 'motion/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import GoogleCalendar from '@/assets/calendar.png';
-import GmailIcon from '@/assets/gmail.png';
+import GoogleCalendar from '@/assets/calendar.webp';
+import GmailIcon from '@/assets/gmail.webp';
 import { downloadLogs } from '@/lib/logger';
 
 const CONTACT_EMAIL = 'hsu.dotbugi@gmail.com';

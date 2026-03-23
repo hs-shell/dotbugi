@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { PopoverTrigger } from '@/components/ui/popover';
-import icon from '@/assets/icon.png';
+import icon from '@/assets/icon.webp';
 import { BorderTrail } from '@/components/ui/border-trail';
 import { useTranslation } from 'react-i18next';
 

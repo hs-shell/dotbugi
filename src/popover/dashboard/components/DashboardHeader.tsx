@@ -2,7 +2,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { useMemo } from 'react';
 import { Filters, TAB_TYPE } from '@/types';
 import { EllipsisVertical, ListFilter, RefreshCw, Search, Settings } from 'lucide-react';
-import GoogleCalendar from '@/assets/calendar.png';
+import GoogleCalendar from '@/assets/calendar.webp';
 import filter from '@/assets/filter.svg';
 import { Button } from '@/components/ui/button';
 import FilterBadge from './FilterBadge';
