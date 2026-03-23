@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
 interface InfoBubbleProps {

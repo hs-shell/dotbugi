@@ -1,4 +1,4 @@
-import thung from '@/assets/thung.png';
+import thung from '@/assets/thung.webp';
 import { useTranslation } from 'react-i18next';
 
 interface EmptyStateProps {
