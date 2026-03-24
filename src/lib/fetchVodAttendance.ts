@@ -134,61 +134,68 @@ function flattenRow(
 // ── 메인 ────────────────────────────────────────────────────────────
 
 /**
+ * 출석부 테이블 DOM을 파싱하여 출석 데이터 배열 반환
+ * (테스트 가능하도록 분리)
+ */
+export function parseAttendanceTable(doc: Document): VodAttendanceData[] {
+  const col = detectColumns(doc);
+  if (!col) throw new Error('출석부 테이블 헤더 파싱 실패');
+
+  const rows = doc.querySelectorAll('.user_progress_table > tbody > tr');
+
+  const pendingSpans: (number | undefined)[] = [];
+  const spanValues: (string | null)[] = [];
+  const results: VodAttendanceData[] = [];
+  let currentWeek = 0;
+  let lastWeeklyAttendance = '';
+
+  rows.forEach((row) => {
+    try {
+      const cells = flattenRow(row, pendingSpans, spanValues);
+
+      const title = cells[col.TITLE] || '';
+      const isAttendance = cells[col.ATTENDANCE] || '';
+
+      let weeklyAttendance = cells[col.WEEKLY_ATTENDANCE] || '';
+      if (weeklyAttendance) {
+        lastWeeklyAttendance = weeklyAttendance;
+      } else {
+        weeklyAttendance = lastWeeklyAttendance;
+      }
+      if (BULK_APPROVED.some((keyword) => weeklyAttendance.includes(keyword))) weeklyAttendance = 'o';
+
+      const parsedWeek = parseInt(cells[col.WEEK] || '');
+      if (!isNaN(parsedWeek)) currentWeek = parsedWeek;
+
+      if (!title || !isAttendance) return;
+
+      const requiredTime = col.REQUIRED_TIME !== null ? (cells[col.REQUIRED_TIME] || '') : '';
+      const watchedTime = extractTime(cells[col.WATCHED_TIME]);
+
+      results.push({
+        title,
+        isAttendance,
+        weeklyAttendance,
+        week: currentWeek,
+        ...(requiredTime && { requiredTime }),
+        ...(watchedTime && { watchedTime }),
+      });
+    } catch (error) {
+      // 개별 행 파싱 실패는 무시하고 계속 진행
+    }
+  });
+
+  return results;
+}
+
+/**
  * 온라인 출석부 정보 가져오기 (user_progress_a.php)
  * thead에서 컬럼 구조를 동적으로 감지하여 5열/6열 테이블 모두 처리
  */
 export const fetchVodAttendance = async (link: string) => {
   try {
     const doc = await fetchHtml(link);
-
-    const col = detectColumns(doc);
-    if (!col) throw new Error('출석부 테이블 헤더 파싱 실패');
-
-    const rows = doc.querySelectorAll('.user_progress_table > tbody > tr');
-
-    const pendingSpans: (number | undefined)[] = [];
-    const spanValues: (string | null)[] = [];
-    const results: VodAttendanceData[] = [];
-    let currentWeek = 0;
-    let lastWeeklyAttendance = '';
-
-    rows.forEach((row) => {
-      try {
-        const cells = flattenRow(row, pendingSpans, spanValues);
-
-        const title = cells[col.TITLE] || '';
-        const isAttendance = cells[col.ATTENDANCE] || '';
-
-        let weeklyAttendance = cells[col.WEEKLY_ATTENDANCE] || '';
-        if (weeklyAttendance) {
-          lastWeeklyAttendance = weeklyAttendance;
-        } else {
-          weeklyAttendance = lastWeeklyAttendance;
-        }
-        if (BULK_APPROVED.some((keyword) => weeklyAttendance.includes(keyword))) weeklyAttendance = 'o';
-
-        const parsedWeek = parseInt(cells[col.WEEK] || '');
-        if (!isNaN(parsedWeek)) currentWeek = parsedWeek;
-
-        if (!title || !isAttendance) return;
-
-        const requiredTime = col.REQUIRED_TIME !== null ? (cells[col.REQUIRED_TIME] || '') : '';
-        const watchedTime = extractTime(cells[col.WATCHED_TIME]);
-
-        results.push({
-          title,
-          isAttendance,
-          weeklyAttendance,
-          week: currentWeek,
-          ...(requiredTime && { requiredTime }),
-          ...(watchedTime && { watchedTime }),
-        });
-      } catch (error) {
-        // 개별 행 파싱 실패는 무시하고 계속 진행
-      }
-    });
-
-    return results;
+    return parseAttendanceTable(doc);
   } catch (error) {
     throw new Error(`출석부 조회 실패`, { cause: error });
   }
