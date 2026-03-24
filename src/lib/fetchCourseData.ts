@@ -1,4 +1,3 @@
-import { VodAttendanceData } from '@/types';
 import { fetchVodAttendance } from './fetchVodAttendance';
 import { fetchVodProgress } from './fetchVodProgress';
 import { fetchVodList } from './fetchVodList';
@@ -7,30 +6,6 @@ import { fetchAssign } from './fetchAssign';
 import { fetchQuiz } from './fetchQuiz';
 import { Quiz } from '@/types';
 import { logger } from './logger';
-
-/**
- * 일반 강좌: user_progress_a.php 출석 데이터에 user_progress.php 시간 데이터를 병합
- * (일괄출석인정 등 기존 출석 판정 유지 + 시청중 배지용 시간 데이터 추가)
- */
-function mergeTimeData(
-  attendance: VodAttendanceData[],
-  progress: VodAttendanceData[],
-): VodAttendanceData[] {
-  const progressByKey = new Map<string, VodAttendanceData>();
-  for (const p of progress) {
-    progressByKey.set(`${p.title}-${p.week}`, p);
-  }
-
-  return attendance.map((att) => {
-    const prog = progressByKey.get(`${att.title}-${att.week}`);
-    if (!prog) return att;
-    return {
-      ...att,
-      requiredTime: prog.requiredTime,
-      watchedTime: prog.watchedTime,
-    };
-  });
-}
 
 function settled<T>(result: PromiseSettledResult<T>, fallback: T): T {
   if (result.status === 'fulfilled') return result.value;
@@ -48,8 +23,8 @@ export const scrapeCourseData = async (
     ? new Map(cachedQuizzes.map((q) => [q.url, q.isSubmit]))
     : undefined;
 
-  // 커뮤니티: user_progress.php만 사용
-  // 일반: user_progress_a.php(출석) + user_progress.php(시간 데이터) 병합
+  // 일반 강좌: _a.php 우선, 실패 시 .php 폴백
+  // 커뮤니티: .php만 사용 (_a.php 접근 불가)
   const progressLink = getVodProgressPageLink(courseId);
 
   const results = await Promise.allSettled([
@@ -72,9 +47,11 @@ export const scrapeCourseData = async (
     throw new Error('모든 강의 데이터 요청 실패');
   }
 
+  // 일반 강좌: _a.php 데이터 사용 (출석 + 시간 데이터 포함)
+  // _a.php 실패 또는 커뮤니티: .php 폴백 (시간 비교 기반 출석 판정)
   const vodAttendance = isCommunity || !vodAttendanceRaw
     ? vodProgress
-    : mergeTimeData(vodAttendanceRaw, vodProgress);
+    : vodAttendanceRaw;
 
   return {
     vodAttendanceArray: vodAttendance,

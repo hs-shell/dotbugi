@@ -24,6 +24,15 @@ export const BULK_APPROVED = [
 ];
 
 /**
+ * 출석부 테이블(user_progress_table) 컬럼 헤더 매칭 키워드
+ * 매칭 순서 중요: WEEKLY_ATTENDANCE("주차 출석")를 ATTENDANCE("출석")보다 먼저 검사해야 함
+ * ja/zh는 영어와 동일한 헤더를 사용
+ */
+export const COL_WEEKLY_ATTENDANCE = ['주차 출석', 'Week attendance'];
+export const COL_ATTENDANCE = ['출석', 'Attendance'];
+export const COL_REQUIRED_TIME = ['출석인정 요구시간', 'Required'];
+
+/**
  * LMS 날짜 문자열을 JS Date가 파싱 가능한 형식으로 정규화
  *
  * 지원 형식:

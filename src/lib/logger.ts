@@ -67,11 +67,38 @@ export async function clearLogs(): Promise<void> {
   await chrome.storage.local.remove(STORAGE_KEY);
 }
 
-export async function downloadLogs(): Promise<void> {
-  const logs = await getLogs();
-  if (logs.length === 0) return;
+/** 디버깅용 스토리지 스냅샷 (민감 정보 없음, 트래킹 강의만 포함) */
+const STORAGE_DUMP_KEYS = [
+  'vod', 'assign', 'quiz',
+  'trackedCourseIds', 'communityIds', 'knownCourseIds',
+  'courses', 'language', 'hiddenTaskUrls',
+] as const;
 
-  const text = logs.map((l) => `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.message}`).join('\n');
+async function getStorageDump(): Promise<string> {
+  try {
+    const result = await chrome.storage.local.get([...STORAGE_DUMP_KEYS]);
+    const trackedIds = new Set<string>(result.trackedCourseIds ?? []);
+
+    // 트래킹 중인 강의 데이터만 포함
+    const filterByCourse = <T extends { courseId: string }>(items: T[]) =>
+      items.filter((item) => trackedIds.has(item.courseId));
+
+    if (Array.isArray(result.vod)) result.vod = filterByCourse(result.vod);
+    if (Array.isArray(result.assign)) result.assign = filterByCourse(result.assign);
+    if (Array.isArray(result.quiz)) result.quiz = filterByCourse(result.quiz);
+
+    return JSON.stringify(result, null, 2);
+  } catch {
+    return '(스토리지 접근 불가)';
+  }
+}
+
+export async function downloadLogs(): Promise<void> {
+  const [logs, storageDump] = await Promise.all([getLogs(), getStorageDump()]);
+  if (logs.length === 0 && storageDump === '(스토리지 접근 불가)') return;
+
+  const logText = logs.map((l) => `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.message}`).join('\n');
+  const text = [logText, '', '=== Storage Snapshot ===', storageDump].join('\n');
   const blob = new Blob([text], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

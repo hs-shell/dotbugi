@@ -31,7 +31,7 @@ export const mockVods: Vod[] = [
     range: makeRange(-5, 0),
     length: '38:00',
     isAttendance: 'X',
-    weeklyAttendance: '0/1',
+    weeklyAttendance: 'X',
   },
   // 출석 완료 + 기간 내
   {
@@ -45,7 +45,7 @@ export const mockVods: Vod[] = [
     range: makeRange(-3, 5),
     length: '45:00',
     isAttendance: 'O',
-    weeklyAttendance: '1/1',
+    weeklyAttendance: 'O',
   },
   // 결석 + 마감 임박 (오늘 안에 끝남)
   // 결석 + 기간 여유
@@ -60,7 +60,7 @@ export const mockVods: Vod[] = [
     range: makeRange(-2, 7),
     length: '50:00',
     isAttendance: 'X',
-    weeklyAttendance: '0/1',
+    weeklyAttendance: 'X',
   },
   // 출석 완료
   {
@@ -74,7 +74,7 @@ export const mockVods: Vod[] = [
     range: makeRange(-2, 7),
     length: '42:00',
     isAttendance: 'O',
-    weeklyAttendance: '1/1',
+    weeklyAttendance: 'O',
   },
   // 결석 + 마감 매우 임박 (몇 시간 남음)
   {
@@ -88,7 +88,7 @@ export const mockVods: Vod[] = [
     range: makeRange(-6, 0),
     length: '55:00',
     isAttendance: 'X',
-    weeklyAttendance: '0/2',
+    weeklyAttendance: 'X',
   },
   {
     courseId: '1003',
@@ -101,7 +101,7 @@ export const mockVods: Vod[] = [
     range: makeRange(-6, 0),
     length: '35:00',
     isAttendance: 'O',
-    weeklyAttendance: '1/2',
+    weeklyAttendance: 'O',
   },
   // 출석 + range가 넉넉
   {
@@ -115,7 +115,7 @@ export const mockVods: Vod[] = [
     range: makeRange(-1, 14),
     length: '60:00',
     isAttendance: 'O',
-    weeklyAttendance: '1/1',
+    weeklyAttendance: 'O',
   },
 ];
 
