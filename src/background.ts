@@ -19,8 +19,6 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     chrome.tabs.create({ url: 'https://hs-shell.github.io/dotbugi/' });
-  } else if (details.reason === 'update' && chrome.runtime.getManifest().version === '5.0.0') {
-    chrome.tabs.create({ url: 'https://hs-shell.github.io/dotbugi/' });
   }
 });
 
