@@ -1,5 +1,15 @@
 # Update Log
 
+## v5.0.3
+
+- Fixed bug where attended lectures were shown as absent on courses without the "Required time" column
+- Dynamically detect attendance table columns to support both 5-column and 6-column layouts
+- Fixed non-tracked course data accumulating in local storage indefinitely
+- Removed unnecessary OAuth error logs for users not signed in to Google
+- Include tracked course data snapshot in log downloads
+- Removed unused dependencies and improved bundle splitting
+- Removed auto-opening dotbugi page on extension update
+
 ## v5.0.2
 
 - Fixed bug where courses were not auto-tracked on first install/update
