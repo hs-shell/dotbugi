@@ -33,9 +33,14 @@ export const getOAuthToken = async (interactive = false): Promise<string | null>
     if (response?.token) {
       return response.token;
     }
-    logger.error('OAuth 토큰 획득 실패:', response?.error);
+    // 비대화형 호출에서 토큰 없음은 미로그인 상태이므로 에러 로그 생략
+    if (interactive) {
+      logger.error('OAuth 토큰 획득 실패:', response?.error);
+    }
   } catch (e) {
-    logger.error('OAuth 메시지 전송 실패:', e);
+    if (interactive) {
+      logger.error('OAuth 메시지 전송 실패:', e);
+    }
   }
   return null;
 };

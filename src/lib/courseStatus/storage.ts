@@ -1,11 +1,7 @@
 import { Vod, Assign, Quiz } from '@/types';
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
 
-const TEMP_COURSES_KEY = 'tempCourseFetchTimes';
-const TEMP_COURSE_TTL_MS = 60 * 1000;
 const FETCH_CACHE_TTL_MS = 2 * 60 * 1000;
-
-type TempCourseFetchTimes = Record<string, number>;
 
 // ── Generic loader ──────────────────────────────────────────────────
 
@@ -58,38 +54,7 @@ export function saveCourseData(
   saveDataToStorage('quiz', [...exclude(all.quizzes), ...newQuizzes]);
 }
 
-// ── Temp course cleanup ─────────────────────────────────────────────
-
-export async function cleanupExpiredTempCourses() {
-  const times = (await load<TempCourseFetchTimes>(TEMP_COURSES_KEY)) ?? {};
-  const now = Date.now();
-  const expired = Object.entries(times)
-    .filter(([, at]) => now - at >= TEMP_COURSE_TTL_MS)
-    .map(([id]) => id);
-
-  if (expired.length === 0) return;
-
-  const expiredSet = new Set(expired);
-  const all = await loadAllData();
-
-  const notExpired = <T extends { courseId: string }>(items: T[]) =>
-    items.filter((item) => !expiredSet.has(item.courseId));
-
-  saveDataToStorage('vod', notExpired(all.vods));
-  saveDataToStorage('assign', notExpired(all.assigns));
-  saveDataToStorage('quiz', notExpired(all.quizzes));
-
-  for (const id of expired) delete times[id];
-  saveDataToStorage(TEMP_COURSES_KEY, times);
-}
-
-export async function registerTempCourse(courseId: string) {
-  const times = (await load<TempCourseFetchTimes>(TEMP_COURSES_KEY)) ?? {};
-  times[courseId] = Date.now();
-  saveDataToStorage(TEMP_COURSES_KEY, times);
-}
-
-// ── Fetch cache (sessionStorage) ────────────────────────────────────
+// ── Session cache (sessionStorage) ──────────────────────────────────
 
 function isBackForwardNavigation(): boolean {
   const [entry] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
@@ -104,4 +69,19 @@ export function isFetchCacheValid(courseId: string): boolean {
 
 export function setFetchCache(courseId: string) {
   sessionStorage.setItem(`dotbugi_fetch_${courseId}`, Date.now().toString());
+}
+
+/** 비트래킹 강좌용: sessionStorage에 데이터 캐시 (탭 닫으면 소멸) */
+export function saveSessionCourseData(courseId: string, vods: Vod[], assigns: Assign[], quizzes: Quiz[]) {
+  sessionStorage.setItem(`dotbugi_data_${courseId}`, JSON.stringify({ vods, assigns, quizzes }));
+}
+
+export function loadSessionCourseData(courseId: string): { vods: Vod[]; assigns: Assign[]; quizzes: Quiz[] } | null {
+  const raw = sessionStorage.getItem(`dotbugi_data_${courseId}`);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 }

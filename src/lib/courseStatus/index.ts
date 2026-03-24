@@ -8,8 +8,8 @@ import {
   loadCourseData,
   loadAllData,
   saveCourseData,
-  cleanupExpiredTempCourses,
-  registerTempCourse,
+  saveSessionCourseData,
+  loadSessionCourseData,
   isFetchCacheValid,
   setFetchCache,
 } from './storage';
@@ -44,10 +44,14 @@ async function fetchAndInject(courseId: string, course: CourseBase, isTracked: b
     const newAssigns = mergeDueDateItems(course, scraped.assignDataArray);
     const newQuizzes = mergeDueDateItems(course, scraped.quizDataArray);
 
-    const all = await loadAllData();
-    saveCourseData(courseId, newVods, newAssigns, newQuizzes, all);
-
-    if (!isTracked) await registerTempCourse(courseId);
+    if (isTracked) {
+      // 트래킹 강좌: chrome.storage에 영구 저장
+      const all = await loadAllData();
+      saveCourseData(courseId, newVods, newAssigns, newQuizzes, all);
+    } else {
+      // 비트래킹 강좌: sessionStorage에 임시 캐시 (탭 닫으면 소멸)
+      saveSessionCourseData(courseId, newVods, newAssigns, newQuizzes);
+    }
 
     injectBadgesIntoDOM(newVods, newAssigns, newQuizzes, new Set(hiddenUrls ?? []));
     setFetchCache(courseId);
@@ -67,7 +71,6 @@ export async function injectCourseStatus() {
   const courseId = match[1];
 
   highlightCurrentWeek();
-  await cleanupExpiredTempCourses();
 
   const [trackedIds, communityIds] = await Promise.all([
     load<string[]>('trackedCourseIds'),
@@ -78,9 +81,20 @@ export async function injectCourseStatus() {
 
   // 뒤로가기/앞으로가기 → 캐시 사용
   if (isFetchCacheValid(courseId)) {
-    const data = await loadCourseData(courseId);
-    injectBadgesIntoDOM(data.vods, data.assigns, data.quizzes, data.hiddenUrls);
-    return;
+    if (isTracked) {
+      const data = await loadCourseData(courseId);
+      if (data.vods.length || data.assigns.length || data.quizzes.length) {
+        injectBadgesIntoDOM(data.vods, data.assigns, data.quizzes, data.hiddenUrls);
+        return;
+      }
+    } else {
+      const cached = loadSessionCourseData(courseId);
+      if (cached) {
+        const hiddenUrls = await load<string[]>('hiddenTaskUrls');
+        injectBadgesIntoDOM(cached.vods, cached.assigns, cached.quizzes, new Set(hiddenUrls ?? []));
+        return;
+      }
+    }
   }
 
   // 트래킹 강의 → 저장된 데이터로 빠른 초기 렌더링

@@ -181,4 +181,51 @@ export function injectBadgesIntoDOM(vods: Vod[], assigns: Assign[], quizzes: Qui
     hiddenUrls,
     hidden,
   );
+
+  if (import.meta.env.VITE_MOCK) {
+    injectWeeklyAttendanceDebug(vods);
+  }
+}
+
+// ── Mock-only: 주차별 출석 상태 디버그 배지 ──────────────────────────
+
+function injectWeeklyAttendanceDebug(vods: Vod[]) {
+  const WEEKLY_ATTR = 'data-dotbugi-weekly-debug';
+  document.querySelectorAll(`[${WEEKLY_ATTR}]`).forEach((el) => el.remove());
+
+  // 주차별 weeklyAttendance 집계
+  const weekMap = new Map<number, string>();
+  for (const vod of vods) {
+    if (!weekMap.has(vod.week)) {
+      weekMap.set(vod.week, vod.weeklyAttendance);
+    }
+  }
+
+  const sections = document.querySelectorAll('li[id^="section-"]');
+  for (const section of sections) {
+    const match = section.id?.match(/section-(\d+)/);
+    if (!match) continue;
+    const week = parseInt(match[1], 10);
+
+    const attendance = weekMap.get(week);
+    if (attendance === undefined) continue;
+
+    const attended = isAttended(attendance);
+    const badge = document.createElement('span');
+    badge.setAttribute(WEEKLY_ATTR, '');
+    badge.textContent = `주차 ${attended ? '출석' : '결석'} [${attendance}]`;
+
+    const colors = attended
+      ? { bg: '#dcfce7', text: '#166534', border: '#86efac' }
+      : { bg: '#fee2e2', text: '#b91c1c', border: '#fca5a5' };
+
+    badge.style.cssText = `
+      display:inline-flex;align-items:center;padding:2px 8px;margin-left:8px;
+      border-radius:9999px;font-size:11px;font-weight:600;line-height:1.4;
+      background:${colors.bg};color:${colors.text};border:1px solid ${colors.border};
+      white-space:nowrap;vertical-align:middle;
+    `;
+
+    section.querySelector('.sectionname span')?.appendChild(badge);
+  }
 }
