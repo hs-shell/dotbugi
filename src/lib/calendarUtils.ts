@@ -35,11 +35,11 @@ export const getOAuthToken = async (interactive = false): Promise<string | null>
     }
     // 비대화형 호출에서 토큰 없음은 미로그인 상태이므로 에러 로그 생략
     if (interactive) {
-      logger.error('OAuth 토큰 획득 실패:', response?.error);
+      logger.calendar.error('OAuth 토큰 획득 실패:', response?.error);
     }
   } catch (e) {
     if (interactive) {
-      logger.error('OAuth 메시지 전송 실패:', e);
+      logger.calendar.error('OAuth 메시지 전송 실패:', e);
     }
   }
   return null;
@@ -49,7 +49,7 @@ export const removeCachedAuthToken = async (token: string): Promise<void> => {
   try {
     await chrome.runtime.sendMessage({ action: 'removeCachedAuthToken', token });
   } catch (e) {
-    logger.error('토큰 제거 메시지 전송 실패:', e);
+    logger.calendar.error('토큰 제거 메시지 전송 실패:', e);
   }
 };
 
@@ -75,12 +75,12 @@ export async function addCalendarEvent(
     }
     if (!response.ok) {
       const errorBody = await response.json();
-      logger.error('이벤트 추가 실패:', response.status, errorBody);
+      logger.calendar.error('이벤트 추가 실패:', response.status, errorBody);
       return { ok: false, tokenExpired: false };
     }
     return { ok: true, tokenExpired: false };
   } catch (error) {
-    logger.error('캘린더 이벤트 추가 오류:', error);
+    logger.calendar.error('캘린더 이벤트 추가 오류:', error);
     return { ok: false, tokenExpired: false };
   }
 }
@@ -190,7 +190,7 @@ export async function getCalendarEvents(
 
     return { events: allEvents, tokenExpired: false };
   } catch (error) {
-    logger.error('캘린더 이벤트 가져오기 실패:', error);
+    logger.calendar.error('캘린더 이벤트 가져오기 실패:', error);
     return { events: [], tokenExpired: false };
   }
 }

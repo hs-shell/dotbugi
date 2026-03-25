@@ -141,7 +141,7 @@ export function useCourseData(courses: CourseBase[]) {
       setLastRequestTime(fetchedAt);
       saveDataToStorage('lastRequestTime', fetchedAt.toString());
     } catch (error) {
-      logger.error('강의 데이터 새로고침 실패:', error);
+      logger.course.error('강의 데이터 새로고침 실패:', error);
       clearLastRequestTime();
       setIsError(true);
     } finally {
@@ -204,7 +204,7 @@ export function useCourseData(courses: CourseBase[]) {
         return merged;
       });
     } catch (error) {
-      logger.warn('강의 추가 데이터 fetch 실패:', error);
+      logger.course.warn('강의 추가 데이터 fetch 실패:', error);
     } finally {
       setPendingCourseIds((prev) => {
         const next = new Set(prev);

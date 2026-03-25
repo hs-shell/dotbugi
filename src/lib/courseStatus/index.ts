@@ -57,7 +57,7 @@ async function fetchAndInject(courseId: string, course: CourseBase, isTracked: b
     setFetchCache(courseId);
     showStatusBar('success');
   } catch (error) {
-    logger.error('강의 데이터 로드 오류:', error);
+    logger.course.error('강의 데이터 로드 오류:', error);
     showStatusBar('error');
   }
 }
