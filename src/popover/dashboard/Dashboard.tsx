@@ -229,8 +229,12 @@ export default function Dashboard() {
       setCalendarToken(null);
       showTokenExpiredNotif();
     } else {
-      getOAuthToken(false).then((token) => {
-        if (token) setCalendarToken(token);
+      // 이전에 로그인한 적이 있는 사용자만 자동 토큰 가져오기
+      chrome.storage.local.get('calendarLoggedIn', (result) => {
+        if (!result.calendarLoggedIn) return;
+        getOAuthToken(false).then((token) => {
+          if (token) setCalendarToken(token);
+        });
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -240,6 +244,7 @@ export default function Dashboard() {
     const token = await getOAuthToken(true);
     if (token) {
       setCalendarToken(token);
+      chrome.storage.local.set({ calendarLoggedIn: true });
     }
   };
 
@@ -248,10 +253,11 @@ export default function Dashboard() {
       try {
         await removeCachedAuthToken(calendarToken);
       } catch (e) {
-        logger.warn('removeCachedAuthToken failed:', e);
+        logger.calendar.warn('removeCachedAuthToken failed:', e);
       }
     }
     setCalendarToken(null);
+    chrome.storage.local.remove('calendarLoggedIn');
   };
 
   const handleCalendarSync = async () => {

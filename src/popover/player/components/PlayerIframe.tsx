@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { logger } from '@/lib/logger';
 
 const formatMMSS = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
@@ -40,7 +41,7 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
     if (play) {
       video.muted = false;
       video.volume = 0.01;
-      video.play().catch((e) => console.warn('Playback failed:', e));
+      video.play().catch((e) => logger.player.warn('Playback failed:', e));
     } else {
       video.pause();
     }
@@ -68,24 +69,44 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
       const isComplete = completeMatch?.[1] === '1';
       const beforeProgress = progressMatch ? parseInt(progressMatch[1], 10) : 0;
 
+      logger.player.info('handleLoad meta:', {
+        src: iframe.src,
+        isComplete,
+        beforeProgress,
+        isPlaying: isPlayingRef.current,
+      });
+
       // is_complete면 스킵
       if (isComplete && isPlayingRef.current) {
+        logger.player.info('Skipping completed video:', iframe.src);
         onNextVideoRef.current();
         return;
       }
 
       const video = getVideoElement();
-      if (!video) return;
+      if (!video) {
+        logger.player.warn('Video element not found after meta fetch');
+        return;
+      }
 
       video.onended = null;
-      video.onended = () => onNextVideoRef.current();
+      video.onended = () => {
+        logger.player.info('Video ended naturally:', {
+          src: iframe.src,
+          currentTime: video.currentTime,
+          duration: video.duration,
+        });
+        onNextVideoRef.current();
+      };
 
       // 이어보기
       if (!isComplete && beforeProgress > 0) {
         const trySeek = () => {
           if (controller.signal.aborted) return;
           if (video.readyState >= 1 && video.duration > 0) {
-            video.currentTime = Math.min(beforeProgress, video.duration - 1);
+            const seekTo = Math.min(beforeProgress, video.duration - 1);
+            logger.player.info('Resuming from', seekTo, 'duration:', video.duration);
+            video.currentTime = seekTo;
           } else {
             setTimeout(trySeek, 500);
           }
@@ -97,6 +118,7 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
     } catch {
       // fetch 실패 시 일반 재생
       if (controller.signal.aborted) return;
+      logger.player.warn('Meta fetch failed, falling back to normal playback');
       const video = getVideoElement();
       if (!video) return;
       video.onended = null;
@@ -146,10 +168,15 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
       if (!video || !isPlayingRef.current) return;
 
       if (video.paused) {
+        logger.player.info('Resuming paused video in background tab');
         video.play().catch(() => {});
       }
 
       if (video.duration > 0 && video.currentTime >= video.duration - 0.5) {
+        logger.player.info('Fallback: advancing to next video', {
+          currentTime: video.currentTime,
+          duration: video.duration,
+        });
         onNextVideoRef.current();
       }
     }, 3_000);

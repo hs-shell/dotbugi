@@ -48,8 +48,11 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
 
   const onNextVideo = useCallback(() => {
     if (currentVideoIndex + 1 >= vods.length) {
-      setIsPlaying(false);
-      setIsDone(true);
+      // 마지막 영상: LMS 수강기록 전송(30초 간격)을 위해 60초 대기 후 종료
+      setTimeout(() => {
+        setIsPlaying(false);
+        setIsDone(true);
+      }, 60_000);
       return;
     }
 

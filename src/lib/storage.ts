@@ -40,7 +40,7 @@ export function loadAndTransform<T, R>(
       try {
         parsedData = JSON.parse(data);
       } catch (error) {
-        logger.error(`JSON 파싱 에러 (${storageKey}):`, error);
+        logger.storage.error(`JSON 파싱 에러 (${storageKey}):`, error);
         return;
       }
     } else {

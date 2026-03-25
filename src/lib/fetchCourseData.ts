@@ -9,7 +9,7 @@ import { logger } from './logger';
 
 function settled<T>(result: PromiseSettledResult<T>, fallback: T): T {
   if (result.status === 'fulfilled') return result.value;
-  logger.warn(result.reason?.message ?? result.reason);
+  logger.course.warn(result.reason?.message ?? result.reason);
   return fallback;
 }
 
