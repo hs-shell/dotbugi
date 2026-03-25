@@ -1,5 +1,12 @@
 # Update Log
 
+## v5.0.4
+
+- Split logs into categories (player/course/calendar/storage/general) with ZIP download support
+- Added player autoplay debug logging to trace video skip/end/resume causes
+- Prevent unnecessary OAuth token requests for users not signed in to Google Calendar
+- Fixed last video attendance not being recorded by waiting 60 seconds for LMS progress submission
+
 ## v5.0.3
 
 - Fixed bug where attended lectures were shown as absent on courses without the "Required time" column
