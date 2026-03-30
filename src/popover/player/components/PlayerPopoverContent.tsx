@@ -33,9 +33,9 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     return 0;
   };
 
-  const totalDurationSeconds = useMemo(() => {
-    return vods.reduce((sum, vod) => sum + parseTimeToSeconds(vod.length), 0);
-  }, [vods]);
+  const remainingDurationSeconds = useMemo(() => {
+    return vods.slice(currentVideoIndex).reduce((sum, vod) => sum + parseTimeToSeconds(vod.length), 0);
+  }, [vods, currentVideoIndex]);
 
   const formatExpectedEndTime = (seconds: number): string => {
     const endTime = new Date(Date.now() + seconds * 1000);
@@ -140,7 +140,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     isHover && isPlaying
       ? t('stopWatching')
       : isPlaying
-        ? t('expectedEnd', { time: formatExpectedEndTime(totalDurationSeconds) })
+        ? t('expectedEnd', { time: formatExpectedEndTime(remainingDurationSeconds) })
         : isDone
           ? t('doneWatching')
           : t('startWatching');
