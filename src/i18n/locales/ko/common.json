@@ -102,6 +102,16 @@
     "empty": "숨긴 태스크가 없습니다",
     "unhide": "숨김 해제"
   },
+  "version": {
+    "title": "버전 정보",
+    "current": "현재 버전",
+    "checkUpdate": "업데이트 확인",
+    "update": "업데이트",
+    "checking": "확인 중...",
+    "latest": "최신 버전입니다",
+    "available": "{{version}} 사용 가능",
+    "error": "확인 실패"
+  },
   "github": {
     "likeProject": "이 프로젝트가 마음에 드시나요?",
     "starOnGithub": "GitHub에서 스타를 눌러주세요!"

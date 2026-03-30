@@ -8,6 +8,16 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       }
     });
     return true;
+  } else if (message.action === 'requestUpdateCheck') {
+    chrome.runtime.requestUpdateCheck().then((result) => {
+      sendResponse({ status: result.status });
+      if (result.status === 'update_available') {
+        chrome.runtime.reload();
+      }
+    }).catch(() => {
+      sendResponse({ status: 'error' });
+    });
+    return true;
   } else if (message.action === 'removeCachedAuthToken') {
     chrome.identity.removeCachedAuthToken({ token: message.token }, () => {
       sendResponse({ success: true });

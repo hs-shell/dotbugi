@@ -102,6 +102,16 @@
     "empty": "No hidden tasks",
     "unhide": "Unhide"
   },
+  "version": {
+    "title": "Version",
+    "current": "Current Version",
+    "checkUpdate": "Check for Updates",
+    "update": "Update",
+    "checking": "Checking...",
+    "latest": "Up to date",
+    "available": "{{version}} available",
+    "error": "Check failed"
+  },
   "github": {
     "likeProject": "Like this project?",
     "starOnGithub": "Star us on GitHub!"

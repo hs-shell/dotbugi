@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, changeLanguage, type LanguageCode } from '@/i18n';
-import { Globe, Github, X, Download } from 'lucide-react';
+import { Globe, Github, X, Download, Info, RefreshCw, CloudDownload } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,9 @@ import { downloadLogs } from '@/lib/logger';
 const CONTACT_EMAIL = 'hsu.dotbugi@gmail.com';
 const KAKAO_LINK = 'https://open.kakao.com/o/sZBnxllh';
 const CALENDAR_LINK = 'https://calendar.google.com/calendar';
+const GITHUB_RELEASES_API = 'https://api.github.com/repos/hs-shell/dotbugi/releases/latest';
+const WEBSTORE_URL =
+  'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch';
 
 interface HiddenTaskInfo {
   url: string;
@@ -122,6 +125,9 @@ export default function Setting({
         </div>
       </Card>
 
+      {/* 버전 정보 */}
+      <VersionInfo />
+
       {/* 로그 다운로드 */}
       <Card className="bg-white rounded-2xl w-full border-0 shadow-none px-1.5 py-1.5">
         <button
@@ -163,6 +169,109 @@ export default function Setting({
       {/* GitHub Star 배너 */}
       <GitHubStarBanner />
     </div>
+  );
+}
+
+type UpdateStatus = 'idle' | 'checking' | 'latest' | 'available' | 'error';
+
+function VersionInfo() {
+  const { t } = useTranslation('common');
+  const isMock = !!import.meta.env.VITE_MOCK;
+  const [status, setStatus] = useState<UpdateStatus>(isMock ? 'available' : 'idle');
+  const [latestVersion, setLatestVersion] = useState<string | null>(isMock ? '99.0.0' : null);
+
+  const currentVersion = chrome.runtime.getManifest().version;
+
+  const checkForUpdate = async () => {
+    setStatus('checking');
+    try {
+      const res = await fetch(GITHUB_RELEASES_API);
+      if (!res.ok) throw new Error('fetch failed');
+      const data = await res.json();
+      const remote = (data.tag_name as string).replace(/^v/, '');
+      if (remote !== currentVersion) {
+        setLatestVersion(remote);
+        setStatus('available');
+      } else {
+        setStatus('latest');
+      }
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  const requestUpdate = async () => {
+    setStatus('checking');
+    try {
+      const response = await chrome.runtime.sendMessage({ action: 'requestUpdateCheck' });
+      if (response.status === 'update_available') {
+        return; // background에서 reload 처리
+      }
+      setStatus('available');
+      window.open(WEBSTORE_URL, '_blank');
+    } catch {
+      setStatus('available');
+      window.open(WEBSTORE_URL, '_blank');
+    }
+  };
+
+  const statusText = () => {
+    switch (status) {
+      case 'checking':
+        return t('version.checking');
+      case 'latest':
+        return t('version.latest');
+      case 'available':
+        return t('version.available', { version: `v${latestVersion}` });
+      case 'error':
+        return t('version.error');
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Card className="bg-white rounded-2xl w-full border-0 shadow-none px-1.5 py-1.5">
+      <div className="flex items-center w-full h-14 rounded-xl px-4 py-3 gap-x-3">
+        <Info className="w-5 h-5 text-zinc-500 flex-shrink-0" />
+        <span className="flex-1 text-lg font-semibold text-zinc-600">v{currentVersion}</span>
+        {statusText() && (
+          <span
+            className={`text-base font-medium ${
+              status === 'latest'
+                ? 'text-green-600'
+                : status === 'available'
+                  ? 'text-blue-600'
+                  : status === 'error'
+                    ? 'text-red-500'
+                    : 'text-zinc-500'
+            }`}
+          >
+            {statusText()}
+          </span>
+        )}
+        <div className="flex items-center gap-2">
+          {status === 'available' ? (
+            <button
+              onClick={requestUpdate}
+              className="flex items-center justify-center w-10 h-10 rounded-lg bg-zinc-900 transition-transform duration-200 hover:scale-[1.2]"
+              title={t('version.update')}
+            >
+              <CloudDownload className="w-5 h-5 text-white" />
+            </button>
+          ) : (
+            <button
+              onClick={checkForUpdate}
+              disabled={status === 'checking'}
+              className="flex items-center justify-center w-10 h-10 rounded-lg bg-zinc-100 transition-transform duration-200 hover:scale-[1.2] disabled:opacity-50"
+              title={t('version.checkUpdate')}
+            >
+              <RefreshCw className={`w-5 h-5 text-zinc-600 ${status === 'checking' ? 'animate-spin' : ''}`} />
+            </button>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }
 

@@ -102,6 +102,16 @@
     "empty": "非表示のタスクはありません",
     "unhide": "再表示"
   },
+  "version": {
+    "title": "バージョン情報",
+    "current": "現在のバージョン",
+    "checkUpdate": "アップデート確認",
+    "update": "アップデート",
+    "checking": "確認中...",
+    "latest": "最新バージョンです",
+    "available": "{{version}} が利用可能",
+    "error": "確認に失敗しました"
+  },
   "github": {
     "likeProject": "このプロジェクトが気に入りましたか？",
     "starOnGithub": "GitHubでスターをお願いします！"
