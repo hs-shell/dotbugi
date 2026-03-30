@@ -1,5 +1,9 @@
 # 更新日志
 
+## v5.0.5
+
+- 修复自动播放器切换视频时预计结束时间不断后移的问题
+
 ## v5.0.4
 
 - 日志按类别（player/course/calendar/storage/general）分离存储并支持ZIP下载

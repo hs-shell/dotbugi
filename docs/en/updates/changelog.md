@@ -1,5 +1,9 @@
 # Update Log
 
+## v5.0.5
+
+- Fixed autoplay end time shifting forward when advancing to the next video
+
 ## v5.0.4
 
 - Split logs into categories (player/course/calendar/storage/general) with ZIP download support
