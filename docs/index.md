@@ -81,6 +81,12 @@ hero:
   </div>
 </div>
 
+<div class="more-links">
+  <a class="more-link" href="/dotbugi/overview">서비스 개요</a>
+  <span class="more-sep">·</span>
+  <a class="more-link" href="/dotbugi/privacy">개인정보 처리방침</a>
+</div>
+
 <style>
 .VPHome .vp-doc {
   max-width: 100% !important;
@@ -158,6 +164,26 @@ hero:
   font-size: 14px;
   color: var(--vp-c-text-2);
   line-height: 1.6;
+}
+.vp-doc .more-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 32px 48px;
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+}
+.vp-doc .more-link {
+  color: var(--vp-c-text-2);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.vp-doc .more-link:hover {
+  color: var(--vp-c-brand-1);
+}
+.vp-doc .more-sep {
+  color: var(--vp-c-divider);
 }
 @media (max-width: 768px) {
   .vp-doc .cards {
