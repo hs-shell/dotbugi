@@ -85,6 +85,8 @@ hero:
   <a class="more-link" href="/dotbugi/overview">서비스 개요</a>
   <span class="more-sep">·</span>
   <a class="more-link" href="/dotbugi/privacy">개인정보 처리방침</a>
+  <span class="more-sep">·</span>
+  <a class="more-link" href="/dotbugi/terms">이용약관</a>
 </div>
 
 <style>

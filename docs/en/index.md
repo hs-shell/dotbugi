@@ -70,6 +70,8 @@ hero:
   <a class="more-link" href="/dotbugi/en/overview">Service Overview</a>
   <span class="more-sep">·</span>
   <a class="more-link" href="/dotbugi/en/privacy">Privacy Policy</a>
+  <span class="more-sep">·</span>
+  <a class="more-link" href="/dotbugi/en/terms">Terms of Service</a>
 </div>
 
 <style>

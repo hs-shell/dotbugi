@@ -70,6 +70,8 @@ hero:
   <a class="more-link" href="/dotbugi/zh/overview">服务概览</a>
   <span class="more-sep">·</span>
   <a class="more-link" href="/dotbugi/zh/privacy">隐私政策</a>
+  <span class="more-sep">·</span>
+  <a class="more-link" href="/dotbugi/zh/terms">服务条款</a>
 </div>
 
 <style>

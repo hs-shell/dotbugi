@@ -70,6 +70,8 @@ hero:
   <a class="more-link" href="/dotbugi/ja/overview">サービス概要</a>
   <span class="more-sep">·</span>
   <a class="more-link" href="/dotbugi/ja/privacy">プライバシーポリシー</a>
+  <span class="more-sep">·</span>
+  <a class="more-link" href="/dotbugi/ja/terms">利用規約</a>
 </div>
 
 <style>
