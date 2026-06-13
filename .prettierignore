@@ -7,3 +7,6 @@ coverage
 
 *.log
 *.lock
+
+# release-please가 포맷을 소유 (prettier 검사 제외)
+CHANGELOG.md
