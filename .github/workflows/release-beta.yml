@@ -1,0 +1,97 @@
+name: Release Beta
+
+# 베타는 별도 브랜치 없이 main에서 수동으로 발행한다 (prerelease 태그).
+# 검증된 빌드는 이후 일반 머지 흐름(release-please)으로 스테이블 승급.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  beta:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Node.js 설정
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: 베타 버전 계산
+        id: ver
+        run: |
+          BASE=$(node -p "require('./package.json').version" | sed 's/-.*//')
+          echo "tag=v${BASE}-beta.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: 프로덕션 빌드 (베타)
+        run: npm run build
+        env:
+          RELEASE_CHANNEL: beta
+
+      - name: dist 압축
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: cd dist && zip -r "../dotbugi-${TAG}.zip" .
+
+      - name: 프리릴리즈 생성 + zip 첨부
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          gh release create "$TAG" "dotbugi-${TAG}.zip" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --notes "베타(프리릴리즈) 빌드 — main @ ${GITHUB_SHA}" \
+            --prerelease \
+            --target "$GITHUB_SHA"
+
+      # ── 베타 Chrome Web Store 게시 (기반 — 기본 비활성) ──────────────
+      # 베타는 별도 스토어 항목이므로 BETA_EXTENSION_ID 사용.
+      # ※ Chrome manifest version은 숫자만 허용되므로, 스토어 발행을 켤 때는
+      #   `-beta.N` 대신 숫자 스킴(예: x.y.z.N)으로 manifest 버전을 맞춰야 함.
+      - name: Chrome Web Store 게시 (beta)
+        if: vars.ENABLE_STORE_PUBLISH == 'true'
+        uses: mnao305/chrome-extension-upload@4008e29e13c144d0f6725462cbd49b7c291b4928 # v5.0.0
+        with:
+          file-path: dotbugi-${{ steps.ver.outputs.tag }}.zip
+          extension-id: ${{ secrets.BETA_EXTENSION_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          publish: true
+
+      - name: Discord 베타 알림 (노랑)
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const webhook = process.env.DISCORD_WEBHOOK_URL;
+            if (!webhook) return;
+            const tag = '${{ steps.ver.outputs.tag }}';
+            const success = '${{ job.status }}' === 'success';
+            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/${tag}`;
+            const res = await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                embeds: [{
+                  title: success ? `🚀 베타 릴리즈 ${tag}` : `⚠️ 베타 발행 실패 (${tag})`,
+                  url: success ? url : undefined,
+                  color: success ? 0xfee75c : 0xed4245,
+                }],
+              }),
+            });
+            if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);
