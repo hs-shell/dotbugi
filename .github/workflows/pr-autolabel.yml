@@ -43,6 +43,12 @@ jobs:
             });
             const currentNames = current.map((l) => l.name);
 
+            // 타입을 못 찾으면 라벨을 건드리지 않는다 (기존 라벨 보존)
+            if (!target) {
+              core.info(`제목에서 타입을 못 찾음: "${title}" — 라벨 변경 없음`);
+              return;
+            }
+
             // 관리 대상(타입) 라벨 중 target이 아닌 것 제거
             for (const name of currentNames) {
               if (MANAGED.has(name) && name !== target) {
@@ -53,11 +59,6 @@ jobs:
                   name,
                 });
               }
-            }
-
-            if (!target) {
-              core.info(`제목에서 타입을 못 찾음: "${title}" — 라벨 변경 없음`);
-              return;
             }
             if (!currentNames.includes(target)) {
               await github.rest.issues.addLabels({
