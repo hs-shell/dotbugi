@@ -1,0 +1,286 @@
+name: 릴리즈
+
+# 트리거:
+#  1) main으로 PR 머지 시 (라벨로 버전 범프/채널 결정)
+#  2) 수동 실행 (workflow_dispatch)
+#  3) repository_dispatch — 향후 Discord 봇이 승인 시 릴리즈를 킥할 진입점 (B안 기반)
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: '릴리즈 채널'
+        type: choice
+        default: stable
+        options: [stable, beta]
+      bump:
+        description: '버전 범프'
+        type: choice
+        default: patch
+        options: [patch, minor, major]
+  repository_dispatch:
+    types: [discord-release]
+
+# 최소 권한: 기본은 읽기만. 실제 push/tag/release는 release 잡에만 contents: write 부여.
+permissions:
+  contents: read
+
+# 릴리즈 run을 직렬화한다. 동시에 머지된 두 PR이 같은 다음 버전을 계산해
+# main/tag에서 충돌하는 것을 막는다 (pending run은 앞 run이 끝난 뒤 prepare를
+# 다시 실행하므로 최신 main 기준으로 버전을 계산하게 된다).
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  # ── 1) 버전/채널 결정 ─────────────────────────────────────────────
+  prepare:
+    runs-on: ubuntu-latest
+    # PR 트리거일 때는 머지된 경우에만 진행
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    outputs:
+      new_version: ${{ steps.plan.outputs.new_version }}
+      bump: ${{ steps.plan.outputs.bump }}
+      channel: ${{ steps.plan.outputs.channel }}
+      prerelease: ${{ steps.plan.outputs.prerelease }}
+    steps:
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 버전/채널 계획 수립
+        id: plan
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const event = context.eventName;
+
+            // 채널 / 범프 결정 (트리거별)
+            let channel = 'stable';
+            let bump = 'patch';
+
+            if (event === 'pull_request') {
+              const labels = context.payload.pull_request.labels.map((l) => l.name);
+              if (labels.includes('🔖 major')) bump = 'major';
+              else if (labels.includes('🔖 minor')) bump = 'minor';
+              if (labels.includes('🚀 beta')) channel = 'beta';
+            } else if (event === 'workflow_dispatch') {
+              channel = context.payload.inputs.channel || 'stable';
+              bump = context.payload.inputs.bump || 'patch';
+            } else if (event === 'repository_dispatch') {
+              const p = context.payload.client_payload || {};
+              channel = p.channel || 'stable';
+              bump = p.bump || 'patch';
+            }
+
+            // 화이트리스트 검증: 임의 channel 값으로 보호되지 않은 Environment가
+            // 생성되어 승인 게이트를 우회하는 것을 막는다.
+            const allowedChannels = new Set(['stable', 'beta']);
+            const allowedBumps = new Set(['patch', 'minor', 'major']);
+            if (!allowedChannels.has(channel)) {
+              core.setFailed(`허용되지 않은 채널: ${channel}`);
+              return;
+            }
+            if (!allowedBumps.has(bump)) {
+              core.setFailed(`허용되지 않은 범프: ${bump}`);
+              return;
+            }
+
+            // 현재 안정 버전은 package.json을 기준으로 한다 (베타 태그가 섞여도 안전)
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+            const base = pkg.version.split('-')[0]; // prerelease 꼬리표 제거
+            let [major, minor, patch] = base.split('.').map(Number);
+            if (bump === 'major') { major += 1; minor = 0; patch = 0; }
+            else if (bump === 'minor') { minor += 1; patch = 0; }
+            else { patch += 1; }
+
+            let newVersion = `${major}.${minor}.${patch}`;
+            const prerelease = channel === 'beta';
+            if (prerelease) {
+              // 베타는 main을 전진시키지 않고 -beta.<run_number>로 고유 태그만 만든다
+              newVersion = `${newVersion}-beta.${context.runNumber}`;
+            }
+
+            core.setOutput('new_version', newVersion);
+            core.setOutput('bump', bump);
+            core.setOutput('channel', channel);
+            core.setOutput('prerelease', String(prerelease));
+            core.summary
+              .addRaw(`채널: **${channel}** / 범프: **${bump}** / 새 버전: **v${newVersion}**`)
+              .write();
+
+  # ── 2) 빌드 & 릴리즈 (승인 게이트) ────────────────────────────────
+  release:
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push / tag / release 생성
+    # GitHub Environment의 required reviewers가 승인 게이트 역할을 한다.
+    # Settings → Environments 에서 'beta' / 'stable' 환경에 리뷰어를 등록해두면
+    # 머지 후에도 승인 전까지 이 job이 대기 상태로 멈춘다.
+    environment: ${{ needs.prepare.outputs.channel }}
+    steps:
+      # GitHub App으로 실행 시점에만 유효한 단기 설치 토큰을 발급한다.
+      # 저장되는 secret은 APP_ID/APP_PRIVATE_KEY(환경 secret)뿐이고,
+      # 발급된 토큰은 휘발성이라 탈취 위험이 낮다. 이 토큰으로 보호된 main에
+      # 버전 범프 커밋을 push 한다. (App을 브랜치 보호 bypass 목록에 등록)
+      - name: GitHub App 토큰 발급
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      # persist-credentials: false — 토큰을 .git/config에 남기지 않는다.
+      # (npm ci/build 단계의 공급망 위험으로부터 토큰을 보호; push는 아래에서 just-in-time 인증)
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Node.js 설정
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: package.json 버전 적용
+        env:
+          NEW_VERSION: ${{ needs.prepare.outputs.new_version }}
+        run: npm version "$NEW_VERSION" --no-git-tag-version --allow-same-version
+
+      - name: 프로덕션 빌드
+        run: npm run build
+        env:
+          RELEASE_CHANNEL: ${{ needs.prepare.outputs.channel }}
+
+      - name: dist 압축
+        env:
+          NEW_VERSION: ${{ needs.prepare.outputs.new_version }}
+        run: cd dist && zip -r "../dotbugi-v${NEW_VERSION}.zip" .
+
+      # 스테이블만 main을 전진시킨다 (package.json/README 커밋 + 태그)
+      - name: 변경사항 커밋 및 태그 (stable)
+        if: needs.prepare.outputs.channel == 'stable'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          NEW_VERSION: ${{ needs.prepare.outputs.new_version }}
+        run: |
+          sed -i "s/Chrome_Web_Store-v[0-9]\+\.[0-9]\+\.[0-9]\+/Chrome_Web_Store-v${NEW_VERSION}/" README.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json README.md
+          git commit -m "chore: bump version to v${NEW_VERSION}"
+          git tag "v${NEW_VERSION}"
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push "$REMOTE" HEAD:main
+          git push "$REMOTE" "refs/tags/v${NEW_VERSION}"
+
+      # 베타는 main을 건드리지 않고 태그만 만든다
+      - name: 태그 생성 (beta)
+        if: needs.prepare.outputs.channel == 'beta'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          NEW_VERSION: ${{ needs.prepare.outputs.new_version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v${NEW_VERSION}"
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push "$REMOTE" "refs/tags/v${NEW_VERSION}"
+
+      - name: 릴리즈 노트 생성
+        id: changelog
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            let prevTag;
+            try {
+              prevTag = execSync('git describe --tags --abbrev=0 HEAD~1', { encoding: 'utf-8' }).trim();
+            } catch {
+              prevTag = execSync('git rev-list --max-parents=0 HEAD', { encoding: 'utf-8' }).trim();
+            }
+            const newVersion = '${{ needs.prepare.outputs.new_version }}';
+            const commits = execSync(
+              `git log ${prevTag}..HEAD --pretty=format:"- %s (%h)" --no-merges`,
+              { encoding: 'utf-8' }
+            ).trim();
+            const body = [
+              `## What's Changed`,
+              ``,
+              commits || '- (변경 커밋 없음)',
+              ``,
+              `**Full Changelog:** https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${prevTag}...v${newVersion}`,
+            ].join('\n');
+            core.setOutput('body', body);
+
+      - name: GitHub 릴리즈 생성
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          tag_name: v${{ needs.prepare.outputs.new_version }}
+          name: v${{ needs.prepare.outputs.new_version }}
+          body: ${{ steps.changelog.outputs.body }}
+          prerelease: ${{ needs.prepare.outputs.prerelease == 'true' }}
+          files: dotbugi-v${{ needs.prepare.outputs.new_version }}.zip
+
+      # ── Chrome Web Store 자동 게시 (2단계 기반 — 기본 비활성) ──────────
+      # 활성화 방법:
+      #  1) 베타용 별도 스토어 항목을 GUI로 생성하고 각 EXTENSION_ID 확보
+      #  2) 아래 secret 등록:
+      #     - CHROME_CLIENT_ID / CHROME_CLIENT_SECRET / CHROME_REFRESH_TOKEN (OAuth, 채널 공유 가능)
+      #     - BETA_EXTENSION_ID / STABLE_EXTENSION_ID
+      #  3) 저장소 Variable ENABLE_STORE_PUBLISH=true 설정하면 이 step이 동작한다.
+      - name: Chrome Web Store 게시
+        if: vars.ENABLE_STORE_PUBLISH == 'true'
+        uses: mnao305/chrome-extension-upload@4008e29e13c144d0f6725462cbd49b7c291b4928 # v5.0.0
+        with:
+          file-path: dotbugi-v${{ needs.prepare.outputs.new_version }}.zip
+          extension-id: ${{ needs.prepare.outputs.channel == 'beta' && secrets.BETA_EXTENSION_ID || secrets.STABLE_EXTENSION_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          publish: true
+
+      # ── Discord 릴리즈 알림 (베타=노랑 / 스테이블=초록) ───────────────
+      - name: Discord 릴리즈 알림
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const webhook = process.env.DISCORD_WEBHOOK_URL;
+            if (!webhook) return;
+            const channel = '${{ needs.prepare.outputs.channel }}';
+            const version = '${{ needs.prepare.outputs.new_version }}';
+            const success = '${{ job.status }}' === 'success';
+            const beta = channel === 'beta';
+            const color = !success ? 0xed4245 : beta ? 0xfee75c : 0x57f287; // 빨강/노랑/초록
+            const title = !success
+              ? `⚠️ 릴리즈 실패 (${channel})`
+              : `${beta ? '🚀 베타' : '✅ 스테이블'} 릴리즈 v${version}`;
+            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/v${version}`;
+            const res = await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                embeds: [{
+                  title,
+                  url: success ? url : undefined,
+                  description: success ? `채널: **${channel}**` : '워크플로 로그를 확인해주세요.',
+                  color,
+                }],
+              }),
+            });
+            if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);

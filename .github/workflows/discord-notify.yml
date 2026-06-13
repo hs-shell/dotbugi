@@ -1,0 +1,75 @@
+name: Discord 알림
+
+# 릴리즈 알림은 release.yaml 안에서 직접 보낸다.
+# 이 워크플로는 이슈/PR/CI 실패 이벤트를 담당한다.
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened, closed]
+  workflow_run:
+    workflows: ['PR 검사']
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ vars.DISCORD_ENABLED != 'false' }}
+    steps:
+      - name: Discord 전송
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const webhook = process.env.DISCORD_WEBHOOK_URL;
+            if (!webhook) {
+              core.info('DISCORD_WEBHOOK_URL 미설정 — 건너뜀');
+              return;
+            }
+
+            const event = context.eventName;
+            let embed;
+
+            if (event === 'issues') {
+              const i = context.payload.issue;
+              embed = {
+                title: `🐛 새 이슈 #${i.number}: ${i.title}`,
+                url: i.html_url,
+                description: `작성자: ${i.user.login}`,
+                color: 0x5865f2, // 파랑
+              };
+            } else if (event === 'pull_request') {
+              const pr = context.payload.pull_request;
+              const merged = pr.merged === true;
+              const action = context.payload.action;
+              if (action === 'closed' && !merged) return; // 머지 없이 닫힌 PR은 무시
+              embed = {
+                title: merged
+                  ? `🟣 PR 머지됨 #${pr.number}: ${pr.title}`
+                  : `🟢 PR 열림 #${pr.number}: ${pr.title}`,
+                url: pr.html_url,
+                description: `작성자: ${pr.user.login}`,
+                color: merged ? 0x8957e5 : 0x57f287, // 보라/초록
+              };
+            } else if (event === 'workflow_run') {
+              const run = context.payload.workflow_run;
+              if (run.conclusion !== 'failure') return; // 실패만 알림
+              embed = {
+                title: `❌ CI 실패: ${run.name}`,
+                url: run.html_url,
+                description: `브랜치: ${run.head_branch}`,
+                color: 0xed4245, // 빨강
+              };
+            }
+
+            if (!embed) return;
+            const res = await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ embeds: [embed] }),
+            });
+            if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);

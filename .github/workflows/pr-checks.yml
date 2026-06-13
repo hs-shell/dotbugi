@@ -1,0 +1,66 @@
+name: PR 검사
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # PR 본문에 연결된 이슈 참조가 있는지 검사 (이슈-먼저 정책 강제)
+  issue-link:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 이슈 참조 확인
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            // "#123", "Closes #123", "Fixes #45", "Resolves: #6" 등 + 전체 URL 형태 모두 허용
+            const ref = /(close[sd]?|fix(e[sd])?|resolve[sd]?)?\s*:?\s*#\d+/i.test(body)
+              || /github\.com\/[^/]+\/[^/]+\/issues\/\d+/i.test(body);
+            if (!ref) {
+              core.setFailed(
+                'PR 본문에 연결된 이슈가 없습니다. ' +
+                '`Closes #이슈번호` 형식으로 관련 이슈를 참조해주세요. ' +
+                '(모든 변경은 이슈가 먼저 등록되어 있어야 합니다)'
+              );
+            }
+
+  verify:
+    needs: issue-link # 이슈-먼저 정책: 이슈 참조 실패 시 빌드/테스트 낭비 방지
+    runs-on: ubuntu-latest
+    steps:
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Node.js 설정
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: 포맷 검사 (Prettier)
+        run: npx prettier --check .
+
+      - name: 린트 (ESLint)
+        run: npm run lint
+
+      - name: 타입 체크 + 빌드
+        run: npm run build
+
+      - name: 테스트
+        run: npm run test

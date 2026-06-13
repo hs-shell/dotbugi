@@ -1,0 +1,122 @@
+name: 유사 이슈 탐지
+
+# 새 이슈가 열리면 기존 open 이슈들과 비교해 중복 가능성이 있으면 댓글을 단다.
+# GitHub Models(무료, GITHUB_TOKEN)로 의미 기반 비교 — 별도 API 키 불필요.
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  models: read
+  contents: read
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 유사 이슈 분석 및 댓글
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const current = context.payload.issue;
+
+            // 1) 기존 open 이슈 수집 (현재 이슈/PR 제외, 최근 갱신순 최대 50개)
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 50,
+            });
+            const candidates = issues
+              .filter((i) => i.number !== current.number && !i.pull_request)
+              .map((i) => ({
+                number: i.number,
+                title: i.title,
+                body: (i.body || '').slice(0, 500),
+              }));
+
+            if (candidates.length === 0) {
+              core.info('비교할 기존 이슈 없음 — 종료');
+              return;
+            }
+
+            // 2) GitHub Models 호출
+            const prompt = [
+              '너는 GitHub 이슈 트리아지 도우미야.',
+              '아래 "새 이슈"와 의미상 중복(같은 버그/같은 요청)일 가능성이 높은 "기존 이슈"의 번호만 골라줘.',
+              '주제가 다르면 절대 고르지 마. 확실하지 않으면 비워둬.',
+              '반드시 JSON만 출력: {"duplicates":[{"number":123,"reason":"한 줄 근거"}]}',
+              '',
+              `## 새 이슈\n제목: ${current.title}\n본문: ${(current.body || '').slice(0, 1500)}`,
+              '',
+              '## 기존 이슈 목록',
+              JSON.stringify(candidates),
+            ].join('\n');
+
+            let duplicates = [];
+            try {
+              const res = await fetch('https://models.github.ai/inference/chat/completions', {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  model: 'openai/gpt-4o-mini',
+                  temperature: 0,
+                  response_format: { type: 'json_object' },
+                  messages: [{ role: 'user', content: prompt }],
+                }),
+              });
+              if (!res.ok) {
+                core.warning(`GitHub Models 호출 실패: ${res.status} ${await res.text()}`);
+                return;
+              }
+              const data = await res.json();
+              const content = data.choices?.[0]?.message?.content || '{}';
+              // 모델이 number를 문자열로 줄 수 있으므로 숫자로 정규화 후 비교
+              duplicates = (JSON.parse(content).duplicates || [])
+                .map((d) => ({ ...d, number: Number(d.number) }))
+                .filter((d) => candidates.some((c) => c.number === d.number));
+            } catch (e) {
+              core.warning(`분석 중 오류: ${e.message}`);
+              return;
+            }
+
+            if (duplicates.length === 0) {
+              core.info('유사 이슈 없음');
+              return;
+            }
+
+            // 3) 댓글 + 라벨
+            const lines = duplicates.map((d) => `- #${d.number} — ${d.reason}`).join('\n');
+            const body = [
+              '🔁 **유사한 이슈가 있는 것 같아요.**',
+              '아래 이슈와 중복이 아닌지 확인해주세요. 같은 내용이라면 이 이슈를 닫고 기존 이슈에 의견을 남겨주시면 됩니다.',
+              '',
+              lines,
+              '',
+              '_이 댓글은 자동 분석 결과이며 틀릴 수 있습니다._',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: current.number,
+              body,
+            });
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: current.number,
+                labels: ['👀 possible-duplicate'],
+              });
+            } catch (e) {
+              core.info(`라벨 추가 건너뜀: ${e.message}`);
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
