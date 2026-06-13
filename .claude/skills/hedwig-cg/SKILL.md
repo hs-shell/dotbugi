@@ -23,7 +23,7 @@ Builds code graphs from source code and documents. Hybrid search (vector + FTS5 
 
 ## Recommended Workflow
 
-```
+```text
 Step 1: hedwig-cg search → identify relevant files and services
 Step 2: Read → deeply understand architecture and data flow
 Step 3: Grep → find specific symbols, types, constants
@@ -41,7 +41,7 @@ hedwig-cg search "error handling" --top-k 10      # custom count
 
 Response (compact text — seeds + subgraph edges):
 
-```
+```text
 seeds:
 core/build.py:15
 storage/store.py:20

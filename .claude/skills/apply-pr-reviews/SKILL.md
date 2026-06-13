@@ -43,7 +43,7 @@ gh api graphql ...reviewThreads(isResolved)               # 스레드 해결 여
 
 ## 5단계: 검증·커밋
 
-- CI 동일 조건 검증: `npm run lint` / `npm run build` / `npm run test`.
+- CI 동일 조건 검증: `npx prettier --check .` / `npm run lint` / `npm run build` / `npm run test`.
 - 반영분을 커밋해 PR 브랜치에 push (Conventional Commits).
 - 인라인 코멘트엔 한 줄 답글 후 스레드 resolve, 보류 항목엔 보류 사유 답글.
 

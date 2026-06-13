@@ -22,7 +22,7 @@
 
 - 브랜치 전략: GitHub Flow (main + feature branch).
 - 브랜치 네이밍: `<type>/<short-description>` (예: `fix/vod-parse`, 이슈 번호 포함 가능 `fix/123-vod-parse`).
-- 커밋 메시지: **Conventional Commits** (`feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `test:`, `ci:`).
+- 커밋 메시지: **Conventional Commits** (허용 타입 기준은 `.github/workflows/pr-title.yml`: `feat`/`fix`/`docs`/`refactor`/`perf`/`test`/`chore`/`ci`/`style`/`build`/`revert`).
 - PR 생성: `/create-pr`. 리뷰 반영: `/apply-pr-reviews`.
 - **스쿼시 머지만 허용.** 스쿼시 커밋 제목 = PR 제목이 main에 남고 **release-please가 이를 읽어 버전을 산출**하므로, **PR 제목은 반드시 Conventional Commits**.
 

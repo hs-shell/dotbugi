@@ -10,7 +10,7 @@ paths:
 - 복잡하거나 비직관적인 로직에는 **"왜(why)"** 주석을 단다. "무엇(what)"은 코드로 드러나면 생략.
 - **매직 넘버/매직 문자열 금지** — 의미 있는 상수로 추출한다. (LMS 키워드·셀렉터는 `src/lib/lmsKeywords.ts` 같은 단일 출처로)
 - TODO/FIXME 는 `// TODO(이슈번호): 내용` 형식.
-- 커밋 메시지는 **Conventional Commits** (`feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `test:`, `ci:`). 스쿼시 머지 + release-please가 PR 제목을 읽으므로 **PR 제목도 Conventional**.
+- 커밋 메시지는 **Conventional Commits**. 허용 타입의 기준은 `.github/workflows/pr-title.yml`이다: `feat`/`fix`/`docs`/`refactor`/`perf`/`test`/`chore`/`ci`/`style`/`build`/`revert`. 스쿼시 머지 + release-please가 PR 제목을 읽으므로 **PR 제목도 이 규칙을 따른다**.
 - Prettier: single quote / semicolon / 120 폭 / 2-space / es5 trailing comma.
 
 ## PR 전 사전 검증 (CI 동일 조건)

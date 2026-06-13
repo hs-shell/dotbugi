@@ -11,7 +11,7 @@ gh issue list --repo hs-shell/dotbugi --state open \
   --json number,title,labels,assignees --limit 100
 ```
 
-- 프로젝트 보드를 쓰는 경우 Status도 함께 보고 싶으면 `gh project item-list <번호> --owner hs-shell --format json`을 시도하고, 보드가 없거나 `read:project` 스코프가 없어 실패하면 건너뛴다(이슈 목록만 출력).
+- 프로젝트 보드를 쓰는 경우 Status도 보고 싶으면 `gh project item-list <프로젝트번호> --owner hs-shell --format json`을 시도한다. 여기서 `<프로젝트번호>`는 **이슈 번호가 아니라 프로젝트 번호**(예: 보드 #1 → `1`)다. 보드가 없거나 `read:project` 스코프가 없어 실패하면 건너뛴다(이슈 목록만 출력).
 
 ## 2단계: 출력
 
