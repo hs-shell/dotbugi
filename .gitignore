@@ -46,10 +46,6 @@ temp/
 *.zip
 dist
 
-*.md
-!README.md
-!docs/**/*.md
-
 # VitePress
 docs/.vitepress/dist/
 docs/.vitepress/cache/

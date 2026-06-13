@@ -1,0 +1,74 @@
+name: 🐛 버그 리포트
+description: 동작하지 않거나 예상과 다르게 동작하는 문제를 알려주세요.
+title: '[Bug] '
+labels: ['🐛 bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        버그 리포트를 작성해주셔서 감사합니다! 🙏
+        작성 전 **이미 같은 이슈가 있는지 [검색](https://github.com/hs-shell/dotbugi/issues?q=is%3Aissue)** 부탁드립니다.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 확인 사항
+      options:
+        - label: 동일하거나 유사한 이슈가 없는지 검색했습니다.
+          required: true
+        - label: 최신 버전에서 재현되는 문제입니다.
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 무슨 일이 일어났나요?
+      description: 어떤 문제가 발생했는지 명확하게 설명해주세요.
+      placeholder: VOD 목록이 비어있게 표시됩니다...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 재현 방법
+      description: 문제를 재현하는 단계를 순서대로 적어주세요.
+      placeholder: |
+        1. LMS 강의 페이지 접속
+        2. 돋부기 대시보드 열기
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대한 동작
+      description: 원래 어떻게 동작해야 한다고 생각하셨나요?
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 확장 프로그램 버전
+      description: chrome://extensions 에서 확인할 수 있습니다.
+      placeholder: 'v5.0.5'
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: 브라우저 / OS
+      placeholder: 'Chrome 130 / macOS 15'
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 스크린샷 / 콘솔 로그
+      description: 가능하다면 스크린샷이나 개발자 도구 콘솔 로그를 첨부해주세요.
+    validations:
+      required: false
