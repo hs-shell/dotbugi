@@ -23,6 +23,12 @@ jobs:
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
+            // release-please가 자동 생성하는 Release PR은 이슈가 없으므로 예외
+            const headRef = context.payload.pull_request.head.ref || '';
+            if (headRef.startsWith('release-please--')) {
+              core.info('release-please Release PR — 이슈 참조 검사 생략');
+              return;
+            }
             const body = context.payload.pull_request.body || '';
             // "#123", "Closes #123", "Fixes #45", "Resolves: #6" 등 + 전체 URL 형태 모두 허용
             const ref = /(close[sd]?|fix(e[sd])?|resolve[sd]?)?\s*:?\s*#\d+/i.test(body)

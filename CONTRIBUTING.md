@@ -56,6 +56,9 @@ docs: 기여 가이드 추가
 
 ## 릴리즈 / 버전 규칙 (메인테이너용)
 
-- PR 라벨로 버전 범프가 결정됩니다: `🔖 patch`(기본) / `🔖 minor` / `🔖 major`
-- `🚀 beta` 라벨이 있으면 베타(프리릴리즈) 채널로, 없으면 스테이블 채널로 릴리즈됩니다.
-- 머지 후 릴리즈는 **승인 게이트**(GitHub Environment)를 통과해야 실제로 발행됩니다.
+릴리즈는 **release-please**로 관리됩니다 (통합과 배포 분리).
+
+- 평소 PR을 main에 머지하면 릴리즈가 나가지 **않습니다.** release-please가 Conventional Commits를 읽어 **"Release PR"**(버전 범프 + CHANGELOG)을 자동으로 만들고 갱신합니다.
+- 발행하려면 그 **Release PR을 머지**하면 됩니다 → 태그 + GitHub Release 생성 + (활성화 시) Chrome Web Store 발행.
+- 버전은 커밋 타입에서 자동 산출됩니다 (`feat` → minor, `fix` → patch, `feat!`/`BREAKING CHANGE` → major). 별도 버전 라벨은 필요 없습니다.
+- **베타**: `Release Beta` 워크플로를 수동 실행(`workflow_dispatch`)하면 `vX.Y.Z-beta.N` 프리릴리즈가 발행됩니다. 별도 베타 브랜치는 두지 않습니다.
