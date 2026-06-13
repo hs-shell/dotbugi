@@ -4,8 +4,18 @@ const CURRENT_WEEK_ATTR = 'data-dotbugi-current-week';
 const SCROLL_BTN_ID = 'dotbugi-scroll-current-week';
 
 const MONTH_NAMES: Record<string, number> = {
-  january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
-  july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
+  january: 1,
+  february: 2,
+  march: 3,
+  april: 4,
+  may: 5,
+  june: 6,
+  july: 7,
+  august: 8,
+  september: 9,
+  october: 10,
+  november: 11,
+  december: 12,
 };
 
 const t = (key: string) => i18n.t(key, { ns: 'common' });
@@ -13,7 +23,10 @@ const t = (key: string) => i18n.t(key, { ns: 'common' });
 // ── Date parsing ────────────────────────────────────────────────────
 
 function inferYearFromSection(section: Element): number | null {
-  const m = section.querySelector('.text-ubstrap')?.textContent?.trim()?.match(/(\d{4})-/);
+  const m = section
+    .querySelector('.text-ubstrap')
+    ?.textContent?.trim()
+    ?.match(/(\d{4})-/);
   return m ? parseInt(m[1]) : null;
 }
 

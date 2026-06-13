@@ -1,0 +1,70 @@
+name: PR 자동 라벨
+
+# PR 제목의 Conventional Commits prefix(feat/fix/...)에 따라 타입 라벨을 자동으로 단다.
+# pull_request_target 사용: 포크 PR에도 라벨을 달 수 있다. (PR 제목만 읽고 코드는 실행하지 않아 안전)
+on:
+  pull_request_target:
+    types: [opened, edited]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 타입 라벨 동기화
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            // 커밋 타입 → 라벨 매핑
+            const MAP = {
+              feat: '✨ feat',
+              fix: '🐛 bug',
+              docs: '📝 docs',
+              refactor: '♻️ refactor',
+              perf: '⚡ perf',
+              test: '🧪 test',
+              chore: '🧹 chore',
+              ci: '⚙️ ci',
+              style: '💄 style',
+            };
+            const MANAGED = new Set(Object.values(MAP));
+
+            const title = context.payload.pull_request.title || '';
+            const m = title.match(/^(\w+)(\([^)]*\))?!?:/);
+            const target = m ? MAP[m[1].toLowerCase()] : undefined;
+
+            const prNumber = context.payload.pull_request.number;
+            const { data: current } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const currentNames = current.map((l) => l.name);
+
+            // 관리 대상(타입) 라벨 중 target이 아닌 것 제거
+            for (const name of currentNames) {
+              if (MANAGED.has(name) && name !== target) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  name,
+                });
+              }
+            }
+
+            if (!target) {
+              core.info(`제목에서 타입을 못 찾음: "${title}" — 라벨 변경 없음`);
+              return;
+            }
+            if (!currentNames.includes(target)) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: [target],
+              });
+              core.info(`라벨 추가: ${target}`);
+            }

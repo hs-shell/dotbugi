@@ -487,7 +487,9 @@ export default function Dashboard() {
               </div>
             ) : (
               <>
-                {activeTab === 'VIDEO' && <VodList courseData={filteredVods} onHideTask={hideTask} onHideTasks={hideTasks} />}
+                {activeTab === 'VIDEO' && (
+                  <VodList courseData={filteredVods} onHideTask={hideTask} onHideTasks={hideTasks} />
+                )}
                 {activeTab === 'ASSIGN' && <AssignList courseData={filteredAssigns} onHideTask={hideTask} />}
                 {activeTab === 'QUIZ' && <QuizList courseData={filteredQuizzes} onHideTask={hideTask} />}
                 {activeTab === 'SETTING' && (

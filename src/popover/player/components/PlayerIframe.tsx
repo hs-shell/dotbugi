@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 
 const formatMMSS = (seconds: number) =>
-  `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
+  `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60)
+    .toString()
+    .padStart(2, '0')}`;
 
 interface PlayerIframeProps {
   videoSrc: string;
@@ -138,7 +140,7 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
         node.addEventListener('load', handleLoad);
       }
     },
-    [handleLoad],
+    [handleLoad]
   );
 
   // 시간 표시

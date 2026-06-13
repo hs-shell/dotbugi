@@ -26,7 +26,7 @@ export const fetchAssign = async (link: string) => {
       const url = getHref(row, COL.TITLE_LINK);
       const rawDueDate = getText(row, COL.DUE_DATE)?.trim();
       if (!title || !url) return [];
-      const dueDate = rawDueDate && rawDueDate !== '-' ? normalizeLmsDate(rawDueDate) ?? null : null;
+      const dueDate = rawDueDate && rawDueDate !== '-' ? (normalizeLmsDate(rawDueDate) ?? null) : null;
 
       const submitText = getText(row, COL.SUBMIT_STATUS) ?? '';
       const isSubmit = !NOT_SUBMITTED.some((keyword) => submitText.includes(keyword));

@@ -19,20 +19,14 @@ const makeVod = (overrides: Partial<Vod> = {}): Vod => ({
 
 describe('vodGroupsToEvents', () => {
   it('같은 courseId+subject+range는 하나의 이벤트로 그룹핑', () => {
-    const vods = [
-      makeVod({ title: '파트1' }),
-      makeVod({ title: '파트2' }),
-    ];
+    const vods = [makeVod({ title: '파트1' }), makeVod({ title: '파트2' })];
     const events = vodGroupsToEvents(vods);
     expect(events).toHaveLength(1);
     expect(events[0].type).toBe('vod');
   });
 
   it('다른 subject면 별도 이벤트', () => {
-    const vods = [
-      makeVod({ subject: '1주차' }),
-      makeVod({ subject: '2주차' }),
-    ];
+    const vods = [makeVod({ subject: '1주차' }), makeVod({ subject: '2주차' })];
     const events = vodGroupsToEvents(vods);
     expect(events).toHaveLength(2);
   });
@@ -60,10 +54,7 @@ describe('vodGroupsToEvents', () => {
   });
 
   it('다른 courseId면 같은 subject+range여도 별도 이벤트', () => {
-    const vods = [
-      makeVod({ courseId: 'C1' }),
-      makeVod({ courseId: 'C2' }),
-    ];
+    const vods = [makeVod({ courseId: 'C1' }), makeVod({ courseId: 'C2' })];
     const events = vodGroupsToEvents(vods);
     expect(events).toHaveLength(2);
   });

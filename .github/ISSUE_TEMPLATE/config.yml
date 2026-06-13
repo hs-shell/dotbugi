@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 질문 / 사용 문의
+    url: https://github.com/hs-shell/dotbugi/discussions
+    about: 버그·기능 제안이 아닌 일반 질문이나 사용법 문의는 Discussions에 남겨주세요.
+  - name: 🔎 중복 이슈 먼저 검색하기
+    url: https://github.com/hs-shell/dotbugi/issues?q=is%3Aissue
+    about: 이슈를 올리기 전에 같은 내용이 이미 등록되어 있는지 꼭 검색해주세요.

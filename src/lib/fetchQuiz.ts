@@ -47,32 +47,28 @@ type QuizItem = {
  * @param cachedSubmitMap 이전에 저장된 퀴즈별 제출 상태 (key: url)
  *   마감된 퀴즈는 상세 페이지를 다시 fetch하지 않고 캐시된 값을 사용
  */
-export const fetchQuiz = async (
-  link: string,
-  cachedSubmitMap?: Map<string, boolean>,
-) => {
+export const fetchQuiz = async (link: string, cachedSubmitMap?: Map<string, boolean>) => {
   try {
     const doc = await fetchHtml(link);
     const rows = doc.querySelectorAll('table.generaltable tbody tr');
 
     let lastWeekLabel = '';
 
-    const quizItems: Omit<QuizItem, 'isSubmit'>[] = Array.from(rows)
-      .flatMap((row) => {
-        const weekLabel = getText(row, COL.WEEK);
-        if (weekLabel) lastWeekLabel = weekLabel;
+    const quizItems: Omit<QuizItem, 'isSubmit'>[] = Array.from(rows).flatMap((row) => {
+      const weekLabel = getText(row, COL.WEEK);
+      if (weekLabel) lastWeekLabel = weekLabel;
 
-        const titleLink = row.querySelector<HTMLAnchorElement>(COL.TITLE_LINK);
-        const rawDueDate = getText(row, COL.DUE_DATE)?.trim();
-        if (!titleLink) return [];
-        const dueDate = rawDueDate && rawDueDate !== '-' ? normalizeLmsDate(rawDueDate) ?? null : null;
+      const titleLink = row.querySelector<HTMLAnchorElement>(COL.TITLE_LINK);
+      const rawDueDate = getText(row, COL.DUE_DATE)?.trim();
+      if (!titleLink) return [];
+      const dueDate = rawDueDate && rawDueDate !== '-' ? (normalizeLmsDate(rawDueDate) ?? null) : null;
 
-        const title = titleLink.textContent?.trim();
-        const rawHref = titleLink.getAttribute('href');
-        if (!title || !rawHref) return [];
+      const title = titleLink.textContent?.trim();
+      const rawHref = titleLink.getAttribute('href');
+      if (!title || !rawHref) return [];
 
-        return { title, subject: lastWeekLabel, url: toQuizUrl(rawHref), dueDate };
-      });
+      return { title, subject: lastWeekLabel, url: toQuizUrl(rawHref), dueDate };
+    });
 
     // 마감 전 퀴즈만 상세 페이지 fetch, 마감된 퀴즈는 캐시 사용
     const results: QuizItem[] = await Promise.all(
@@ -85,7 +81,7 @@ export const fetchQuiz = async (
 
         const isSubmit = await fetchQuizSubmitStatus(item.url);
         return { ...item, isSubmit };
-      }),
+      })
     );
 
     return results;

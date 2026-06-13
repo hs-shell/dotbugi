@@ -83,7 +83,7 @@ function extractTime(raw: string | null): string {
 function flattenRow(
   row: Element,
   pendingSpans: (number | undefined)[],
-  spanValues: (string | null)[],
+  spanValues: (string | null)[]
 ): (string | null)[] {
   const cells = Array.from(row.querySelectorAll('td'));
   const rowData: (string | null)[] = [];
@@ -169,7 +169,7 @@ export function parseAttendanceTable(doc: Document): VodAttendanceData[] {
 
       if (!title || !isAttendance) return;
 
-      const requiredTime = col.REQUIRED_TIME !== null ? (cells[col.REQUIRED_TIME] || '') : '';
+      const requiredTime = col.REQUIRED_TIME !== null ? cells[col.REQUIRED_TIME] || '' : '';
       const watchedTime = extractTime(cells[col.WATCHED_TIME]);
 
       results.push({
@@ -180,7 +180,7 @@ export function parseAttendanceTable(doc: Document): VodAttendanceData[] {
         ...(requiredTime && { requiredTime }),
         ...(watchedTime && { watchedTime }),
       });
-    } catch (error) {
+    } catch {
       // 개별 행 파싱 실패는 무시하고 계속 진행
     }
   });

@@ -51,10 +51,7 @@ describe('filterVods', () => {
   });
 
   it('과목 필터로 특정 과목만 반환', () => {
-    const vods = [
-      makeVod({ courseTitle: '수학' }),
-      makeVod({ courseTitle: '영어' }),
-    ];
+    const vods = [makeVod({ courseTitle: '수학' }), makeVod({ courseTitle: '영어' })];
     const filters: Filters = { courseTitles: ['수학'] };
     const result = filterVods(vods, filters, '', 'range');
     expect(result).toHaveLength(1);
@@ -62,19 +59,13 @@ describe('filterVods', () => {
   });
 
   it('검색어로 제목 필터링', () => {
-    const vods = [
-      makeVod({ title: '파이썬 기초' }),
-      makeVod({ title: '자바 고급' }),
-    ];
+    const vods = [makeVod({ title: '파이썬 기초' }), makeVod({ title: '자바 고급' })];
     const result = filterVods(vods, emptyFilters, '파이썬', 'range');
     expect(result).toHaveLength(1);
   });
 
   it('검색어로 교수명 필터링', () => {
-    const vods = [
-      makeVod({ prof: '김교수' }),
-      makeVod({ prof: '이교수' }),
-    ];
+    const vods = [makeVod({ prof: '김교수' }), makeVod({ prof: '이교수' })];
     const result = filterVods(vods, emptyFilters, '이교수', 'range');
     expect(result).toHaveLength(1);
   });
@@ -86,10 +77,7 @@ describe('filterVods', () => {
   });
 
   it('출석 상태 필터 - 출석만', () => {
-    const vods = [
-      makeVod({ isAttendance: 'O' }),
-      makeVod({ isAttendance: 'X', title: '강의2' }),
-    ];
+    const vods = [makeVod({ isAttendance: 'O' }), makeVod({ isAttendance: 'X', title: '강의2' })];
     // i18n mock: attendance.attended
     const filters: Filters = { courseTitles: [], attendanceStatuses: ['attendance.attended'] };
     const result = filterVods(vods, filters, '', 'range');
@@ -98,10 +86,7 @@ describe('filterVods', () => {
   });
 
   it('정렬: 미출석이 먼저 (isAttendance 기준)', () => {
-    const vods = [
-      makeVod({ isAttendance: 'O', title: '출석' }),
-      makeVod({ isAttendance: 'X', title: '미출석' }),
-    ];
+    const vods = [makeVod({ isAttendance: 'O', title: '출석' }), makeVod({ isAttendance: 'X', title: '미출석' })];
     const result = filterVods(vods, emptyFilters, '', 'range');
     // isAttended('O') = true → 출석이 앞으로? 아니, 코드에서 attendanceA ? -1 : 1
     // 실제로는 출석이 먼저 정렬됨 (출석 완료한 것을 상단)
@@ -110,10 +95,7 @@ describe('filterVods', () => {
   });
 
   it('정렬: title 기준', () => {
-    const vods = [
-      makeVod({ isAttendance: 'X', title: 'B강의' }),
-      makeVod({ isAttendance: 'X', title: 'A강의' }),
-    ];
+    const vods = [makeVod({ isAttendance: 'X', title: 'B강의' }), makeVod({ isAttendance: 'X', title: 'A강의' })];
     const result = filterVods(vods, emptyFilters, '', 'title');
     expect(result[0].title).toBe('A강의');
     expect(result[1].title).toBe('B강의');
@@ -160,10 +142,7 @@ describe('filterVods', () => {
   });
 
   it('검색어로 과목명 필터링', () => {
-    const vods = [
-      makeVod({ courseTitle: '컴퓨터구조' }),
-      makeVod({ courseTitle: '운영체제', title: '강의2' }),
-    ];
+    const vods = [makeVod({ courseTitle: '컴퓨터구조' }), makeVod({ courseTitle: '운영체제', title: '강의2' })];
     const result = filterVods(vods, emptyFilters, '컴퓨터', 'range');
     expect(result).toHaveLength(1);
     expect(result[0].courseTitle).toBe('컴퓨터구조');
@@ -190,20 +169,14 @@ describe('filterAssigns', () => {
   });
 
   it('과목 필터', () => {
-    const assigns = [
-      makeAssign({ courseTitle: '수학' }),
-      makeAssign({ courseTitle: '영어' }),
-    ];
+    const assigns = [makeAssign({ courseTitle: '수학' }), makeAssign({ courseTitle: '영어' })];
     const filters: Filters = { courseTitles: ['수학'] };
     const result = filterAssigns(assigns, filters, '', 'dueDate');
     expect(result).toHaveLength(1);
   });
 
   it('제출 상태 필터 - 미제출만', () => {
-    const assigns = [
-      makeAssign({ isSubmit: false }),
-      makeAssign({ isSubmit: true, title: '과제2' }),
-    ];
+    const assigns = [makeAssign({ isSubmit: false }), makeAssign({ isSubmit: true, title: '과제2' })];
     const filters: Filters = { courseTitles: [], submitStatuses: [false] };
     const result = filterAssigns(assigns, filters, '', 'dueDate');
     expect(result).toHaveLength(1);
@@ -211,10 +184,7 @@ describe('filterAssigns', () => {
   });
 
   it('정렬: 미제출이 먼저', () => {
-    const assigns = [
-      makeAssign({ isSubmit: true, title: '제출됨' }),
-      makeAssign({ isSubmit: false, title: '미제출' }),
-    ];
+    const assigns = [makeAssign({ isSubmit: true, title: '제출됨' }), makeAssign({ isSubmit: false, title: '미제출' })];
     const result = filterAssigns(assigns, emptyFilters, '', 'dueDate');
     expect(result[0].isSubmit).toBe(false);
   });
@@ -239,19 +209,13 @@ describe('filterAssigns', () => {
   });
 
   it('정렬: title 기준', () => {
-    const assigns = [
-      makeAssign({ isSubmit: false, title: 'B과제' }),
-      makeAssign({ isSubmit: false, title: 'A과제' }),
-    ];
+    const assigns = [makeAssign({ isSubmit: false, title: 'B과제' }), makeAssign({ isSubmit: false, title: 'A과제' })];
     const result = filterAssigns(assigns, emptyFilters, '', 'title');
     expect(result[0].title).toBe('A과제');
   });
 
   it('검색어로 과목명 필터링', () => {
-    const assigns = [
-      makeAssign({ courseTitle: '데이터베이스' }),
-      makeAssign({ courseTitle: '네트워크' }),
-    ];
+    const assigns = [makeAssign({ courseTitle: '데이터베이스' }), makeAssign({ courseTitle: '네트워크' })];
     const result = filterAssigns(assigns, emptyFilters, '데이터', 'dueDate');
     expect(result).toHaveLength(1);
   });
@@ -276,20 +240,14 @@ describe('filterAssigns', () => {
   });
 
   it('submitStatuses 필터가 빈 배열이면 전체 반환', () => {
-    const assigns = [
-      makeAssign({ isSubmit: true, title: 'A' }),
-      makeAssign({ isSubmit: false, title: 'B' }),
-    ];
+    const assigns = [makeAssign({ isSubmit: true, title: 'A' }), makeAssign({ isSubmit: false, title: 'B' })];
     const filters: Filters = { courseTitles: [], submitStatuses: [] };
     const result = filterAssigns(assigns, filters, '', 'dueDate');
     expect(result).toHaveLength(2);
   });
 
   it('제출/미제출 모두 포함하는 submitStatuses 필터', () => {
-    const assigns = [
-      makeAssign({ isSubmit: true, title: 'A' }),
-      makeAssign({ isSubmit: false, title: 'B' }),
-    ];
+    const assigns = [makeAssign({ isSubmit: true, title: 'A' }), makeAssign({ isSubmit: false, title: 'B' })];
     const filters: Filters = { courseTitles: [], submitStatuses: [true, false] };
     const result = filterAssigns(assigns, filters, '', 'dueDate');
     expect(result).toHaveLength(2);
@@ -304,10 +262,7 @@ describe('filterQuizzes', () => {
   });
 
   it('제출 상태 필터', () => {
-    const quizzes = [
-      makeQuiz({ isSubmit: false }),
-      makeQuiz({ isSubmit: true, title: '퀴즈2' }),
-    ];
+    const quizzes = [makeQuiz({ isSubmit: false }), makeQuiz({ isSubmit: true, title: '퀴즈2' })];
     const filters: Filters = { courseTitles: [], submitStatuses: [true] };
     const result = filterQuizzes(quizzes, filters, '', 'dueDate');
     expect(result).toHaveLength(1);
@@ -315,10 +270,7 @@ describe('filterQuizzes', () => {
   });
 
   it('정렬: 미제출 우선', () => {
-    const quizzes = [
-      makeQuiz({ isSubmit: true, title: '제출됨' }),
-      makeQuiz({ isSubmit: false, title: '미제출' }),
-    ];
+    const quizzes = [makeQuiz({ isSubmit: true, title: '제출됨' }), makeQuiz({ isSubmit: false, title: '미제출' })];
     const result = filterQuizzes(quizzes, emptyFilters, '', 'dueDate');
     expect(result[0].isSubmit).toBe(false);
   });
@@ -355,10 +307,7 @@ describe('filterQuizzes', () => {
   });
 
   it('정렬: title 기준 (퀴즈)', () => {
-    const quizzes = [
-      makeQuiz({ isSubmit: false, title: 'B퀴즈' }),
-      makeQuiz({ isSubmit: false, title: 'A퀴즈' }),
-    ];
+    const quizzes = [makeQuiz({ isSubmit: false, title: 'B퀴즈' }), makeQuiz({ isSubmit: false, title: 'A퀴즈' })];
     const result = filterQuizzes(quizzes, emptyFilters, '', 'title');
     expect(result[0].title).toBe('A퀴즈');
   });

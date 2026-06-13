@@ -18,16 +18,24 @@ function useCardData() {
   useEffect(() => {
     loadAndTransform<Vod, CardData>('vod', summarizeVods, updateKey('vod'));
 
-    loadAndTransform<Assign, CardData>('assign', (assigns) => ({
-      done: assigns.filter((a) => a.isSubmit).length,
-      total: assigns.length,
-    }), updateKey('assign'));
+    loadAndTransform<Assign, CardData>(
+      'assign',
+      (assigns) => ({
+        done: assigns.filter((a) => a.isSubmit).length,
+        total: assigns.length,
+      }),
+      updateKey('assign')
+    );
 
     // QuizData에 완료 여부 필드가 없어 done은 항상 0
-    loadAndTransform<Quiz, CardData>('quiz', (quizzes) => ({
-      done: 0,
-      total: quizzes.length,
-    }), updateKey('quiz'));
+    loadAndTransform<Quiz, CardData>(
+      'quiz',
+      (quizzes) => ({
+        done: 0,
+        total: quizzes.length,
+      }),
+      updateKey('quiz')
+    );
   }, []);
 
   return summaries;

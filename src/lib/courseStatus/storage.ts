@@ -44,10 +44,9 @@ export function saveCourseData(
   newVods: Vod[],
   newAssigns: Assign[],
   newQuizzes: Quiz[],
-  all: { vods: Vod[]; assigns: Assign[]; quizzes: Quiz[] },
+  all: { vods: Vod[]; assigns: Assign[]; quizzes: Quiz[] }
 ) {
-  const exclude = <T extends { courseId: string }>(items: T[]) =>
-    items.filter((item) => item.courseId !== courseId);
+  const exclude = <T extends { courseId: string }>(items: T[]) => items.filter((item) => item.courseId !== courseId);
 
   saveDataToStorage('vod', [...exclude(all.vods), ...newVods]);
   saveDataToStorage('assign', [...exclude(all.assigns), ...newAssigns]);

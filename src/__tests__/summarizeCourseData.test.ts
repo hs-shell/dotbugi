@@ -23,19 +23,13 @@ describe('summarizeVods', () => {
   });
 
   it('같은 그룹의 VOD들은 하나로 카운트', () => {
-    const vods = [
-      makeVod({ title: '파트1' }),
-      makeVod({ title: '파트2' }),
-    ]; // 같은 courseId+subject+range → 1그룹
+    const vods = [makeVod({ title: '파트1' }), makeVod({ title: '파트2' })]; // 같은 courseId+subject+range → 1그룹
     const result = summarizeVods(vods);
     expect(result.total).toBe(1);
   });
 
   it('다른 그룹은 별도 카운트', () => {
-    const vods = [
-      makeVod({ subject: '1주차' }),
-      makeVod({ subject: '2주차' }),
-    ];
+    const vods = [makeVod({ subject: '1주차' }), makeVod({ subject: '2주차' })];
     const result = summarizeVods(vods);
     expect(result.total).toBe(2);
   });
@@ -78,19 +72,13 @@ describe('summarizeVods', () => {
   });
 
   it('다른 courseId인 같은 subject+range는 별도 그룹', () => {
-    const vods = [
-      makeVod({ courseId: 'C1', subject: '1주차' }),
-      makeVod({ courseId: 'C2', subject: '1주차' }),
-    ];
+    const vods = [makeVod({ courseId: 'C1', subject: '1주차' }), makeVod({ courseId: 'C2', subject: '1주차' })];
     const result = summarizeVods(vods);
     expect(result.total).toBe(2);
   });
 
   it('같은 courseId+subject이지만 다른 range는 별도 그룹', () => {
-    const vods = [
-      makeVod({ range: '2024-01-01 ~ 2024-01-07' }),
-      makeVod({ range: '2024-01-08 ~ 2024-01-14' }),
-    ];
+    const vods = [makeVod({ range: '2024-01-01 ~ 2024-01-07' }), makeVod({ range: '2024-01-08 ~ 2024-01-14' })];
     const result = summarizeVods(vods);
     expect(result.total).toBe(2);
   });

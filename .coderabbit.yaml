@@ -1,0 +1,26 @@
+# CodeRabbit 설정 — https://docs.coderabbit.ai/guides/configure-coderabbit
+# public 저장소에서는 별도 설치/활성화 없이 자동으로 PR 리뷰가 동작합니다.
+language: ko-KR
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true # PR 최초 생성 시 자동 리뷰
+    auto_incremental_review: false # 이후 push에는 자동 재리뷰 안 함 (수동 `@coderabbitai review`)
+    drafts: false
+    base_branches:
+      - main
+  path_filters:
+    - '!dist/**'
+    - '!**/*.lock'
+    - '!package-lock.json'
+  tools:
+    eslint:
+      enabled: true
+
+chat:
+  auto_reply: true

@@ -117,9 +117,15 @@ export async function clearLogs(): Promise<void> {
 
 /** 디버깅용 스토리지 스냅샷 (민감 정보 없음, 트래킹 강의만 포함) */
 const STORAGE_DUMP_KEYS = [
-  'vod', 'assign', 'quiz',
-  'trackedCourseIds', 'communityIds', 'knownCourseIds',
-  'courses', 'language', 'hiddenTaskUrls',
+  'vod',
+  'assign',
+  'quiz',
+  'trackedCourseIds',
+  'communityIds',
+  'knownCourseIds',
+  'courses',
+  'language',
+  'hiddenTaskUrls',
 ] as const;
 
 async function getStorageDump(): Promise<string> {
@@ -150,9 +156,7 @@ export async function downloadLogs(): Promise<void> {
   for (const category of LOG_CATEGORIES) {
     const logs = allLogs[category];
     if (logs.length === 0) continue;
-    const text = logs
-      .map((l) => `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.message}`)
-      .join('\n');
+    const text = logs.map((l) => `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.message}`).join('\n');
     files.push({ name: `${category}.txt`, data: encoder.encode(text) });
   }
 

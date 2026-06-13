@@ -21,6 +21,7 @@ function parseCourseFromElement(li: Element): CourseBase | null {
 }
 
 export function parseCoursesFromDOM(): CourseBase[] {
-  return Array.from(document.querySelectorAll('.my-course-lists > li'))
-    .flatMap((li) => parseCourseFromElement(li) ?? []);
+  return Array.from(document.querySelectorAll('.my-course-lists > li')).flatMap(
+    (li) => parseCourseFromElement(li) ?? []
+  );
 }

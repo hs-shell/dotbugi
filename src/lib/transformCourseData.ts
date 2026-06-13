@@ -6,7 +6,14 @@ import { Vod, CourseBase } from '@/types';
 export function mergeVodWithAttendance(
   course: CourseBase,
   vodList: { week: number; subject: string; title: string; url: string; range: string | null; length: string }[],
-  attendanceList: { title: string; isAttendance: string; weeklyAttendance: string; week: number; requiredTime?: string; watchedTime?: string }[]
+  attendanceList: {
+    title: string;
+    isAttendance: string;
+    weeklyAttendance: string;
+    week: number;
+    requiredTime?: string;
+    watchedTime?: string;
+  }[]
 ): Vod[] {
   const attendanceByKey = new Map<string, (typeof attendanceList)[number]>();
   for (const att of attendanceList) {
@@ -34,8 +41,7 @@ export function mergeVodWithAttendance(
  */
 export function mergeDueDateItems<T extends { title: string; dueDate: string | null }>(
   course: CourseBase,
-  items: T[],
+  items: T[]
 ): (CourseBase & T)[] {
   return items.map((item) => ({ ...course, ...item }));
 }
-

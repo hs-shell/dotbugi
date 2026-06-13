@@ -36,7 +36,7 @@ export function vodGroupsToEvents(vods: Vod[]): CalendarEvent[] {
 
 export function dueDateItemToEvent(
   item: { courseId: string; courseTitle: string; title: string; dueDate: string | null },
-  type: 'assign' | 'quiz',
+  type: 'assign' | 'quiz'
 ): CalendarEvent {
   const normalizedDate = item.dueDate ? startOfDay(new Date(item.dueDate)) : null;
   return {

@@ -56,10 +56,7 @@ onMounted(() => {
   setOffset(true);
   window.addEventListener('resize', updateBarHeight);
 
-  observer = new IntersectionObserver(
-    ([entry]) => setOffset(entry.isIntersecting),
-    { threshold: 0 },
-  );
+  observer = new IntersectionObserver(([entry]) => setOffset(entry.isIntersecting), { threshold: 0 });
   observer.observe(bar.value);
 });
 
