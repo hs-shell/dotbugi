@@ -49,3 +49,9 @@ dist
 # VitePress
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+
+# hedwig-cg 로컬 코드 그래프 인덱스
+.hedwig-cg/
+
+# Claude Code 로컬 개인 설정
+.claude/settings.local.json
