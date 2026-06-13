@@ -92,25 +92,23 @@ export function useCourseData(courses: CourseBase[]) {
 
       await Promise.all(
         courses.map(async (course) => {
-          const scraped = await scrapeCourseData(course.courseId, cachedQuizMap.get(course.courseId), course.isCommunity);
+          const scraped = await scrapeCourseData(
+            course.courseId,
+            cachedQuizMap.get(course.courseId),
+            course.isCommunity
+          );
 
           deduplicateInto(
             vods,
             mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray),
             seenVods,
-            (v) => makeVodKey(v.courseId, v.title, v.week),
+            (v) => makeVodKey(v.courseId, v.title, v.week)
           );
-          deduplicateInto(
-            assigns,
-            mergeDueDateItems(course, scraped.assignDataArray),
-            seenAssigns,
-            (a) => makeItemKey(a.courseId, a.title, a.dueDate ?? ''),
+          deduplicateInto(assigns, mergeDueDateItems(course, scraped.assignDataArray), seenAssigns, (a) =>
+            makeItemKey(a.courseId, a.title, a.dueDate ?? '')
           );
-          deduplicateInto(
-            quizzes,
-            mergeDueDateItems(course, scraped.quizDataArray),
-            seenQuizzes,
-            (q) => makeItemKey(q.courseId, q.title, q.dueDate ?? ''),
+          deduplicateInto(quizzes, mergeDueDateItems(course, scraped.quizDataArray), seenQuizzes, (q) =>
+            makeItemKey(q.courseId, q.title, q.dueDate ?? '')
           );
         })
       );
@@ -217,13 +215,25 @@ export function useCourseData(courses: CourseBase[]) {
   const removeCourseData = useCallback((courseId: string) => {
     // Storage: 전체 데이터에서 해당 강의 제거
     loadDataFromStorage<Vod[]>('vod', (stored) => {
-      if (stored) saveDataToStorage('vod', stored.filter((v) => v.courseId !== courseId));
+      if (stored)
+        saveDataToStorage(
+          'vod',
+          stored.filter((v) => v.courseId !== courseId)
+        );
     });
     loadDataFromStorage<Assign[]>('assign', (stored) => {
-      if (stored) saveDataToStorage('assign', stored.filter((a) => a.courseId !== courseId));
+      if (stored)
+        saveDataToStorage(
+          'assign',
+          stored.filter((a) => a.courseId !== courseId)
+        );
     });
     loadDataFromStorage<Quiz[]>('quiz', (stored) => {
-      if (stored) saveDataToStorage('quiz', stored.filter((q) => q.courseId !== courseId));
+      if (stored)
+        saveDataToStorage(
+          'quiz',
+          stored.filter((q) => q.courseId !== courseId)
+        );
     });
 
     // State: 대시보드에서 제거
@@ -292,7 +302,7 @@ export function useCourseData(courses: CourseBase[]) {
         if (data) setQuizzes(filterItemsForDisplay(byTracked(data)));
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courses]);
 
   return {

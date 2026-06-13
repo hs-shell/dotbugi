@@ -22,11 +22,11 @@ Sync result notifications:
 
 ## Calendar Color Coding
 
-| Color        | Item             |
-| ------------ | ---------------- |
-| Lavender     | Online Lectures  |
-| Blue         | Assignments      |
-| Orange       | Quizzes          |
+| Color    | Item            |
+| -------- | --------------- |
+| Lavender | Online Lectures |
+| Blue     | Assignments     |
+| Orange   | Quizzes         |
 
 ## Login Expiration
 

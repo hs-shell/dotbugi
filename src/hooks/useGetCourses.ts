@@ -50,9 +50,7 @@ export const useGetCourses = () => {
             }
           } else if (courses.length > 0) {
             // 최초 사용: 비교과(커뮤니티)와 이전 학기 과목 제외하고 전부 트래킹
-            const defaultIds = courses
-              .filter((c) => !c.isCommunity)
-              .map((c) => c.courseId);
+            const defaultIds = courses.filter((c) => !c.isCommunity).map((c) => c.courseId);
             setTrackedCourseIdsState(defaultIds);
             saveDataToStorage('trackedCourseIds', defaultIds);
           }

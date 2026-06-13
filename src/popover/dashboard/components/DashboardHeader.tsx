@@ -110,7 +110,10 @@ export default function DashboardHeader({ activeTab, filter: f, actions: a }: Da
             {a.isCalendarConnected && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={a.onCalendarSync} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
+                <DropdownMenuItem
+                  onClick={a.onCalendarSync}
+                  className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5"
+                >
                   <img src={GoogleCalendar} className="w-5 h-5" alt="" />
                   {t('common:calendar.syncShort')}
                 </DropdownMenuItem>

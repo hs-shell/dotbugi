@@ -1,0 +1,13 @@
+# 모든 텍스트 파일은 저장소에 LF로 저장하고 LF로 체크아웃한다.
+# (Prettier 기본값과 일치 → 환경에 상관없이 `prettier --check` 일관성 보장)
+* text=auto eol=lf
+
+# 바이너리 자산은 변환하지 않는다.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary

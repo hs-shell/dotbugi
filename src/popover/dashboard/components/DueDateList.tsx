@@ -69,10 +69,7 @@ export default function DueDateList<T extends DueDateItem>({
               </Card>
             </ContextMenuTrigger>
             <ContextMenuContent>
-              <ContextMenuItem
-                onClick={() => onHideTask?.(course.url)}
-                className="text-lg gap-2 cursor-pointer"
-              >
+              <ContextMenuItem onClick={() => onHideTask?.(course.url)} className="text-lg gap-2 cursor-pointer">
                 <EyeOff className="w-4 h-4" />
                 {t('hide.task')}
               </ContextMenuItem>

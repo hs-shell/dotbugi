@@ -1,7 +1,13 @@
 import { fetchVodAttendance } from './fetchVodAttendance';
 import { fetchVodProgress } from './fetchVodProgress';
 import { fetchVodList } from './fetchVodList';
-import { getAssignPageLink, getVodProgressPageLink, getIndexPageLink, getQuizPageLink, getVodPageLink } from '@/constants/links';
+import {
+  getAssignPageLink,
+  getVodProgressPageLink,
+  getIndexPageLink,
+  getQuizPageLink,
+  getVodPageLink,
+} from '@/constants/links';
 import { fetchAssign } from './fetchAssign';
 import { fetchQuiz } from './fetchQuiz';
 import { Quiz } from '@/types';
@@ -13,15 +19,9 @@ function settled<T>(result: PromiseSettledResult<T>, fallback: T): T {
   return fallback;
 }
 
-export const scrapeCourseData = async (
-  courseId: string,
-  cachedQuizzes?: Quiz[],
-  isCommunity?: boolean,
-) => {
+export const scrapeCourseData = async (courseId: string, cachedQuizzes?: Quiz[], isCommunity?: boolean) => {
   // 캐시된 퀴즈의 제출 상태 맵 생성 (url → isSubmit)
-  const cachedSubmitMap = cachedQuizzes
-    ? new Map(cachedQuizzes.map((q) => [q.url, q.isSubmit]))
-    : undefined;
+  const cachedSubmitMap = cachedQuizzes ? new Map(cachedQuizzes.map((q) => [q.url, q.isSubmit])) : undefined;
 
   // 일반 강좌: _a.php 우선, 실패 시 .php 폴백
   // 커뮤니티: .php만 사용 (_a.php 접근 불가)
@@ -49,9 +49,7 @@ export const scrapeCourseData = async (
 
   // 일반 강좌: _a.php 데이터 사용 (출석 + 시간 데이터 포함)
   // _a.php 실패 또는 커뮤니티: .php 폴백 (시간 비교 기반 출석 판정)
-  const vodAttendance = isCommunity || !vodAttendanceRaw
-    ? vodProgress
-    : vodAttendanceRaw;
+  const vodAttendance = isCommunity || !vodAttendanceRaw ? vodProgress : vodAttendanceRaw;
 
   return {
     vodAttendanceArray: vodAttendance,

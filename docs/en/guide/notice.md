@@ -10,12 +10,12 @@ Some users may be concerned about whether Dotbugi's auto-play feature falls unde
 
 Here's how Dotbugi's auto-play works compared to speed-up programs:
 
-| | External Speed-Up Programs | Dotbugi Auto-Play |
-|------|-------------------|-----------------|
-| Playback Speed | Changed to 2x, 4x, etc. | **Maintains 1x (original speed)** |
-| Playback Time Manipulation | Shortens playback time | **No manipulation** |
-| LMS Records | Mismatch with actual study time | **Playback time = Study time** |
-| Attendance | Risk of rejection | **Normally recognized** |
+|                            | External Speed-Up Programs      | Dotbugi Auto-Play                 |
+| -------------------------- | ------------------------------- | --------------------------------- |
+| Playback Speed             | Changed to 2x, 4x, etc.         | **Maintains 1x (original speed)** |
+| Playback Time Manipulation | Shortens playback time          | **No manipulation**               |
+| LMS Records                | Mismatch with actual study time | **Playback time = Study time**    |
+| Attendance                 | Risk of rejection               | **Normally recognized**           |
 
 ### What Dotbugi Does
 

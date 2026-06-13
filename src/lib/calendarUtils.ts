@@ -59,7 +59,7 @@ export const removeCachedAuthToken = async (token: string): Promise<void> => {
  */
 export async function addCalendarEvent(
   event: GoogleCalendarEvent,
-  token: string,
+  token: string
 ): Promise<{ ok: boolean; tokenExpired: boolean }> {
   try {
     const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
@@ -88,17 +88,15 @@ export async function addCalendarEvent(
 const BATCH_CONCURRENCY = 2;
 const BATCH_DELAY_MS = 500;
 
-async function runBatch<T, R>(
-  items: T[],
-  fn: (item: T) => Promise<R>,
-  concurrency: number,
-): Promise<R[]> {
+async function runBatch<T, R>(items: T[], fn: (item: T) => Promise<R>, concurrency: number): Promise<R[]> {
   const results: R[] = new Array(items.length);
 
   for (let i = 0; i < items.length; i += concurrency) {
     const chunk = items.slice(i, i + concurrency);
     const chunkResults = await Promise.all(chunk.map((item) => fn(item)));
-    chunkResults.forEach((r, j) => { results[i + j] = r; });
+    chunkResults.forEach((r, j) => {
+      results[i + j] = r;
+    });
     if (i + concurrency < items.length) {
       await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
     }
@@ -112,7 +110,7 @@ async function runBatch<T, R>(
  */
 export async function addCalendarEventsBatch(
   events: GoogleCalendarEvent[],
-  token: string,
+  token: string
 ): Promise<CalendarSyncResult> {
   const results = await runBatch(events, (event) => addCalendarEvent(event, token), BATCH_CONCURRENCY);
 
@@ -158,7 +156,7 @@ export async function addCalendarEventsBatch(
  * 구글 캘린더 API를 사용해 현재 이벤트 목록을 가져옵니다.
  */
 export async function getCalendarEvents(
-  token: string,
+  token: string
 ): Promise<{ events: GoogleCalendarEvent[]; tokenExpired: boolean }> {
   try {
     const pastDate = new Date();

@@ -79,7 +79,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
           length: '00:00',
           isAttendance: 'X',
           weeklyAttendance: 'X',
-        })),
+        }))
       );
       return;
     }
@@ -90,7 +90,11 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
         if (skipPlayerFilter) {
           setVods(data.filter((vod) => !hidden.has(vod.url)));
         } else {
-          setVods(data.filter((vod) => !hidden.has(vod.url) && isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)));
+          setVods(
+            data.filter(
+              (vod) => !hidden.has(vod.url) && isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)
+            )
+          );
         }
       });
     });
@@ -230,9 +234,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
             <div className="w-full flex items-center justify-center text-zinc-800 text-3xl font-medium">
               {t('noVideos')}
             </div>
-            <div className="w-full flex items-center justify-center text-zinc-500">
-              {t('refreshPrompt')}
-            </div>
+            <div className="w-full flex items-center justify-center text-zinc-500">{t('refreshPrompt')}</div>
           </div>
         )}
       </div>

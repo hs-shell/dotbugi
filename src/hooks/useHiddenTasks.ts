@@ -16,32 +16,41 @@ export function useHiddenTasks() {
     saveDataToStorage(STORAGE_KEY, Array.from(urls));
   }, []);
 
-  const hideTask = useCallback((url: string) => {
-    setHiddenUrls((prev) => {
-      const next = new Set(prev);
-      next.add(url);
-      persist(next);
-      return next;
-    });
-  }, [persist]);
+  const hideTask = useCallback(
+    (url: string) => {
+      setHiddenUrls((prev) => {
+        const next = new Set(prev);
+        next.add(url);
+        persist(next);
+        return next;
+      });
+    },
+    [persist]
+  );
 
-  const hideTasks = useCallback((urls: string[]) => {
-    setHiddenUrls((prev) => {
-      const next = new Set(prev);
-      for (const url of urls) next.add(url);
-      persist(next);
-      return next;
-    });
-  }, [persist]);
+  const hideTasks = useCallback(
+    (urls: string[]) => {
+      setHiddenUrls((prev) => {
+        const next = new Set(prev);
+        for (const url of urls) next.add(url);
+        persist(next);
+        return next;
+      });
+    },
+    [persist]
+  );
 
-  const unhideTask = useCallback((url: string) => {
-    setHiddenUrls((prev) => {
-      const next = new Set(prev);
-      next.delete(url);
-      persist(next);
-      return next;
-    });
-  }, [persist]);
+  const unhideTask = useCallback(
+    (url: string) => {
+      setHiddenUrls((prev) => {
+        const next = new Set(prev);
+        next.delete(url);
+        persist(next);
+        return next;
+      });
+    },
+    [persist]
+  );
 
   const isHidden = useCallback((url: string) => hiddenUrls.has(url), [hiddenUrls]);
 

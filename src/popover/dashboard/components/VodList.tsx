@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Vod } from '@/types';
-import { calculateDueDate, calculateRemainingTime, extractEndDate, formatDateString, isAbsent, isAttended } from '@/lib/utils';
+import {
+  calculateDueDate,
+  calculateRemainingTime,
+  extractEndDate,
+  formatDateString,
+  isAbsent,
+  isAttended,
+} from '@/lib/utils';
 import { makeVodGroupKey } from '@/lib/generateKey';
 import { ChevronDown, ChevronUp, EyeOff } from 'lucide-react';
 import EmptyState from './EmptyState';
@@ -47,7 +54,7 @@ export default function VodList({ courseData, onHideTask, onHideTasks }: VideoPr
   };
 
   const sortedVodGroups = Object.values(groupedData).sort((groupA, groupB) =>
-    compareByAbsentThenEndTime(groupA[0], groupB[0], 'weeklyAttendance'),
+    compareByAbsentThenEndTime(groupA[0], groupB[0], 'weeklyAttendance')
   );
 
   return (
@@ -91,9 +98,14 @@ export default function VodList({ courseData, onHideTask, onHideTasks }: VideoPr
                             <div className="font-medium text-ellipsis line-clamp-1" style={{ fontWeight: 550 }}>
                               {vod.title}
                             </div>
-                            <div className="font-light text-zinc-500 text-ellipsis line-clamp-1" style={{ fontSize: 10 }}>
+                            <div
+                              className="font-light text-zinc-500 text-ellipsis line-clamp-1"
+                              style={{ fontSize: 10 }}
+                            >
                               {formatDateString(vod.range)},{' '}
-                              <span className={`font-medium ${isAttended(vod.isAttendance) ? 'text-green-500' : 'text-amber-500'}`}>
+                              <span
+                                className={`font-medium ${isAttended(vod.isAttendance) ? 'text-green-500' : 'text-amber-500'}`}
+                              >
                                 {vod.length}
                               </span>
                             </div>

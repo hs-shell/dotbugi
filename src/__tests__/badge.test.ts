@@ -46,20 +46,16 @@ describe('normalizeUrl (logic)', () => {
 
   it('http로 시작하는 URL은 그대로 반환', () => {
     expect(normalizeUrl('https://learn.hansung.ac.kr/mod/vod/view.php?id=1')).toBe(
-      'https://learn.hansung.ac.kr/mod/vod/view.php?id=1',
+      'https://learn.hansung.ac.kr/mod/vod/view.php?id=1'
     );
     expect(normalizeUrl('http://example.com')).toBe('http://example.com');
   });
 
   it('/로 시작하는 상대 경로에 BASE_LINK 추가', () => {
-    expect(normalizeUrl('/mod/vod/view.php?id=1')).toBe(
-      'https://learn.hansung.ac.kr/mod/vod/view.php?id=1',
-    );
+    expect(normalizeUrl('/mod/vod/view.php?id=1')).toBe('https://learn.hansung.ac.kr/mod/vod/view.php?id=1');
   });
 
   it('/가 없는 상대 경로에 BASE_LINK/ 추가', () => {
-    expect(normalizeUrl('mod/vod/view.php?id=1')).toBe(
-      'https://learn.hansung.ac.kr/mod/vod/view.php?id=1',
-    );
+    expect(normalizeUrl('mod/vod/view.php?id=1')).toBe('https://learn.hansung.ac.kr/mod/vod/view.php?id=1');
   });
 });

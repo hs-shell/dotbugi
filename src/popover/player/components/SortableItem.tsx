@@ -53,9 +53,7 @@ export default function SortableItem({ vod, idx, currentVideoIndex, setCurrentVi
         <div className="flex-1 min-w-0">
           <p className={`text-xl font-semibold truncate ${isCurrent ? 'text-blue-700' : 'text-black'}`}>{vod.title}</p>
           <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-lg text-zinc-500 truncate">
-              {vod.courseTitle}
-            </p>
+            <p className="text-lg text-zinc-500 truncate">{vod.courseTitle}</p>
             <span className="text-zinc-300">·</span>
             <span className="text-lg text-zinc-400 flex-shrink-0">{vod.length.trim()}</span>
           </div>

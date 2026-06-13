@@ -55,7 +55,13 @@ export function calculateDueDate(dueDate: string | null): TimeDifferenceResult {
   const endDate = new Date(dueDate);
 
   if (isNaN(endDate.getTime())) {
-    return { message: 'Invalid date format', status: 'invalid', borderColor: 'gray', borderLeftColor: 'gray', textColor: 'black' };
+    return {
+      message: 'Invalid date format',
+      status: 'invalid',
+      borderColor: 'gray',
+      borderLeftColor: 'gray',
+      textColor: 'black',
+    };
   }
 
   if (now >= endDate) {

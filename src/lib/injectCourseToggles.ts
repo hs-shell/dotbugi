@@ -13,64 +13,62 @@ export function injectCourseToggles() {
 
   loadDataFromStorage<string[]>('trackedCourseIds', (savedIds) => {
     loadDataFromStorage<string[]>('knownCourseIds', (knownIds) => {
-    const knownSet = new Set(knownIds ?? []);
+      const knownSet = new Set(knownIds ?? []);
 
-    const currentCourseIds = new Set(allCourses.map((c) => c.courseId));
+      const currentCourseIds = new Set(allCourses.map((c) => c.courseId));
 
-    let trackedIds: string[];
-    let changed = false;
-    if (savedIds) {
-      // 현재 강의 목록에 없는 과목은 추적에서 제거
-      const filtered = savedIds.filter((id) => currentCourseIds.has(id));
-      // 새로 추가된 과목 자동 추가
-      const newTrackableIds = allCourses
-        .filter((c) => !knownSet.has(c.courseId) && !c.isCommunity)
-        .map((c) => c.courseId);
-      trackedIds = [...filtered, ...newTrackableIds];
-      changed = filtered.length !== savedIds.length || newTrackableIds.length > 0;
-    } else {
-      trackedIds = allCourses
-        .filter((c) => !c.isCommunity)
-        .map((c) => c.courseId);
-      changed = true;
-    }
-
-    if (changed) {
-      saveDataToStorage('trackedCourseIds', trackedIds);
-    }
-
-    // knownCourseIds 업데이트
-    const updatedKnown = [...new Set([...knownSet, ...currentCourseIds])];
-    saveDataToStorage('knownCourseIds', updatedKnown);
-
-    const trackedSet = new Set(trackedIds);
-    const listItems = document.querySelectorAll('.my-course-lists > li');
-
-    listItems.forEach((li) => {
-      if (li.querySelector(`[${TOGGLE_ATTR}]`)) return;
-
-      const link = li.querySelector('a.course_link') as HTMLAnchorElement | null;
-      if (!link) return;
-
-      const courseId = new URL(link.href).searchParams.get('id');
-      if (!courseId) return;
-
-      const isTracked = trackedSet.has(courseId);
-      const toggle = createToggleElement(isTracked);
-      toggle.setAttribute(TOGGLE_ATTR, courseId);
-
-      toggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        handleToggle(toggle, courseId);
-      });
-
-      const courseBox = li.querySelector('.course_box');
-      if (courseBox) {
-        (courseBox as HTMLElement).style.position = 'relative';
-        courseBox.appendChild(toggle);
+      let trackedIds: string[];
+      let changed = false;
+      if (savedIds) {
+        // 현재 강의 목록에 없는 과목은 추적에서 제거
+        const filtered = savedIds.filter((id) => currentCourseIds.has(id));
+        // 새로 추가된 과목 자동 추가
+        const newTrackableIds = allCourses
+          .filter((c) => !knownSet.has(c.courseId) && !c.isCommunity)
+          .map((c) => c.courseId);
+        trackedIds = [...filtered, ...newTrackableIds];
+        changed = filtered.length !== savedIds.length || newTrackableIds.length > 0;
+      } else {
+        trackedIds = allCourses.filter((c) => !c.isCommunity).map((c) => c.courseId);
+        changed = true;
       }
-    });
+
+      if (changed) {
+        saveDataToStorage('trackedCourseIds', trackedIds);
+      }
+
+      // knownCourseIds 업데이트
+      const updatedKnown = [...new Set([...knownSet, ...currentCourseIds])];
+      saveDataToStorage('knownCourseIds', updatedKnown);
+
+      const trackedSet = new Set(trackedIds);
+      const listItems = document.querySelectorAll('.my-course-lists > li');
+
+      listItems.forEach((li) => {
+        if (li.querySelector(`[${TOGGLE_ATTR}]`)) return;
+
+        const link = li.querySelector('a.course_link') as HTMLAnchorElement | null;
+        if (!link) return;
+
+        const courseId = new URL(link.href).searchParams.get('id');
+        if (!courseId) return;
+
+        const isTracked = trackedSet.has(courseId);
+        const toggle = createToggleElement(isTracked);
+        toggle.setAttribute(TOGGLE_ATTR, courseId);
+
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleToggle(toggle, courseId);
+        });
+
+        const courseBox = li.querySelector('.course_box');
+        if (courseBox) {
+          (courseBox as HTMLElement).style.position = 'relative';
+          courseBox.appendChild(toggle);
+        }
+      });
     });
   });
 }

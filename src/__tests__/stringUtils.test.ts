@@ -42,8 +42,7 @@ describe('removeSquareBrackets', () => {
 
 describe('formatDateString', () => {
   it('전체 날짜 범위를 축약 형식으로 변환', () => {
-    expect(formatDateString('2024-03-15 09:00:00 ~ 2024-03-22 23:59:00'))
-      .toBe('24.03.15 09:00 ~ 24.03.22 23:59');
+    expect(formatDateString('2024-03-15 09:00:00 ~ 2024-03-22 23:59:00')).toBe('24.03.15 09:00 ~ 24.03.22 23:59');
   });
 
   it('null이면 i18n 키 반환', () => {
@@ -60,7 +59,6 @@ describe('formatDateString', () => {
   });
 
   it('초 부분이 없는 형식은 원본 반환', () => {
-    expect(formatDateString('2024-03-15 09:00 ~ 2024-03-22 23:59'))
-      .toBe('2024-03-15 09:00 ~ 2024-03-22 23:59');
+    expect(formatDateString('2024-03-15 09:00 ~ 2024-03-22 23:59')).toBe('2024-03-15 09:00 ~ 2024-03-22 23:59');
   });
 });

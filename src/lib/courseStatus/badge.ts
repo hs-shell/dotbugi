@@ -60,9 +60,7 @@ function getVodStatus(vod: Vod): StatusInfo {
       const endDate = extractEndDate(vod.range);
       const remaining = endDate ? calculateDueDate(endDate) : null;
       const suffix =
-        remaining && remaining.status !== 'expired' && remaining.status !== 'noInfo'
-          ? ` · ${remaining.message}`
-          : '';
+        remaining && remaining.status !== 'expired' && remaining.status !== 'noInfo' ? ` · ${remaining.message}` : '';
       const isUrgent = remaining?.status === 'urgent';
       return {
         label: `${t('courseStatus.vod.inProgress')}${suffix}`,
@@ -134,7 +132,7 @@ function injectBadgesForSelector<T>(
   dataMap: Map<string, T>,
   getStatus: (item: T) => StatusInfo,
   hiddenUrls: Set<string>,
-  hiddenStatus: StatusInfo,
+  hiddenStatus: StatusInfo
 ) {
   document.querySelectorAll(selector).forEach((activity) => {
     const link = activity.querySelector('a') as HTMLAnchorElement | null;
@@ -163,7 +161,7 @@ export function injectBadgesIntoDOM(vods: Vod[], assigns: Assign[], quizzes: Qui
     new Map(vods.map((v) => [v.url, v])),
     getVodStatus,
     hiddenUrls,
-    hidden,
+    hidden
   );
 
   injectBadgesForSelector(
@@ -171,7 +169,7 @@ export function injectBadgesIntoDOM(vods: Vod[], assigns: Assign[], quizzes: Qui
     new Map(assigns.map((a) => [a.url, a])),
     (a) => getDueDateStatus(a.isSubmit, a.dueDate, 'assign'),
     hiddenUrls,
-    hidden,
+    hidden
   );
 
   injectBadgesForSelector(
@@ -179,7 +177,7 @@ export function injectBadgesIntoDOM(vods: Vod[], assigns: Assign[], quizzes: Qui
     new Map(quizzes.map((q) => [q.url, q])),
     (q) => getDueDateStatus(q.isSubmit, q.dueDate, 'quiz'),
     hiddenUrls,
-    hidden,
+    hidden
   );
 
   if (import.meta.env.VITE_MOCK) {

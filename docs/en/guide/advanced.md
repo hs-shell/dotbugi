@@ -9,8 +9,8 @@ A tracking toggle button is displayed on each course card on the LMS main page.
 
 By default, all regular courses are tracked, and extracurricular courses are excluded.
 
-|               Before Tracking                |              After Adding Tracking              |
-| :------------------------------------------: | :---------------------------------------------: |
+|               Before Tracking                |           After Adding Tracking            |
+| :------------------------------------------: | :----------------------------------------: |
 | ![Before Tracking](/images/track-before.png) | ![After Tracking](/images/track-after.png) |
 
 ## Search and Filter
@@ -110,9 +110,10 @@ Dotbugi's auto-play does not change video speed or manipulate playback time. It 
 :::
 
 ::: info Smart Playback
+
 - Lectures already marked as attended are automatically skipped.
 - If there is a previous watch position, playback resumes from that point.
-:::
+  :::
 
 ### Estimated End Time
 

@@ -77,6 +77,6 @@ Dotbugi's auto-play works at **normal speed (1x) without any speed manipulation 
 
 You can choose from Korean, English, Chinese, or Japanese in the Settings tab.
 
-|                                  |                                   |
-| -------------------------------- | --------------------------------- |
+|                                   |                                    |
+| --------------------------------- | ---------------------------------- |
 | ![Dashboard](/images/setting.png) | ![Dashboard](/images/language.png) |

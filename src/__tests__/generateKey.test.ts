@@ -27,8 +27,7 @@ describe('makeItemKey', () => {
 
 describe('makeVodGroupKey', () => {
   it('courseId-subject-range 형식의 키 생성', () => {
-    expect(makeVodGroupKey('123', '1주차', '2024-01-01 ~ 2024-01-07'))
-      .toBe('123-1주차-2024-01-01 ~ 2024-01-07');
+    expect(makeVodGroupKey('123', '1주차', '2024-01-01 ~ 2024-01-07')).toBe('123-1주차-2024-01-01 ~ 2024-01-07');
   });
 
   it('range가 null이면 null 포함', () => {
@@ -42,8 +41,9 @@ describe('makeVodGroupKey', () => {
   });
 
   it('한글/특수문자 포함 키 생성', () => {
-    expect(makeVodGroupKey('C-1', '1주차 (보충)', '2024-01-01 ~ 2024-01-07'))
-      .toBe('C-1-1주차 (보충)-2024-01-01 ~ 2024-01-07');
+    expect(makeVodGroupKey('C-1', '1주차 (보충)', '2024-01-01 ~ 2024-01-07')).toBe(
+      'C-1-1주차 (보충)-2024-01-01 ~ 2024-01-07'
+    );
   });
 });
 

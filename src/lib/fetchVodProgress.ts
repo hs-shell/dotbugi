@@ -88,7 +88,7 @@ export const fetchVodProgress = async (link: string) => {
           requiredTime,
           watchedTime,
         });
-      } catch (error) {
+      } catch {
         // 개별 행 파싱 실패는 무시하고 계속 진행
       }
     });

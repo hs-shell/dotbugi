@@ -18,13 +18,13 @@ function useCalendarEvents() {
     loadAndTransform<Assign, CalendarEvent[]>(
       'assign',
       (assigns) => assigns.map((a) => dueDateItemToEvent(a, 'assign')),
-      appendEvents,
+      appendEvents
     );
 
     loadAndTransform<Quiz, CalendarEvent[]>(
       'quiz',
       (quizzes) => quizzes.map((q) => dueDateItemToEvent(q, 'quiz')),
-      appendEvents,
+      appendEvents
     );
   }, []);
 

@@ -1,13 +1,26 @@
 import { defineConfig, type DefaultTheme } from 'vitepress';
 
-function guideSidebar(basic: string, advanced: string, calendar: string, faq: string, notice: string, label: string, prefix = ''): DefaultTheme.SidebarItem[] {
-  return [{ text: label, items: [
-    { text: notice, link: `${prefix}/guide/notice` },
-    { text: basic, link: `${prefix}/guide/basic` },
-    { text: advanced, link: `${prefix}/guide/advanced` },
-    { text: calendar, link: `${prefix}/guide/calendar` },
-    { text: faq, link: `${prefix}/guide/faq` },
-  ]}];
+function guideSidebar(
+  basic: string,
+  advanced: string,
+  calendar: string,
+  faq: string,
+  notice: string,
+  label: string,
+  prefix = ''
+): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: label,
+      items: [
+        { text: notice, link: `${prefix}/guide/notice` },
+        { text: basic, link: `${prefix}/guide/basic` },
+        { text: advanced, link: `${prefix}/guide/advanced` },
+        { text: calendar, link: `${prefix}/guide/calendar` },
+        { text: faq, link: `${prefix}/guide/faq` },
+      ],
+    },
+  ];
 }
 
 function updatesSidebar(label: string, changelog: string, prefix = ''): DefaultTheme.SidebarItem[] {
@@ -21,7 +34,13 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', href: '/dotbugi/favicon.png', type: 'image/png' }],
-    ['link', { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-jp.min.css' }],
+    [
+      'link',
+      {
+        rel: 'stylesheet',
+        href: 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-jp.min.css',
+      },
+    ],
   ],
 
   locales: {
@@ -32,10 +51,20 @@ export default defineConfig({
         nav: [
           { text: '가이드', link: '/guide/basic' },
           { text: '업데이트', link: '/updates/changelog' },
-          { text: '설치', link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch' },
+          {
+            text: '설치',
+            link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch',
+          },
         ],
         sidebar: {
-          '/guide/': guideSidebar('간단 사용 설명서', '고급 사용 설명서', 'Google 캘린더 연동', 'FAQ', '공지사항', '가이드'),
+          '/guide/': guideSidebar(
+            '간단 사용 설명서',
+            '고급 사용 설명서',
+            'Google 캘린더 연동',
+            'FAQ',
+            '공지사항',
+            '가이드'
+          ),
           '/updates/': updatesSidebar('업데이트', '업데이트 로그'),
         },
         outline: { label: '목차' },
@@ -49,10 +78,21 @@ export default defineConfig({
         nav: [
           { text: 'Guide', link: '/en/guide/basic' },
           { text: 'Updates', link: '/en/updates/changelog' },
-          { text: 'Install', link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch' },
+          {
+            text: 'Install',
+            link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch',
+          },
         ],
         sidebar: {
-          '/en/guide/': guideSidebar('Quick Start', 'Advanced Guide', 'Google Calendar', 'FAQ', 'Notice', 'Guide', '/en'),
+          '/en/guide/': guideSidebar(
+            'Quick Start',
+            'Advanced Guide',
+            'Google Calendar',
+            'FAQ',
+            'Notice',
+            'Guide',
+            '/en'
+          ),
           '/en/updates/': updatesSidebar('Updates', 'Changelog', '/en'),
         },
         outline: { label: 'On this page' },
@@ -66,10 +106,21 @@ export default defineConfig({
         nav: [
           { text: 'ガイド', link: '/ja/guide/basic' },
           { text: '更新履歴', link: '/ja/updates/changelog' },
-          { text: 'インストール', link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch' },
+          {
+            text: 'インストール',
+            link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch',
+          },
         ],
         sidebar: {
-          '/ja/guide/': guideSidebar('簡単ガイド', '詳細ガイド', 'Google カレンダー連携', 'よくある質問', 'お知らせ', 'ガイド', '/ja'),
+          '/ja/guide/': guideSidebar(
+            '簡単ガイド',
+            '詳細ガイド',
+            'Google カレンダー連携',
+            'よくある質問',
+            'お知らせ',
+            'ガイド',
+            '/ja'
+          ),
           '/ja/updates/': updatesSidebar('更新履歴', '更新ログ', '/ja'),
         },
         outline: { label: '目次' },
@@ -83,7 +134,10 @@ export default defineConfig({
         nav: [
           { text: '指南', link: '/zh/guide/basic' },
           { text: '更新日志', link: '/zh/updates/changelog' },
-          { text: '安装', link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch' },
+          {
+            text: '安装',
+            link: 'https://chromewebstore.google.com/detail/hsu-%EB%8F%8B%EB%B6%80%EA%B8%B0-%F0%9F%94%8E/fbhdnbombekihdhjcfiimiibfmikghch',
+          },
         ],
         sidebar: {
           '/zh/guide/': guideSidebar('快速入门', '高级指南', 'Google 日历', '常见问题', '公告', '指南', '/zh'),
