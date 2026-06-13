@@ -12,6 +12,9 @@ reviews:
     enabled: true # PR 최초 생성 시 자동 리뷰
     auto_incremental_review: false # 이후 push에는 자동 재리뷰 안 함 (수동 `@coderabbitai review`)
     drafts: false
+    # release-please가 자동 생성하는 Release PR은 리뷰하지 않는다 (리뷰할 코드 없음)
+    ignore_title_keywords:
+      - release
     base_branches:
       - main
   path_filters:
