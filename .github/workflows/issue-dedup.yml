@@ -113,7 +113,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: current.number,
-                labels: ['👀 possible-duplicate'],
+                labels: ['possible-duplicate'],
               });
             } catch (e) {
               core.info(`라벨 추가 건너뜀: ${e.message}`);

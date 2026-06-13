@@ -38,7 +38,7 @@ git push -u origin HEAD
 
 - 본문은 `.github/PULL_REQUEST_TEMPLATE.md`의 모든 섹션을 diff 기반으로 채운다. **관련 이슈를 `Closes #<번호>`로 반드시 참조**한다(없으면 `pr-checks`의 이슈 가드가 실패).
 - 라벨: 브랜치/본문에서 이슈 번호를 찾으면 `gh issue view <번호> --json labels`로 이슈 라벨을 상속한다.
-- 타입 라벨(`✨ feat`/`🐛 bug` 등)은 **`pr-autolabel` 워크플로가 PR 제목 prefix로 자동 부착**하므로 수동 지정 불필요.
+- 타입 라벨(`feat`/`bug` 등)은 **`pr-autolabel` 워크플로가 PR 제목 prefix로 자동 부착**하므로 수동 지정 불필요.
 
 ## 5단계: PR 생성
 
