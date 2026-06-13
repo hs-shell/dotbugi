@@ -19,15 +19,15 @@ jobs:
           script: |
             // 커밋 타입 → 라벨 매핑
             const MAP = {
-              feat: '✨ feat',
-              fix: '🐛 bug',
-              docs: '📝 docs',
-              refactor: '♻️ refactor',
-              perf: '⚡ perf',
-              test: '🧪 test',
-              chore: '🧹 chore',
-              ci: '⚙️ ci',
-              style: '💄 style',
+              feat: 'feat',
+              fix: 'bug',
+              docs: 'docs',
+              refactor: 'refactor',
+              perf: 'perf',
+              test: 'test',
+              chore: 'chore',
+              ci: 'ci',
+              style: 'style',
             };
             const MANAGED = new Set(Object.values(MAP));
 
