@@ -48,8 +48,8 @@ export default function PlayerPopoverTrigger({ onClick, isPlaying }: PlayerPopov
         </div>
 
         <BorderTrail
-          className="absolute inset-0 z-[9999] pointer-events-none
-                     bg-gradient-to-r from-white/10 via-white/80 to-white/10
+          className="absolute inset-0 z-9999 pointer-events-none
+                     bg-linear-to-r from-white/10 via-white/80 to-white/10
                      dark:from-white/10 dark:via-white/60 dark:to-white/10"
           style={{
             boxShadow: `

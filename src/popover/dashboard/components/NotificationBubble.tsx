@@ -80,7 +80,7 @@ function NotificationItem({
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.2 }}
         >
-          <Icon className={`w-6 h-6 flex-shrink-0 mt-0.5 ${ICON_COLOR_MAP[notification.type]}`} />
+          <Icon className={`w-6 h-6 shrink-0 mt-0.5 ${ICON_COLOR_MAP[notification.type]}`} />
         </motion.div>
         <div className="flex-1 min-w-0">
           <motion.p
@@ -104,7 +104,7 @@ function NotificationItem({
         {notification.type !== 'loading' && (
           <button
             onClick={() => onDismiss(notification.id)}
-            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-300 hover:bg-zinc-500 transition-colors"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-300 hover:bg-zinc-500 transition-colors"
           >
             <X className="w-5 h-5 text-white" />
           </button>

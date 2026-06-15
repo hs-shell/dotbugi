@@ -1,10 +1,9 @@
-const { heroui } = require('@heroui/theme');
 /** @type {import('tailwindcss').Config} */
 
 module.exports = {
   darkMode: ['media', 'class'],
   important: true,
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}', './node_modules/@heroui/theme/dist/components/toggle.js'],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       borderRadius: {
@@ -88,5 +87,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate'), heroui()],
+  plugins: [require('tailwindcss-animate')],
 };

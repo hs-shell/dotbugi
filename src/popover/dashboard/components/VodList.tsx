@@ -77,7 +77,8 @@ export default function VodList({ courseData, onHideTask, onHideTasks }: VideoPr
                 className={`w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${attended ? 'border-green-500' : timeDifference.borderColor}`}
               >
                 <CardHeader
-                  className={`cursor-pointer flex flex-row items-center justify-between px-5 pt-5 pb-3 hover:bg-zinc-100 transition-all duration-100 ${isExpanded && 'shadow-2xl shadow-zinc-950'}`}
+                  // space-y-0: 기본 CardHeader의 space-y-1.5 가 flex-row 로 바꿔도 남아, v4의 space-y(=margin-bottom) 의미 변경 탓에 카드 높이가 늘어나는 것을 막는다
+                  className={`cursor-pointer flex flex-row items-center justify-between space-y-0 px-5 pt-5 pb-3 hover:bg-zinc-100 transition-all duration-100 ${isExpanded && 'shadow-2xl shadow-zinc-950'}`}
                   onClick={() => toggleCard(cardKey)}
                 >
                   <div className="grid grid-cols-1">

@@ -29,7 +29,7 @@ export default function InfoBubble({ taskCount, remainingTime, onDismiss }: Info
       <div className="flex items-start gap-3 p-2">
         <div className="flex-1 min-w-0">
           <div className="font-extrabold text-2xl text-zinc-800 leading-tight flex items-center gap-2">
-            {allDone && <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />}
+            {allDone && <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />}
             {allDone ? t('bubble.allDone') : t('bubble.tasks', { count: taskCount })}
           </div>
           <div className={`flex items-center gap-2 mt-2 text-lg ${isStale ? 'text-orange-500' : 'text-zinc-500'}`}>
@@ -42,7 +42,7 @@ export default function InfoBubble({ taskCount, remainingTime, onDismiss }: Info
             e.stopPropagation();
             onDismiss();
           }}
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-300 hover:bg-zinc-500 transition-colors"
+          className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-300 hover:bg-zinc-500 transition-colors"
         >
           <X className="w-5 h-5 text-white" />
         </button>

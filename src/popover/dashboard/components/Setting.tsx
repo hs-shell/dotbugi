@@ -77,7 +77,7 @@ export default function Setting({
       <Card className="bg-white rounded-2xl w-full border-0 shadow-none px-1.5 py-1.5">
         <Select value={i18n.language} onValueChange={(value) => changeLanguage(value as LanguageCode)}>
           <SelectTrigger className="w-full h-14 border-0 shadow-none rounded-2xl px-4 py-3 gap-x-3 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500 focus:ring-0 [&>svg:last-child]:hidden">
-            <Globe className="w-5 h-5 text-zinc-500 flex-shrink-0" />
+            <Globe className="w-5 h-5 text-zinc-500 shrink-0" />
             <span className="flex-1 text-lg font-semibold text-zinc-600 text-left">{t('language')}</span>
             <span className="text-lg">
               <SelectValue />
@@ -128,7 +128,7 @@ export default function Setting({
           onClick={() => downloadLogs()}
           className="flex items-center w-full h-14 rounded-2xl px-4 py-3 gap-x-3 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500"
         >
-          <Download className="w-5 h-5 text-zinc-500 flex-shrink-0" />
+          <Download className="w-5 h-5 text-zinc-500 shrink-0" />
           <span className="flex-1 text-lg font-semibold text-zinc-600 text-left">{t('downloadLogs')}</span>
         </button>
       </Card>
@@ -149,7 +149,7 @@ export default function Setting({
                 </div>
                 <button
                   onClick={() => onUnhideTask?.(task.url)}
-                  className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-zinc-300 hover:bg-zinc-500 transition-colors"
+                  className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-zinc-300 hover:bg-zinc-500 transition-colors"
                   title={t('hide.unhide')}
                 >
                   <X className="w-4 h-4 text-white" />
