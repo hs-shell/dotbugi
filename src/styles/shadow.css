@@ -17,10 +17,14 @@
   }
 }
 
-/* v4는 버튼 기본 커서를 pointer→default로 바꿨다. v3와 동일하게 보이도록 복원한다. */
+/*
+  v4는 버튼 기본 커서를 pointer→default로 바꿨다. v3와 동일하게 복원한다.
+  role="button" 커스텀 요소는 :disabled 가 안 먹으므로(네이티브 폼 전용),
+  Radix가 쓰는 data-disabled 로 비활성 상태를 제외한다.
+*/
 @layer base {
   button:not(:disabled),
-  [role='button']:not(:disabled) {
+  [role='button']:not([data-disabled]) {
     cursor: pointer;
   }
 }
