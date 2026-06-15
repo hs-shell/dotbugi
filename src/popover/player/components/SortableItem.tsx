@@ -40,14 +40,14 @@ export default function SortableItem({ vod, idx, currentVideoIndex, setCurrentVi
       {...attributes}
       {...listeners}
       onClick={() => setCurrentVideoIndex(idx)}
-      className={`p-3 rounded-lg transition-all flex-shrink-0 ${
+      className={`p-3 rounded-lg transition-all shrink-0 ${
         isCurrent
           ? 'bg-blue-50 border-l-4 border-blue-500 border-y border-r border-y-transparent border-r-transparent'
           : 'bg-zinc-50 border-l-4 border-transparent hover:bg-zinc-100'
       }`}
     >
       <div className="flex items-start gap-2.5">
-        <span className={`text-lg font-bold mt-0.5 flex-shrink-0 ${isCurrent ? 'text-blue-500' : 'text-zinc-400'}`}>
+        <span className={`text-lg font-bold mt-0.5 shrink-0 ${isCurrent ? 'text-blue-500' : 'text-zinc-400'}`}>
           {idx + 1}
         </span>
         <div className="flex-1 min-w-0">
@@ -55,7 +55,7 @@ export default function SortableItem({ vod, idx, currentVideoIndex, setCurrentVi
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-lg text-zinc-500 truncate">{vod.courseTitle}</p>
             <span className="text-zinc-300">·</span>
-            <span className="text-lg text-zinc-400 flex-shrink-0">{vod.length.trim()}</span>
+            <span className="text-lg text-zinc-400 shrink-0">{vod.length.trim()}</span>
           </div>
         </div>
       </div>

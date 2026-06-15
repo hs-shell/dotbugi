@@ -100,7 +100,7 @@ export default function DashboardHeader({ activeTab, filter: f, actions: a }: Da
               <RefreshCw />
               <span className="flex-1">{t('common:refresh')}</span>
               <span
-                className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${a.remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 5) ? 'bg-red-500' : 'bg-green-500'}`}
+                className={`w-2.5 h-2.5 rounded-full shrink-0 ${a.remainingTime >= (import.meta.env.VITE_MOCK ? 1 : 5) ? 'bg-red-500' : 'bg-green-500'}`}
               />
             </DropdownMenuItem>
             <DropdownMenuItem onClick={a.onOpenSetting} className="text-xl py-3 gap-3 cursor-pointer [&>svg]:size-5">
@@ -132,7 +132,7 @@ export default function DashboardHeader({ activeTab, filter: f, actions: a }: Da
               value={f.searchTerm}
               onChange={(e) => f.onSearchChange(e.target.value)}
               autoFocus={true}
-              className="bg-zinc-50 rounded-xl border border-zinc-300 w-full text-lg h-12 pl-12 pr-4 placeholder-gray-400 font-medium py-0 outline-none focus:ring-0 focus:border-zinc-300 focus:bg-slate-50 transition-all duration-200"
+              className="bg-zinc-50 rounded-xl border border-zinc-300 w-full text-lg h-12 pl-12 pr-4 placeholder-gray-400 font-medium py-0 outline-hidden focus:ring-0 focus:border-zinc-300 focus:bg-slate-50 transition-all duration-200"
             />
           </div>
           <div className="flex w-full items-center pl-5 my-1">
@@ -157,7 +157,7 @@ export default function DashboardHeader({ activeTab, filter: f, actions: a }: Da
                   />
                 ))}
             </div>
-            <div className="flex flex-shrink-0 ml-2">
+            <div className="flex shrink-0 ml-2">
               <Popover open={f.isFilterOpen}>
                 <PopoverTrigger asChild>
                   <button

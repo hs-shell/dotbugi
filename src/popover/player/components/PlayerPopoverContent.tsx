@@ -167,7 +167,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
         {vods.length !== 0 ? (
           <div className="w-full h-full flex flex-col">
             <div className="flex w-full overflow-hidden flex-1 min-h-0 space-x-4">
-              <div className="w-2/3 flex-shrink-0">
+              <div className="w-2/3 shrink-0">
                 <PlayerIframe
                   videoSrc={vods[currentVideoIndex]?.url.replace('view', 'viewer')}
                   onNextVideo={onNextVideo}
@@ -176,7 +176,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
               </div>
 
               <div className="w-1/3 flex flex-col py-4 px-4 min-w-0 bg-zinc-50 rounded-xl">
-                <div className="flex items-baseline justify-between mb-4 flex-shrink-0">
+                <div className="flex items-baseline justify-between mb-4 shrink-0">
                   <h3 className="text-4xl font-bold text-black">{t('lectureList')}</h3>
                   <span className="text-lg text-zinc-400 font-medium">
                     {currentVideoIndex + 1} / {vods.length}
@@ -216,7 +216,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
                 <div className="pt-4">
                   <Button
                     variant={`default`}
-                    className={`w-full h-16 text-2xl font-semibold flex items-center justify-center transition-all duration-300 rounded-xl flex-shrink-0 ${
+                    className={`w-full h-16 text-2xl font-semibold flex items-center justify-center transition-all duration-300 rounded-xl shrink-0 ${
                       isPlaying && 'hover:bg-red-700'
                     }`}
                     onClick={() => setIsPlaying((prev) => !prev)}

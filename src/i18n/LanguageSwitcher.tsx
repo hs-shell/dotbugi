@@ -7,11 +7,11 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="flex items-center gap-2 py-2">
-      <Globe size={16} className="text-gray-400 flex-shrink-0" />
+      <Globe size={16} className="text-gray-400 shrink-0" />
       <select
         value={i18n.language}
         onChange={(e) => changeLanguage(e.target.value as LanguageCode)}
-        className="text-sm bg-transparent border border-gray-300 rounded-md px-2 py-1 text-gray-700 outline-none focus:border-slate-400 w-full cursor-pointer"
+        className="text-sm bg-transparent border border-gray-300 rounded-md px-2 py-1 text-gray-700 outline-hidden focus:border-slate-400 w-full cursor-pointer"
         aria-label={t('language')}
       >
         {SUPPORTED_LANGUAGES.map((lang) => (

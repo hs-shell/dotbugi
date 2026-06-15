@@ -189,7 +189,7 @@ export default function PlayerIframe({ videoSrc, onNextVideo, isPlaying }: Playe
     <div className={`relative w-full h-full items-center justify-center rounded-xl ${!isPlaying && 'bg-black'}`}>
       {isPlaying ? (
         time.duration > 0 ? (
-          <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-black/70 backdrop-blur-sm rounded-lg pointer-events-none text-xl font-medium z-10">
+          <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-black/70 backdrop-blur-xs rounded-lg pointer-events-none text-xl font-medium z-10">
             <span className="text-white">{formatMMSS(time.current)}</span>
             <span className="text-zinc-400">/</span>
             <span className="text-zinc-400">{formatMMSS(time.duration)}</span>
