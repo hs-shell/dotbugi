@@ -14,6 +14,6 @@ paths:
 - 컴포넌트/모듈은 1 파일 1 책임.
 - **LMS 스크래핑은 DOMParser 기반**(API 아님). fetch 로직은 `src/lib/fetchCourseData.ts` + 개별 모듈(`fetchVodAttendance.ts`, `fetchAssign.ts`, `fetchQuiz.ts` 등)에 둔다.
 - 중복 제거는 **키 생성기**(`makeVodKey`, `makeAssignKey`, `makeQuizKey`)를 거친다 — 키 불일치로 중복이 새지 않도록.
-- content script UI는 **Shadow DOM**으로 격리(`src/lib/ShadowRootContext.tsx` 컨텍스트 경유).
-- background ↔ content는 chrome 메시지 패싱으로 통신(알람 스케줄링 등).
+- content script UI는 **Shadow DOM**으로 격리(`src/popover/lib/ShadowRootContext.tsx` 컨텍스트 경유).
+- background ↔ content는 chrome 메시지 패싱으로 통신(Google OAuth 토큰 발급 등).
 - 사용자에게 보이는 문자열은 i18n(`react-i18next`)을 통하고, 기본 언어는 한국어.

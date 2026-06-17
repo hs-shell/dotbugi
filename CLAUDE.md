@@ -98,18 +98,17 @@ To test the extension, load `dist/` as an unpacked extension in Chrome (`chrome:
 
 ## Architecture
 
-**Three entry points:**
+**Two entry points:**
 
-1. **Content Script** (`src/content/index.tsx`) — Injects a popover dashboard and video player into the LMS pages using Shadow DOM for style isolation.
-2. **Background Service Worker** (`src/background.ts`) — Handles Chrome alarm scheduling and notification creation via message passing.
-3. **Options Page** (`src/option/index.tsx`, served from `option.html`) — HashRouter SPA with dashboard, VOD/assignment/quiz list pages, and color customization settings.
+1. **Content Script** (`src/popover/index.tsx`) — Injects the dashboard, video player, course toggles, and course-status badges (`injectCourseStatus`) into the LMS pages using Shadow DOM for style isolation.
+2. **Background Service Worker** (`src/background.ts`) — Brokers Google OAuth tokens via `chrome.identity` (message passing) and opens the docs site on install / toolbar-icon click.
 
 **Data flow:** The extension scrapes raw HTML from LMS pages using DOMParser (not an API), orchestrated by `src/lib/fetchCourseData.ts` and individual fetch modules (`fetchVodAttendance.ts`, `fetchIndexPage.ts`, `fetchAssign.ts`, `fetchQuiz.ts`). Results are cached in Chrome storage with a 24-hour TTL. The main data hook is `src/hooks/useCourseData.tsx`.
 
 **Key patterns:**
 
-- Shadow DOM isolation for content script UI (context via `src/lib/ShadowRootContext.tsx`)
-- Chrome message passing between content scripts and background worker for alarm scheduling
+- Shadow DOM isolation for content script UI (context via `src/popover/lib/ShadowRootContext.tsx`)
+- Chrome message passing between content script and background worker for OAuth token retrieval
 - Deduplication via key generators (`makeVodKey`, `makeAssignKey`, `makeQuizKey`)
 - Path alias: `@/` maps to `./src`
 
