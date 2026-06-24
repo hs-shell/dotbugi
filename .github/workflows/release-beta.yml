@@ -29,7 +29,10 @@ jobs:
         id: ver
         run: |
           BASE=$(node -p "require('./package.json').version" | sed 's/-.*//')
+          # GitHub 태그/릴리즈는 SemVer prerelease 표기를 쓴다.
           echo "tag=v${BASE}-beta.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          # manifest version 은 숫자만 허용 → 4-파트 숫자 스킴으로 별도 계산.
+          echo "manifest=${BASE}.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: 의존성 설치
         run: npm ci
@@ -38,6 +41,7 @@ jobs:
         run: npm run build
         env:
           RELEASE_CHANNEL: beta
+          BETA_VERSION: ${{ steps.ver.outputs.manifest }}
 
       - name: dist 압축
         env:
@@ -58,8 +62,8 @@ jobs:
 
       # ── 베타 Chrome Web Store 게시 (기반 — 기본 비활성) ──────────────
       # 베타는 별도 스토어 항목이므로 BETA_EXTENSION_ID 사용.
-      # ※ Chrome manifest version은 숫자만 허용되므로, 스토어 발행을 켤 때는
-      #   `-beta.N` 대신 숫자 스킴(예: x.y.z.N)으로 manifest 버전을 맞춰야 함.
+      # manifest 버전은 위 빌드에서 BETA_VERSION(숫자 4-파트)으로 주입되어
+      # 스토어 버전 규칙(숫자만 허용)을 만족한다.
       - name: Chrome Web Store 게시 (beta)
         if: vars.ENABLE_STORE_PUBLISH == 'true'
         uses: mnao305/chrome-extension-upload@4008e29e13c144d0f6725462cbd49b7c291b4928 # v5.0.0
