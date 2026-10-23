@@ -52,6 +52,3 @@ export const FINGERPRINT_LENGTH = 6;
 
 /** dotbugi-mcp 콜백 주소 */
 export const getCallbackUrl = (port: number) => `http://127.0.0.1:${port}/cb`;
-
-/** 세션을 넘겨도 되는 유일한 출처 — 보안 경계라 외부 패키지 값이 아닌 이 저장소에 고정한다 */
-export const LMS_ORIGIN = 'https://learn.hansung.ac.kr';

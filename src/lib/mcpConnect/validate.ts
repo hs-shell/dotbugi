@@ -2,12 +2,12 @@ import {
   CONNECT_CODE_PATTERN,
   CONNECT_HASH_PATTERN,
   CONNECT_MESSAGE_TYPE,
-  LMS_ORIGIN,
   MAX_CALLBACK_PORT,
   MIN_CALLBACK_PORT,
   SESSION_COOKIE_NAME,
   SESSION_VALUE_PATTERN,
 } from './constants';
+import { isLmsUrl } from '@/lib/lmsUrl';
 
 /** CLI가 넘겨준 연결 대상 */
 export interface ConnectTarget {
@@ -64,12 +64,7 @@ export function readSessionCookie(cookie: string): string | null {
 
 /** 메시지를 보낸 문서가 LMS 출처인지 (startsWith 대신 origin 비교로 유사 도메인 차단) */
 export function isLmsSender(url: string | undefined): boolean {
-  if (!url) return false;
-  try {
-    return new URL(url).origin === LMS_ORIGIN;
-  } catch {
-    return false;
-  }
+  return isLmsUrl(url);
 }
 
 /** content script 메시지 → 연결 요청. 신뢰 경계이므로 모든 필드를 다시 검증한다 */
