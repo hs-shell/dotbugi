@@ -108,13 +108,13 @@ export default function PlayerPopoverContent({
       side="right"
       sideOffset={8}
       forceMount
-      className={`p-0 animate-popover-fade-in transition-opacity border-none bg-transparent ${
-        isPopoverOpen ? 'opacity-100 pointer-events-auto -z-50' : 'opacity-0 pointer-events-none z-50'
+      // 닫혀도 재생이 이어지게 항상 마운트한다. display 대신 visibility 로 숨겨야 페이드가 되고 위치도 다시 계산되지 않는다
+      className={`p-0 transition-[opacity,visibility] border-none bg-transparent ${
+        isPopoverOpen ? 'opacity-100 visible pointer-events-auto -z-50' : 'opacity-0 invisible pointer-events-none z-50'
       }`}
       style={{
         width: 'clamp(400px, 85vw, 900px)',
         height: 'clamp(400px, 80vh, 700px)',
-        display: `${isPopoverOpen ? 'block' : 'none'}`,
       }}
     >
       <div className="bg-white rounded-3xl border-none shadow-2xl shadow-zinc-700 w-full h-full flex flex-col p-6 gap-4">
