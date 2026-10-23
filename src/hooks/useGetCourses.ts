@@ -15,9 +15,14 @@ function getMockCourses(): CourseBase[] | null {
   return null;
 }
 
+// MOCK_COURSES 모드: chrome.storage 없이 환경 변수에 담긴 과목을 전부 트래킹한다. 빌드 시점에 정해지는 값이라 초기 state 로 쓴다.
+const ENV_MOCK_COURSES = import.meta.env.VITE_MOCK ? getMockCourses() : null;
+
 export const useGetCourses = () => {
-  const [allCourses, setAllCourses] = useState<CourseBase[]>([]);
-  const [trackedCourseIds, setTrackedCourseIdsState] = useState<string[] | null>(null);
+  const [allCourses, setAllCourses] = useState<CourseBase[]>(() => ENV_MOCK_COURSES ?? []);
+  const [trackedCourseIds, setTrackedCourseIdsState] = useState<string[] | null>(
+    () => ENV_MOCK_COURSES?.map((c) => c.courseId) ?? null
+  );
 
   const setTrackedCourseIds = useCallback((ids: string[]) => {
     setTrackedCourseIdsState(ids);
@@ -65,14 +70,8 @@ export const useGetCourses = () => {
     };
 
     if (import.meta.env.VITE_MOCK) {
-      const envCourses = getMockCourses();
-      if (envCourses) {
-        // MOCK_COURSES 모드: chrome.storage 없이 전부 트래킹
-        setAllCourses(envCourses);
-        const defaultIds = envCourses.map((c) => c.courseId);
-        setTrackedCourseIdsState(defaultIds);
-        return;
-      }
+      // MOCK_COURSES 모드는 초기 state 에 이미 반영되어 있다
+      if (ENV_MOCK_COURSES) return;
       import('@/mocks/mockData').then(({ mockCourses }) => {
         initCourses(mockCourses);
       });

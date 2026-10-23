@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Assign, Filters, Quiz, TAB_TYPE, Vod } from '@/types';
 import { filterVods, filterAssigns, filterQuizzes } from '@/lib/filterData';
 
@@ -25,10 +25,14 @@ export function useDashboardFilters({ vods, assigns, quizzes, activeTab }: UseDa
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState(INITIAL_FILTERS);
 
-  useEffect(() => {
+  // 탭이 바뀌면 검색어·필터 패널을 초기화한다.
+  // useEffect 로 처리하면 이전 탭의 검색어로 한 번 그려진 뒤 다시 그려지므로, 렌더 중에 이전 탭과 비교해 바로 초기화한다.
+  const [prevTab, setPrevTab] = useState<TAB_TYPE>(activeTab);
+  if (prevTab !== activeTab) {
+    setPrevTab(activeTab);
     setSearchTerm('');
     setIsFilterOpen(false);
-  }, [activeTab]);
+  }
 
   const courseTitlesMap = useMemo(
     () => ({
