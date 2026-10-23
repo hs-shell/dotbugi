@@ -82,7 +82,7 @@ Dotbugi (돋부기) is a Chrome Extension (Manifest V3) for Hansung University s
 ```bash
 npm run dev           # Vite dev server (crx plugin excluded)
 npm run build         # TypeScript check + Vite production build (store upload)
-npm run build:mock    # Mock-data build (no LMS login needed)
+npm run build:mock    # Dev build via .env.mock: fetch real LMS data for VITE_MOCK_COURSES, skip date filter (LMS login still required)
 npm run build:local   # Local test build: manifest `key` → same extension ID as store, DEV icon/name (never upload)
 npm run lint          # ESLint
 npm run test          # Vitest (test:watch for watch mode)
