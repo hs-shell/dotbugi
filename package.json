@@ -45,6 +45,7 @@
     "i18next": "^25.8.18",
     "lucide-react": "^1.61.0",
     "motion": "^12.38.0",
+    "mux.js": "6.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^16.5.8",

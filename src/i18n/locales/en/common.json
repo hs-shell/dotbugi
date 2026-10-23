@@ -65,6 +65,18 @@
   "language": "Language",
   "contact": "Contact Us",
   "downloadLogs": "Download Logs",
+  "vodDownload": {
+    "button": "Download lecture",
+    "started": "Downloading…",
+    "saved": "Saved",
+    "cancel": "Cancel download",
+    "done": "Download complete",
+    "cancelled": "Download cancelled",
+    "failed": "Download failed",
+    "encrypted": "This video is encrypted and cannot be downloaded",
+    "unsupported": "This browser does not support saving files",
+    "busy": "Another download is already in progress"
+  },
   "calendar": {
     "bannerTitle": "Google Calendar Sync",
     "bannerDesc": "Manage your lectures, assignments, and quizzes on Google Calendar with Dotbugi",
