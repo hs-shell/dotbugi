@@ -49,11 +49,15 @@ export default function Dashboard() {
   const loadInitialDataRef = useRef<((courses: CourseBase[]) => void) | null>(null);
   // 토글 비교 기준(아래 스토리지 리스너). 초기화 콜백에서 바로 잡아야 커밋 전에 온 변경도 놓치지 않는다
   const trackedIdsRef = useRef<string[] | null>(null);
-  const handleCoursesInitialized = useCallback((courses: CourseBase[]) => {
+  // 리스너가 과목 이름을 찾는 목록. allCourses state 는 커밋 전이거나 구독 시점 값일 수 있어,
+  // 비교 기준과 같은 순간에 잡아야 초기화 직후 온 토글도 과목을 찾는다 (전체 과목은 초기화 때 한 번만 정해진다)
+  const allCoursesRef = useRef<CourseBase[]>([]);
+  const handleCoursesInitialized = useCallback((courses: CourseBase[], allCourses: CourseBase[]) => {
+    allCoursesRef.current = allCourses;
     trackedIdsRef.current = courses.map((c) => c.courseId);
     loadInitialDataRef.current?.(courses);
   }, []);
-  const { allCourses, trackedCourses, trackedCourseIds, isInitialized } = useGetCourses(handleCoursesInitialized);
+  const { trackedCourses, trackedCourseIds, isInitialized } = useGetCourses(handleCoursesInitialized);
 
   const {
     vods,
@@ -135,7 +139,7 @@ export default function Dashboard() {
 
       const { added, removed } = diffTrackedCourseIds(prevIds, nextIds);
       for (const id of added) {
-        const course = allCourses.find((c) => c.courseId === id);
+        const course = allCoursesRef.current.find((c) => c.courseId === id);
         if (!course) continue;
         addCourseData(course);
         const notifId = pushNotification({
@@ -148,7 +152,7 @@ export default function Dashboard() {
 
       for (const id of removed) {
         removeCourseData(id);
-        const course = allCourses.find((c) => c.courseId === id);
+        const course = allCoursesRef.current.find((c) => c.courseId === id);
         if (course) {
           pushNotification({
             type: 'warning',
@@ -161,7 +165,7 @@ export default function Dashboard() {
     };
     chrome.storage.onChanged.addListener(listener);
     return () => chrome.storage.onChanged.removeListener(listener);
-  }, [allCourses, addCourseData, removeCourseData, pushNotification]);
+  }, [addCourseData, removeCourseData, pushNotification]);
 
   // 과목 추가 fetch 완료 시 알림을 loading → success로 전환
   useEffect(() => {

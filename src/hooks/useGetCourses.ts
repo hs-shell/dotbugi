@@ -18,9 +18,9 @@ function getMockCourses(): CourseBase[] | null {
 // MOCK_COURSES 모드: chrome.storage 없이 환경 변수에 담긴 과목을 전부 트래킹한다. 빌드 시점에 정해지는 값이라 초기 state 로 쓴다.
 const ENV_MOCK_COURSES = import.meta.env.VITE_MOCK ? getMockCourses() : null;
 
-// onInitialized: 과목 목록과 추적 과목이 처음 정해진 시점에 추적 과목으로 호출된다 (초기 데이터 로드 연결용).
+// onInitialized: 과목 목록과 추적 과목이 처음 정해진 시점에 추적 과목·전체 과목으로 호출된다 (초기 데이터 로드 연결용).
 // 마운트 effect 의존성이므로 안정된 참조(useCallback)여야 한다 — 매 렌더 새 함수면 DOM 파싱·저장이 반복된다.
-export const useGetCourses = (onInitialized?: (trackedCourses: CourseBase[]) => void) => {
+export const useGetCourses = (onInitialized?: (trackedCourses: CourseBase[], allCourses: CourseBase[]) => void) => {
   const [allCourses, setAllCourses] = useState<CourseBase[]>(() => ENV_MOCK_COURSES ?? []);
   const [trackedCourseIds, setTrackedCourseIdsState] = useState<string[] | null>(
     () => ENV_MOCK_COURSES?.map((c) => c.courseId) ?? null
@@ -52,7 +52,10 @@ export const useGetCourses = (onInitialized?: (trackedCourses: CourseBase[]) => 
               .map((c) => c.courseId);
             const mergedIds = [...filtered, ...newTrackableIds];
             setTrackedCourseIdsState(mergedIds);
-            onInitialized?.(courses.filter((c) => mergedIds.includes(c.courseId)));
+            onInitialized?.(
+              courses.filter((c) => mergedIds.includes(c.courseId)),
+              courses
+            );
             if (filtered.length !== savedIds.length || newTrackableIds.length > 0) {
               saveDataToStorage('trackedCourseIds', mergedIds);
             }
@@ -60,7 +63,10 @@ export const useGetCourses = (onInitialized?: (trackedCourses: CourseBase[]) => 
             // 최초 사용: 비교과(커뮤니티)와 이전 학기 과목 제외하고 전부 트래킹
             const defaultIds = courses.filter((c) => !c.isCommunity).map((c) => c.courseId);
             setTrackedCourseIdsState(defaultIds);
-            onInitialized?.(courses.filter((c) => defaultIds.includes(c.courseId)));
+            onInitialized?.(
+              courses.filter((c) => defaultIds.includes(c.courseId)),
+              courses
+            );
             saveDataToStorage('trackedCourseIds', defaultIds);
           }
 
@@ -76,7 +82,7 @@ export const useGetCourses = (onInitialized?: (trackedCourses: CourseBase[]) => 
     if (import.meta.env.VITE_MOCK) {
       // MOCK_COURSES 모드는 초기 state 에 이미 반영되어 있어 마운트가 곧 초기화 시점이다
       if (ENV_MOCK_COURSES) {
-        onInitialized?.(ENV_MOCK_COURSES);
+        onInitialized?.(ENV_MOCK_COURSES, ENV_MOCK_COURSES);
         return;
       }
       import('@/mocks/mockData').then(({ mockCourses }) => {
