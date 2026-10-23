@@ -10,8 +10,9 @@ interface VodDownloadButtonProps {
 }
 
 // 강의 페이지 버튼(downloadButton.ts)과 같은 비율·색. rem 은 LMS 페이지 html 글꼴 크기를 따라 달라지므로 px·hex 로 고정한다
+// 아이콘 16 + 여백 5×2 + 투명 테두리 1×2 = 28px 정사각형
 const ICON_BUTTON =
-  'group shrink-0 h-[28px] min-w-[28px] p-[6px] flex items-center justify-center rounded-[6px] border border-transparent bg-transparent cursor-pointer transition-colors duration-150 hover:bg-[#e4e4e7] active:bg-[#d4d4d8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a1a1aa]';
+  'group shrink-0 h-[28px] min-w-[28px] p-[5px] flex items-center justify-center rounded-[6px] border border-transparent bg-transparent cursor-pointer transition-colors duration-150 hover:bg-[#e4e4e7] active:bg-[#d4d4d8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a1a1aa]';
 const ICON = 'w-[16px] h-[16px] shrink-0';
 
 export default function VodDownloadButton({ vod, download }: VodDownloadButtonProps) {

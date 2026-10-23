@@ -27,7 +27,7 @@ const STYLE = `
 :host{all:initial;display:inline-flex;align-items:center;gap:6px;margin-left:6px;vertical-align:middle;
   font:600 11px/1.4 system-ui,-apple-system,sans-serif}
 button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:4px;
-  height:24px;min-width:24px;padding:0 4px;border-radius:6px;cursor:pointer;color:#71717a;
+  height:24px;min-width:24px;padding:0 3px;border-radius:6px;cursor:pointer;color:#71717a;
   border:1px solid transparent;transition:background .15s,color .15s,border-color .15s}
 button:hover{background:#e4e4e7;color:#18181b}
 button:active{background:#d4d4d8}
