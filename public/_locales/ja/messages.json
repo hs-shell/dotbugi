@@ -2,6 +2,9 @@
   "extName": {
     "message": "HSU Dotbugi 🔎"
   },
+  "extNameBeta": {
+    "message": "HSU Dotbugi 🔎 (Beta)"
+  },
   "extDescription": {
     "message": "漢城大学LMSの講義、課題、クイズを一目で！"
   }

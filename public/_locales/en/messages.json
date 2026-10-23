@@ -2,6 +2,9 @@
   "extName": {
     "message": "HSU Dotbugi 🔎"
   },
+  "extNameBeta": {
+    "message": "HSU Dotbugi 🔎 (Beta)"
+  },
   "extDescription": {
     "message": "View all Hansung University LMS lectures, assignments, and quizzes at a glance!"
   }

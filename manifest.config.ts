@@ -6,8 +6,7 @@ const DEV_CLIENT_ID = '981860765955-t69elhj8osi7vdp84m5bf8b9hdib44kr.apps.google
 // 베타는 별도 스토어 항목 = 별도 확장 ID로 게시되므로, 그 확장 ID에 묶인
 // 전용 OAuth client_id 가 필요하다. (스테이블용 PROD_CLIENT_ID 로는 베타에서
 // chrome.identity 토큰 검증이 실패한다.)
-// TODO(#112): 베타 스토어 항목 생성 후 발급받은 client_id 로 교체.
-const BETA_CLIENT_ID = '';
+const BETA_CLIENT_ID = '804067218183-svupooi4prp03er11902envfmmrbubta.apps.googleusercontent.com';
 
 export function createManifest(mode?: string): ManifestV3Export {
   // 베타 채널 빌드 (Chrome Web Store 별도 항목 게시 대비)
@@ -30,7 +29,8 @@ export function createManifest(mode?: string): ManifestV3Export {
 
   return {
     manifest_version: 3,
-    name: isBeta ? '__MSG_extName__ (Beta)' : '__MSG_extName__',
+    // Chrome은 값 전체가 __MSG_키__ 하나일 때만 치환하므로 접미사를 붙이지 말고 별도 키를 쓴다
+    name: isBeta ? '__MSG_extNameBeta__' : '__MSG_extName__',
     version,
     description: '__MSG_extDescription__',
     default_locale: 'ko',
