@@ -28,7 +28,7 @@ flowchart LR
     R["release-please 설정<br/>버전 산출"]
     H[".coderabbit.yaml · .husky/<br/>자동 리뷰 · 훅"]
   end
-  subgraph TEAM["메인테이너 리뷰 (합류 전: 오너)"]
+  subgraph TEAM["@hs-shell/maintainers 리뷰<br/>(팀 자동 할당 · round robin)"]
     direction TB
     S["src/ · docs/ · public/ 등<br/>그 외 전부"]
   end
@@ -69,8 +69,8 @@ flowchart TD
 
 혼자 운영할 때는 승인해 줄 사람이 없어 꺼 둔 설정들을, 메인테이너가 생기면 켠다.
 
-1. 조직에 `maintainers` 팀을 만들고 저장소 권한 **Maintain** 부여, 조직 2FA 필수화
-2. `.github/CODEOWNERS` 의 `*` 줄을 `@hs-shell/maintainers` 로 변경 (민감 경로는 오너 유지)
+1. 새 메인테이너를 `hs-shell/maintainers` 팀에 추가 (팀은 저장소 **Maintain** 권한으로 이미 연결됨), 조직 2FA 필수화
+2. 팀 설정 → **Code review** → 자동 할당이 켜져 있는지 확인 (리뷰어 1명, **Round robin**, 팀 전체 알림 끄기). CODEOWNERS 의 `*` 가 팀을 가리키므로 PR 이 열리면 팀원 1명이 순번대로 배정된다.
 3. 브랜치 보호(`main`)
    - **Require review from Code Owners** 켜기 → 민감 경로는 오너 승인 필수
    - **Require approval of the most recent reviewable push** 켜기 → 승인 후 몰래 커밋 추가 차단
@@ -83,6 +83,7 @@ flowchart TD
 
 - **머지**: 스쿼시 머지만 사용. PR 제목이 Conventional Commits 여야 release-please 가 버전을 산출한다.
 - **Dependabot**: 버전 업데이트는 주 1회 그룹 PR(npm minor/patch, actions), major 는 개별 PR. 보안 업데이트는 생태계별 1개 PR 로 즉시 열린다. CI 통과를 확인하고 머지하되, major 는 변경 로그를 확인한다.
+- **리뷰 배정**: PR 이 열리면 CODEOWNERS 에 따라 `@hs-shell/maintainers` 팀에 요청되고, 팀 자동 할당이 팀원 1명을 순번(round robin)으로 배정한다. 상태를 "Busy" 로 두면 배정에서 빠진다. 민감 경로는 오너에게도 함께 요청된다.
 - **CodeRabbit**: 무료 한도가 시간당 1회라 여러 PR 을 동시에 올리면 리뷰가 밀린다. 필요하면 `@coderabbitai review` 로 재요청.
 - **스토어 게시 점검**: Actions → `CWS Auth Check` 수동 실행 (읽기 전용).
 
