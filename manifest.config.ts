@@ -30,7 +30,8 @@ export function createManifest(mode?: string): ManifestV3Export {
 
   return {
     manifest_version: 3,
-    name: isBeta ? '__MSG_extName__ (Beta)' : '__MSG_extName__',
+    // Chrome은 값 전체가 __MSG_키__ 하나일 때만 치환하므로 접미사를 붙이지 말고 별도 키를 쓴다
+    name: isBeta ? '__MSG_extNameBeta__' : '__MSG_extName__',
     version,
     description: '__MSG_extDescription__',
     default_locale: 'ko',
