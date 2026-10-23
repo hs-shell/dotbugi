@@ -9,6 +9,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEn
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableItem from './SortableItem';
 import { isAttended, isCurrentDateInRange } from '@/lib/utils';
+import { isLmsUrl } from '@/lib/lmsUrl';
 import { useTranslation } from 'react-i18next';
 
 interface PlayerPopoverContentProps {
@@ -90,11 +91,15 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
       loadDataFromStorage<string[]>('hiddenTaskUrls', (hiddenUrls) => {
         const hidden = new Set(hiddenUrls ?? []);
         if (skipPlayerFilter) {
-          setVods(data.filter((vod) => !hidden.has(vod.url)));
+          setVods(data.filter((vod) => !hidden.has(vod.url) && isLmsUrl(vod.url)));
         } else {
           setVods(
             data.filter(
-              (vod) => !hidden.has(vod.url) && isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)
+              (vod) =>
+                !hidden.has(vod.url) &&
+                isLmsUrl(vod.url) &&
+                isCurrentDateInRange(vod.range) &&
+                !isAttended(vod.isAttendance)
             )
           );
         }
