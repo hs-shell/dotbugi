@@ -36,6 +36,11 @@ export function useCourseData(courses: CourseBase[]) {
   useEffect(() => {
     quizzesRef.current = quizzes;
   }, [quizzes]);
+  // 새로고침 저장 시점의 추적 과목 — 새로고침 도중 추적을 끈 과목을 storage 에 되살리지 않기 위해
+  const coursesRef = useRef(courses);
+  useEffect(() => {
+    coursesRef.current = courses;
+  }, [courses]);
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -124,19 +129,16 @@ export function useCourseData(courses: CourseBase[]) {
         // refreshCourseData 실행 중 addCourseData로 추가된 다른 과목 데이터를 보존
         const refreshedCourseIds = new Set(targetCourses.map((c) => c.courseId));
 
-        // Storage: 전체 데이터 저장 (강의 페이지 등에서 사용). 대상 과목만 교체해 그사이 저장된 다른 과목을 지우지 않는다
-        loadDataFromStorage<Vod[]>('vod', (stored) => {
-          const kept = (stored ?? []).filter((v) => !refreshedCourseIds.has(v.courseId));
-          saveDataToStorage('vod', [...kept, ...vods]);
-        });
-        loadDataFromStorage<Assign[]>('assign', (stored) => {
-          const kept = (stored ?? []).filter((a) => !refreshedCourseIds.has(a.courseId));
-          saveDataToStorage('assign', [...kept, ...assigns]);
-        });
-        loadDataFromStorage<Quiz[]>('quiz', (stored) => {
-          const kept = (stored ?? []).filter((q) => !refreshedCourseIds.has(q.courseId));
-          saveDataToStorage('quiz', [...kept, ...quizzes]);
-        });
+        // Storage: 전체 데이터 저장 (강의 페이지 등에서 사용). 대상 과목만 교체해 그사이 저장된 다른 과목은 지우지 않고,
+        // 쓰는 시점에 추적하지 않는 과목(새로고침 도중 끈 과목·지난 학기)은 남기지 않는다
+        const isTracked = (courseId: string) => coursesRef.current.some((c) => c.courseId === courseId);
+        const merge = <T extends { courseId: string }>(stored: T[] | null, fresh: T[]) => [
+          ...(stored ?? []).filter((x) => !refreshedCourseIds.has(x.courseId) && isTracked(x.courseId)),
+          ...fresh.filter((x) => isTracked(x.courseId)),
+        ];
+        loadDataFromStorage<Vod[]>('vod', (stored) => saveDataToStorage('vod', merge(stored, vods)));
+        loadDataFromStorage<Assign[]>('assign', (stored) => saveDataToStorage('assign', merge(stored, assigns)));
+        loadDataFromStorage<Quiz[]>('quiz', (stored) => saveDataToStorage('quiz', merge(stored, quizzes)));
 
         // State: 대시보드 표시용 날짜 필터링 적용
         setVods((prev) => {
