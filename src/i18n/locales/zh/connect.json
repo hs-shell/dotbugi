@@ -7,7 +7,7 @@
   "connecting": "连接中…",
   "cancel": "取消",
   "noPending": "没有待处理的连接请求。请在终端重新运行 dotbugi-mcp login。",
-  "success": "已连接。可以关闭此窗口。",
+  "success": "已连接。此窗口将在 {{seconds}} 秒后关闭。",
   "httpError": "连接失败（HTTP {{status}}）。请重新运行 dotbugi-mcp login。",
   "networkError": "连接失败：请确认 dotbugi-mcp 正在等待。"
 }
