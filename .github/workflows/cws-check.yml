@@ -1,0 +1,44 @@
+name: CWS Auth Check
+
+# 스토어 자동 게시 설정(WIF·서비스 계정·퍼블리셔/확장 ID)을 릴리즈 전에 점검한다.
+# 읽기 전용 fetchStatus 만 호출하므로 스토어 항목에는 아무 변화가 없다.
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: '점검할 채널'
+        type: choice
+        options: [stable, beta]
+        default: stable
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # 게시 잡과 같은 환경을 써야 WIF 조건(환경 이름)과 승인 흐름까지 같이 검증된다.
+    environment: ${{ inputs.channel }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: GCP 인증 (WIF → 서비스 계정)
+        id: gcp
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false # 액세스 토큰만 쓰므로 작업 디렉터리에 자격증명 파일을 남기지 않음
+
+      - name: 스토어 항목 상태 조회
+        env:
+          ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ inputs.channel == 'beta' && vars.BETA_EXTENSION_ID || vars.STABLE_EXTENSION_ID }}
+        run: |
+          curl -sS --fail-with-body \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            "https://chromewebstore.googleapis.com/v2/publishers/${CWS_PUBLISHER_ID}/items/${CWS_EXTENSION_ID}:fetchStatus"

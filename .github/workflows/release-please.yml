@@ -45,9 +45,12 @@ jobs:
   publish:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
+    # stable 환경: 배포 승인(required reviewers) + main 한정. GCP WIF 조건도 이 환경 이름을 요구한다.
+    environment: stable
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write # WIF(OIDC) 토큰 발급용
     steps:
       - name: 리포지토리 체크아웃
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -77,19 +80,29 @@ jobs:
           TAG: ${{ needs.release-please.outputs.tag_name }}
         run: gh release upload "$TAG" "dotbugi-${TAG}.zip" --repo "$GITHUB_REPOSITORY" --clobber
 
-      # ── Chrome Web Store 자동 게시 (기반 — 기본 비활성) ──────────────
-      # 활성화: secret(CHROME_CLIENT_ID/SECRET/REFRESH_TOKEN, STABLE_EXTENSION_ID) +
-      #         Variable ENABLE_STORE_PUBLISH=true
+      # ── Chrome Web Store 자동 게시 (기본 비활성) ──────────────────────
+      # 활성화: Variables(GCP_WIF_PROVIDER, GCP_SERVICE_ACCOUNT, CWS_PUBLISHER_ID,
+      #         STABLE_EXTENSION_ID) + ENABLE_STORE_PUBLISH=true
+      # 인증은 WIF로 서비스 계정 단기 토큰을 받아 쓴다 — 저장소에 장기 비밀 없음.
+      - name: GCP 인증 (WIF → 서비스 계정)
+        id: gcp
+        if: vars.ENABLE_STORE_PUBLISH == 'true'
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false # 액세스 토큰만 쓰므로 작업 디렉터리에 자격증명 파일을 남기지 않음
+
       - name: Chrome Web Store 게시 (stable)
         if: vars.ENABLE_STORE_PUBLISH == 'true'
-        uses: mnao305/chrome-extension-upload@4008e29e13c144d0f6725462cbd49b7c291b4928 # v5.0.0
-        with:
-          file-path: dotbugi-${{ needs.release-please.outputs.tag_name }}.zip
-          extension-id: ${{ secrets.STABLE_EXTENSION_ID }}
-          client-id: ${{ secrets.CHROME_CLIENT_ID }}
-          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
-          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          publish: true
+        env:
+          ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ vars.STABLE_EXTENSION_ID }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: .github/scripts/cws-publish.sh "dotbugi-${TAG}.zip"
 
       - name: Discord 릴리즈 알림 (스테이블=초록)
         if: always() && env.DISCORD_WEBHOOK_URL != ''
