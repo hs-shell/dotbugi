@@ -1,3 +1,5 @@
+import { registerConnectListener } from '@/lib/mcpConnect/registerConnectListener';
+
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   if (message.action === 'getAuthToken') {
     chrome.identity.getAuthToken({ interactive: message.interactive ?? true }, (token) => {
@@ -31,3 +33,5 @@ chrome.action.onClicked.addListener(() => {
     chrome.tabs.create({ url: BASE_URL + langPath });
   });
 });
+
+registerConnectListener();
