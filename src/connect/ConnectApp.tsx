@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { CONNECT_WINDOW_AUTO_CLOSE_MS } from '@/lib/mcpConnect/constants';
 import { toFingerprint } from '@/lib/mcpConnect/fingerprint';
 import { sendSessionToMcp } from '@/lib/mcpConnect/sendSessionToMcp';
 import type { ConnectRequest } from '@/lib/mcpConnect/validate';
@@ -24,8 +25,11 @@ export default function ConnectApp({ request }: ConnectAppProps) {
   const handleConnect = async () => {
     setPhase('sending');
     const result = await sendSessionToMcp(request);
-    if (result.ok) setStatus(t('success'));
-    else if ('status' in result) setStatus(t('httpError', { status: result.status }));
+    if (result.ok) {
+      setStatus(t('success', { seconds: CONNECT_WINDOW_AUTO_CLOSE_MS / 1000 }));
+      // 성공했을 때만 닫는다 — 실패 메시지는 사용자가 읽고 CLI 를 다시 실행해야 하므로 남겨 둔다
+      setTimeout(() => window.close(), CONNECT_WINDOW_AUTO_CLOSE_MS);
+    } else if ('status' in result) setStatus(t('httpError', { status: result.status }));
     else setStatus(t('networkError'));
     // 요청은 창을 열 때 이미 저장소에서 지웠으므로, 실패하면 CLI 에서 다시 시작한다
     setPhase('done');
