@@ -33,6 +33,9 @@ export default defineConfig(({ mode }) => {
       // Vite 8(Rolldown)은 객체형 manualChunks를 지원하지 않으므로 codeSplitting.groups로
       // 기존과 같은 이름의 vendor 청크를 유지한다 (정규식은 Windows 경로 구분자도 허용)
       rolldownOptions: {
+        // manifest 에 선언되지 않는 확장 페이지는 input 으로 등록해야 crx 플러그인이 빌드한다
+        // (dotbugi-mcp 연결 확인 창 — 경로는 src/lib/mcpConnect/constants.ts 의 CONNECT_PAGE_PATH 와 동일)
+        input: { connect: 'src/connect/index.html' },
         output: {
           codeSplitting: {
             groups: [

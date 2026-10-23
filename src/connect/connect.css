@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+@config '../../tailwind.config.js';
+
+/* 확인 창은 Shadow DOM 밖의 일반 확장 페이지라 :host 대신 :root 에 shadcn 색상 변수를 둔다 */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 10% 3.9%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Yu Gothic', system-ui,
+    sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}

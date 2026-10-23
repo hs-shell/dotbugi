@@ -1,0 +1,13 @@
+{
+  "title": "Connect to Claude (dotbugi-mcp)?",
+  "description": "Your current LMS login session will be sent only to dotbugi-mcp running on this PC (port {{port}}). It is never sent to external servers.",
+  "permissionNotice": "When you click Connect, Chrome may ask for permission to \"Read and change your data on 127.0.0.1\". 127.0.0.1 means this PC itself, and it is used only to hand the session to dotbugi-mcp.",
+  "connect": "Connect",
+  "connecting": "Connecting…",
+  "cancel": "Cancel",
+  "noPending": "No pending connection request. Run dotbugi-mcp login again in your terminal.",
+  "permissionDenied": "Permission was denied, so the connection was not made.",
+  "success": "Connected. You can close this window.",
+  "httpError": "Connection failed (HTTP {{status}}). Run dotbugi-mcp login again.",
+  "networkError": "Connection failed: make sure dotbugi-mcp is waiting."
+}

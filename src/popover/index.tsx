@@ -9,10 +9,14 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import PlayerApp from '@/popover/player/App';
 import { injectCourseToggles } from '@/lib/injectCourseToggles';
 import { injectCourseStatus } from '@/lib/courseStatus';
+import { relayConnectRequest } from '@/lib/mcpConnect/relayConnectRequest';
 
 const HANSUNG_URL = 'https://learn.hansung.ac.kr/';
 const footer = document.getElementById('page-footer');
 const leftMenus = document.getElementsByClassName('left-menus');
+
+// dotbugi-mcp 연결 요청(#dotbugi-connect=…) 처리 — 해시를 지우므로 url 을 읽기 전에 실행
+relayConnectRequest();
 
 const url = window.location.href;
 

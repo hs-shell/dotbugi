@@ -1,0 +1,13 @@
+{
+  "title": "Claude（dotbugi-mcp）と接続しますか？",
+  "description": "現在のLMSログインセッションを、このPCで実行中のdotbugi-mcp（ポート {{port}}）にのみ送信します。外部サーバーには送信しません。",
+  "permissionNotice": "「接続」を押すと、Chromeが「127.0.0.1 のデータの読み取りと変更」の権限を求める場合があります。127.0.0.1 はこのPC自身を指し、dotbugi-mcp へのセッション受け渡しにのみ使用します。",
+  "connect": "接続",
+  "connecting": "接続中…",
+  "cancel": "キャンセル",
+  "noPending": "保留中の接続リクエストはありません。ターミナルで dotbugi-mcp login を再実行してください。",
+  "permissionDenied": "権限が拒否されたため接続できませんでした。",
+  "success": "接続しました。このウィンドウを閉じても構いません。",
+  "httpError": "接続に失敗しました（HTTP {{status}}）。dotbugi-mcp login を再実行してください。",
+  "networkError": "接続に失敗しました：dotbugi-mcp が待機中か確認してください。"
+}
