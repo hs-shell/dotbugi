@@ -1,15 +1,14 @@
 # 기여 가이드
 
-돋부기(Dotbugi)에 관심 가져주셔서 감사합니다.
-이 문서는 기여 절차와 규칙을 정리한 것입니다.
+## 1. 이슈 먼저
 
-## 시작하기 전에
+모든 변경은 **이슈가 먼저 등록되어 있어야 합니다** (`1 PR = 1 Issue`).
 
-1. **이슈 먼저 검색하기** — 작업을 시작하기 전에 [이슈 목록](https://github.com/hs-shell/dotbugi/issues)에서 같은 내용이 이미 있는지 확인해주세요.
-2. **이슈 먼저 생성하기** — 모든 변경(버그 수정·기능 추가)은 **이슈가 먼저 등록되어 있어야 합니다.** 이슈에서 방향을 합의한 뒤 PR을 올려주세요.
-3. 질문이나 사용 문의는 [Discussions](https://github.com/hs-shell/dotbugi/discussions)를 이용해주세요.
+1. [이슈 목록](https://github.com/hs-shell/dotbugi/issues)에서 같은 내용이 있는지 검색합니다.
+2. 없으면 템플릿(버그 / 기능 요청 / 작업)을 골라 이슈를 등록하고, 이슈에서 방향을 합의합니다.
+3. 사용 문의는 [Discussions](https://github.com/hs-shell/dotbugi/discussions)를 이용합니다.
 
-## 개발 환경
+## 2. 개발 환경
 
 ```bash
 npm install        # 의존성 설치 (husky git hook 자동 설정)
@@ -19,46 +18,48 @@ npm run lint       # ESLint
 npm run test       # 테스트
 ```
 
-확장 프로그램은 `dist/`를 `chrome://extensions`에서 "압축해제된 확장 프로그램 로드"로 불러와 테스트합니다.
+`npm run build` 후 `chrome://extensions`에서 개발자 모드를 켜고 `dist/`를 **압축해제된 확장 프로그램으로 로드**해 확인합니다.
 
-## 작업 흐름
+## 3. 작업 흐름
 
-1. 이 저장소를 **Fork**하고 브랜치를 만듭니다. (`feat/짧은-설명`, `fix/짧은-설명`)
-2. 변경 후 커밋합니다. 커밋 메시지는 **Conventional Commits** 형식을 따릅니다. (아래 참고)
-3. PR을 올립니다. PR 본문에 **연결된 이슈 번호**(`Closes #123`)를 반드시 적습니다.
-4. 자동 검사를 통과해야 합니다.
-   - `lint` / `prettier` / `build` / `test`
-   - PR 본문에 이슈 참조가 있는지 확인하는 가드
-   - **CodeRabbit AI 코드리뷰** (public 저장소에서 자동 실행)
+1. 저장소를 **Fork**하고 브랜치를 만듭니다. (`<type>/<짧은-설명>`, 예: `fix/vod-parse`, `feat/123-quiz-filter`)
+2. 변경 후 커밋합니다. pre-commit 훅이 변경 파일에 `prettier` + `eslint --fix`를 자동 적용합니다.
+3. PR을 올립니다.
+   - **제목**: Conventional Commits 형식 (스쿼시 머지 시 이 제목이 커밋 메시지가 되고, 버전 산출에 쓰입니다)
+   - **본문**: 연결된 이슈를 `Closes #123` 형식으로 적습니다.
+4. 자동 검사를 통과해야 머지됩니다.
+   - 이슈 참조 확인, PR 제목 검사
+   - `prettier` / `lint` / `build` / `test`
+   - CodeRabbit AI 코드 리뷰
 5. 리뷰 피드백을 반영하면 메인테이너가 머지합니다.
 
-## 커밋 메시지 규칙 (Conventional Commits)
-
-커밋 메시지는 `commitlint`로 검증됩니다. 형식:
+## 4. 커밋 / PR 제목 규칙 (Conventional Commits)
 
 ```text
 <type>: <설명>
 
-예시)
 feat: 과제 마감 D-day 알림 추가
 fix: VOD 출석 파싱 오류 수정
-docs: 기여 가이드 추가
+docs: 기여 가이드 정리
 ```
 
-주요 type: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`
+| type       | 용도                        |
+| ---------- | --------------------------- |
+| `feat`     | 기능 추가                   |
+| `fix`      | 버그 수정                   |
+| `docs`     | 문서                        |
+| `refactor` | 동작 변화 없는 구조 개선    |
+| `perf`     | 성능 개선                   |
+| `test`     | 테스트                      |
+| `style`    | 포맷 등 코드 의미 없는 변경 |
+| `build`    | 빌드·의존성                 |
+| `ci`       | CI 설정                     |
+| `chore`    | 기타                        |
+| `revert`   | 되돌리기                    |
 
-커밋 시 pre-commit 훅이 변경된 파일에 자동으로 `prettier` + `eslint --fix`를 적용합니다.
-
-## 코드 스타일
+## 5. 코드 스타일
 
 - Prettier: single quote, 세미콜론, 120자 폭, 2-space, ES5 trailing comma
 - 경로 별칭 `@/` → `./src`
-
-## 릴리즈 / 버전 규칙 (메인테이너용)
-
-릴리즈는 **release-please**로 관리됩니다 (통합과 배포 분리).
-
-- 평소 PR을 main에 머지하면 릴리즈가 나가지 **않습니다.** release-please가 Conventional Commits를 읽어 **"Release PR"**(버전 범프 + CHANGELOG)을 자동으로 만들고 갱신합니다.
-- 발행하려면 그 **Release PR을 머지**하면 됩니다 → 태그 + GitHub Release 생성 + (활성화 시) Chrome Web Store 발행.
-- 버전은 커밋 타입에서 자동 산출됩니다 (`feat` → minor, `fix` → patch, `feat!`/`BREAKING CHANGE` → major). 별도 버전 라벨은 필요 없습니다.
-- **베타**: `Release Beta` 워크플로를 수동 실행(`workflow_dispatch`)하면 `vX.Y.Z-beta.N` 프리릴리즈가 발행됩니다. 별도 베타 브랜치는 두지 않습니다.
+- 주석은 한국어로, 복잡한 로직에는 "왜"를 적습니다.
+- 사용자에게 보이는 문자열은 i18n(`react-i18next`)을 거칩니다.
