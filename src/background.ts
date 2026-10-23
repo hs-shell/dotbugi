@@ -26,8 +26,8 @@ chrome.action.onClicked.addListener(() => {
   const BASE_URL = 'https://hs-shell.github.io/dotbugi/';
   const LANG_PATHS: Record<string, string> = { en: 'en/', ja: 'ja/', zh: 'zh/' };
 
-  chrome.storage.local.get('language', (result) => {
-    const langPath = LANG_PATHS[result.language] ?? '';
+  chrome.storage.local.get<{ language?: string }>('language', (result) => {
+    const langPath = LANG_PATHS[result.language ?? ''] ?? '';
     chrome.tabs.create({ url: BASE_URL + langPath });
   });
 });
