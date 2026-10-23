@@ -14,16 +14,19 @@ import { openLmsUrl } from '@/lib/lmsUrl';
 import { ChevronDown, ChevronUp, EyeOff } from 'lucide-react';
 import EmptyState from './EmptyState';
 import CardFooterContent from './CardFooterContent';
+import VodDownloadButton from './VodDownloadButton';
 import { useTranslation } from 'react-i18next';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import type { VodDownloadState } from '@/hooks/useVodDownload';
 
 interface VideoProps {
   courseData: Vod[];
   onHideTask?: (url: string) => void;
   onHideTasks?: (urls: string[]) => void;
+  download: VodDownloadState;
 }
 
-export default function VodList({ courseData, onHideTask, onHideTasks }: VideoProps) {
+export default function VodList({ courseData, onHideTask, onHideTasks, download }: VideoProps) {
   const { t } = useTranslation('common');
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
@@ -94,23 +97,26 @@ export default function VodList({ courseData, onHideTask, onHideTasks }: VideoPr
                       <ContextMenu key={vodIndex}>
                         <ContextMenuTrigger asChild>
                           <div
-                            className="w-full px-4 py-3 bg-[rgb(246,250,255)] hover:bg-[rgb(238,246,255)] cursor-pointer transition-colors duration-300"
+                            className="w-full flex items-center gap-2 px-4 py-3 bg-[rgb(246,250,255)] hover:bg-[rgb(238,246,255)] cursor-pointer transition-colors duration-300"
                             onClick={() => openLmsUrl(vod.url.replace('view', 'viewer'), '_blank', 'VodContentWindow')}
                           >
-                            <div className="font-medium text-ellipsis line-clamp-1" style={{ fontWeight: 550 }}>
-                              {vod.title}
-                            </div>
-                            <div
-                              className="font-light text-zinc-500 text-ellipsis line-clamp-1"
-                              style={{ fontSize: 10 }}
-                            >
-                              {formatDateString(vod.range)},{' '}
-                              <span
-                                className={`font-medium ${isAttended(vod.isAttendance) ? 'text-green-500' : 'text-amber-500'}`}
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium text-ellipsis line-clamp-1" style={{ fontWeight: 550 }}>
+                                {vod.title}
+                              </div>
+                              <div
+                                className="font-light text-zinc-500 text-ellipsis line-clamp-1"
+                                style={{ fontSize: 10 }}
                               >
-                                {vod.length}
-                              </span>
+                                {formatDateString(vod.range)},{' '}
+                                <span
+                                  className={`font-medium ${isAttended(vod.isAttendance) ? 'text-green-500' : 'text-amber-500'}`}
+                                >
+                                  {vod.length}
+                                </span>
+                              </div>
                             </div>
+                            <VodDownloadButton vod={vod} download={download} />
                           </div>
                         </ContextMenuTrigger>
                         <ContextMenuContent>

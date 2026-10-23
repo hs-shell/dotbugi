@@ -22,6 +22,7 @@ import { makeVodGroupKey } from '@/lib/generateKey';
 import { diffTrackedCourseIds } from '@/lib/diffTrackedCourseIds';
 import Setting from './components/Setting';
 import { useHiddenTasks } from '@/hooks/useHiddenTasks';
+import { useVodDownload } from '@/hooks/useVodDownload';
 import {
   getOAuthToken,
   removeCachedAuthToken,
@@ -120,6 +121,8 @@ export default function Dashboard() {
   const updateNotification = useCallback((id: string, updates: Partial<Omit<Notification, 'id'>>) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)));
   }, []);
+
+  const vodDownload = useVodDownload(pushNotification);
 
   // 강의 목록 토글이 trackedCourseIds 를 바꾸면(스토리지 변경 이벤트) 그 자리에서 데이터 추가/삭제와 알림을 처리한다.
   // 비교 기준은 마지막으로 반영된 목록이다. 초기화 전(null)에 온 변경은 초기 로드가 처리하므로 기준만 잡는다.
@@ -503,7 +506,12 @@ export default function Dashboard() {
             ) : (
               <>
                 {activeTab === 'VIDEO' && (
-                  <VodList courseData={filteredVods} onHideTask={hideTask} onHideTasks={hideTasks} />
+                  <VodList
+                    courseData={filteredVods}
+                    onHideTask={hideTask}
+                    onHideTasks={hideTasks}
+                    download={vodDownload}
+                  />
                 )}
                 {activeTab === 'ASSIGN' && <AssignList courseData={filteredAssigns} onHideTask={hideTask} />}
                 {activeTab === 'QUIZ' && <QuizList courseData={filteredQuizzes} onHideTask={hideTask} />}

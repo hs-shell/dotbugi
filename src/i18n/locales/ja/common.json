@@ -65,6 +65,16 @@
   "language": "言語",
   "contact": "お問い合わせ",
   "downloadLogs": "ログダウンロード",
+  "vodDownload": {
+    "button": "講義をダウンロード",
+    "notice": "本人の学習目的に限ります。再配布は禁止です。",
+    "cancel": "ダウンロードをキャンセル",
+    "done": "ダウンロード完了",
+    "cancelled": "ダウンロードをキャンセルしました",
+    "failed": "ダウンロードに失敗しました",
+    "encrypted": "暗号化された動画のためダウンロードできません",
+    "unsupported": "このブラウザはファイル保存に対応していません"
+  },
   "calendar": {
     "bannerTitle": "Google Calendar 連携",
     "bannerDesc": "Dotbugiで講義・課題・クイズの日程をGoogle Calendarで管理しましょう",
