@@ -3,6 +3,14 @@
 @config '../../tailwind.config.js';
 
 /*
+  5.0.5(v3)에선 heroui 플러그인이 기본 duration 을 250ms 로 두고 있었다.
+  v4 기본값 150ms 대신 같게 맞춘다. tailwindcss-animate 의 animate-in/out 도 이 값을 따른다.
+*/
+@theme {
+  --default-transition-duration: 250ms;
+}
+
+/*
   v4에서 border 기본 색이 currentcolor 로 바뀌어, v3와 동일하게 보이도록
   호환 스타일을 둔다. 제거하려면 이 기본값에 의존하는 요소마다 명시적
   border 색 유틸을 달아야 한다.

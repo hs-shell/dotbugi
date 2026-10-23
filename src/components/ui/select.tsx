@@ -70,8 +70,10 @@ const SelectContent = React.forwardRef<
         ref={ref}
         className={cn(
           'relative z-50 max-h-96 min-w-32 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+          // transform !important 가 enter 애니메이션의 zoom·slide 를 덮어 페이드만 남긴다(5.0.5/v3 동작).
+          // v4 의 translate-* 는 별도 translate 속성이라 덮지 못하므로 transform 을 직접 쓴다.
           position === 'popper' &&
-            'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
+            'data-[side=bottom]:[transform:translateY(0.25rem)] data-[side=left]:[transform:translateX(-0.25rem)] data-[side=right]:[transform:translateX(0.25rem)] data-[side=top]:[transform:translateY(-0.25rem)]',
           className
         )}
         position={position}
