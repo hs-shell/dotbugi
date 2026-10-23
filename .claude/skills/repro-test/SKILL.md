@@ -15,7 +15,7 @@ description: 사용자가 "재현 테스트", "repro test", "버그 재현 테�
 
 - 위치: `src/__tests__/<대상>.test.ts` (기존 파일에 케이스 추가 우선, 없으면 새 파일).
 - 프레임워크: **vitest** (`import { describe, it, expect } from 'vitest'`), 대상은 `@/` 별칭으로 import.
-- **HTML 파싱 버그**: 픽스처 디렉토리는 없다 — 기존 테스트처럼 **HTML 스니펫을 인라인으로 만들어 DOMParser로 Document를 생성**해 파서에 넣는다. (LMS 파서 자체 버그는 `@dotbugi/lms-parser` 저장소에서 재현 테스트를 작성한다)
+- **HTML 파싱 버그**: 픽스처 디렉토리는 없다 — **HTML 스니펫을 인라인으로 만들어 DOMParser로 Document를 생성**해 파서에 넣는다. (LMS 파서 자체 버그는 `@dotbugi/lms-parser` 저장소에서 재현 테스트를 작성한다)
   ```ts
   function makeDoc(html: string): Document {
     return new DOMParser().parseFromString(html, 'text/html');

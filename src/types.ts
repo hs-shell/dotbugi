@@ -1,9 +1,7 @@
-export type CourseBase = {
-  courseId: string;
-  courseTitle: string;
-  prof: string;
-  isCommunity?: boolean;
-};
+import type { CourseBase } from '@dotbugi/lms-parser';
+
+// 파서와 공유하는 타입은 패키지를 단일 출처로 삼아 정의가 어긋나지 않게 한다
+export type { CourseBase, VodAttendanceData } from '@dotbugi/lms-parser';
 
 export type Vod = CourseBase & {
   week: number;
@@ -17,15 +15,6 @@ export type Vod = CourseBase & {
   requiredTime?: string;
   watchedTime?: string;
 };
-
-export interface VodAttendanceData {
-  title: string;
-  isAttendance: string;
-  weeklyAttendance: string;
-  week: number;
-  requiredTime?: string;
-  watchedTime?: string;
-}
 
 export type Assign = CourseBase & {
   subject: string;
