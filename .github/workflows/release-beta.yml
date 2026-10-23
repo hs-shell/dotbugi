@@ -2,6 +2,18 @@ name: Release Beta
 
 # 베타는 별도 브랜치 없이 main에서 수동으로 발행한다 (prerelease 태그).
 # 검증된 빌드는 이후 일반 머지 흐름(release-please)으로 스테이블 승급.
+#
+# 흐름: beta 잡(빌드 + 프리릴리즈 생성, 승인 없이 자동)
+#    → store 잡(environment: beta 승인 후 베타 스토어 항목에 업로드·심사 제출)
+#
+# 스토어 게시 활성화 (기본 비활성):
+#   - Variables: BETA_EXTENSION_ID (베타 스토어 항목 ID, 공개값이라 Secret 아님)
+#                + 스테이블과 공유하는 GCP_WIF_PROVIDER, GCP_SERVICE_ACCOUNT,
+#                  CWS_PUBLISHER_ID
+#   - Variables: ENABLE_STORE_PUBLISH=true
+#   - Environment: beta (Required reviewers 로 승인 게이트)
+# 인증은 WIF → 서비스 계정 단기 토큰이라 CHROME_* 같은 장기 Secret 은 필요 없다.
+# (CWS 서비스 계정은 퍼블리셔 단위로 등록되므로 베타 항목도 그대로 커버한다)
 on:
   workflow_dispatch:
 
@@ -9,10 +21,14 @@ permissions:
   contents: read
 
 jobs:
+  # ── 1) 베타 빌드 + 프리릴리즈 생성 (승인 없이 자동) ──────────────────────
   beta:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      tag: ${{ steps.ver.outputs.tag }}
+      zip_sha256: ${{ steps.zip.outputs.sha256 }}
     steps:
       - name: 리포지토리 체크아웃
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -44,9 +60,12 @@ jobs:
           BETA_VERSION: ${{ steps.ver.outputs.manifest }}
 
       - name: dist 압축
+        id: zip
         env:
           TAG: ${{ steps.ver.outputs.tag }}
-        run: cd dist && zip -r "../dotbugi-${TAG}.zip" .
+        run: |
+          (cd dist && zip -r "../dotbugi-${TAG}.zip" .)
+          echo "sha256=$(sha256sum "dotbugi-${TAG}.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - name: 프리릴리즈 생성 + zip 첨부
         env:
@@ -60,41 +79,119 @@ jobs:
             --prerelease \
             --target "$GITHUB_SHA"
 
-      # ── 베타 Chrome Web Store 게시 (기반 — 기본 비활성) ──────────────
-      # 베타는 별도 스토어 항목이므로 BETA_EXTENSION_ID 사용.
-      # manifest 버전은 위 빌드에서 BETA_VERSION(숫자 4-파트)으로 주입되어
-      # 스토어 버전 규칙(숫자만 허용)을 만족한다.
-      - name: Chrome Web Store 게시 (beta)
-        if: vars.ENABLE_STORE_PUBLISH == 'true'
-        uses: mnao305/chrome-extension-upload@4008e29e13c144d0f6725462cbd49b7c291b4928 # v5.0.0
-        with:
-          file-path: dotbugi-${{ steps.ver.outputs.tag }}.zip
-          extension-id: ${{ secrets.BETA_EXTENSION_ID }}
-          client-id: ${{ secrets.CHROME_CLIENT_ID }}
-          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
-          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          publish: true
-
       - name: Discord 베타 알림 (노랑)
         if: always() && env.DISCORD_WEBHOOK_URL != ''
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STORE_ENABLED: ${{ vars.ENABLE_STORE_PUBLISH == 'true' }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          JOB_STATUS: ${{ job.status }}
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const webhook = process.env.DISCORD_WEBHOOK_URL;
             if (!webhook) return;
-            const tag = '${{ steps.ver.outputs.tag }}';
-            const success = '${{ job.status }}' === 'success';
-            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/${tag}`;
+            const tag = process.env.TAG;
+            const success = process.env.JOB_STATUS === 'success';
+            const awaitingStore = success && process.env.STORE_ENABLED === 'true';
+            const repoUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`;
+            // 스토어 게시가 켜져 있으면 같은 실행의 store 잡이 승인 대기 중 → 승인 화면(실행 페이지)으로 안내
+            const url = awaitingStore ? `${repoUrl}/actions/runs/${context.runId}` : `${repoUrl}/releases/tag/${tag}`;
             const res = await fetch(webhook, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 embeds: [{
-                  title: success ? `🚀 베타 릴리즈 ${tag}` : `⚠️ 베타 발행 실패 (${tag})`,
-                  url: success ? url : undefined,
+                  title: !success
+                    ? `⚠️ 베타 발행 실패 (${tag})`
+                    : awaitingStore
+                      ? `⏸️ 베타 ${tag} 스토어 게시 승인 대기`
+                      : `🚀 베타 릴리즈 ${tag}`,
+                  url,
+                  description: !success
+                    ? '워크플로 로그를 확인해주세요.'
+                    : awaitingStore
+                      ? '프리릴리즈가 생성되었습니다. 제목을 눌러 **Review deployments → Approve** 하면 베타 스토어 항목 업로드·심사 제출이 진행됩니다.'
+                      : '베타(프리릴리즈) 빌드가 발행되었습니다.',
                   color: success ? 0xfee75c : 0xed4245,
+                }],
+              }),
+            });
+            if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);
+
+  # ── 2) 베타 Chrome Web Store 업로드 + 심사 제출 (beta 환경 승인 후) ──────
+  # 베타는 별도 스토어 항목이므로 BETA_EXTENSION_ID 로 게시한다.
+  # manifest 버전은 beta 잡 빌드에서 BETA_VERSION(숫자 4-파트)으로 주입되어
+  # 스토어 버전 규칙(숫자만 허용)을 만족한다.
+  # 승인 전에는 GCP 토큰 자체가 발급되지 않는다(WIF 조건이 stable/beta 환경을 요구).
+  store:
+    needs: beta
+    if: vars.ENABLE_STORE_PUBLISH == 'true'
+    environment: beta
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # WIF(OIDC) 토큰 발급용
+    steps:
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      # 다시 빌드하지 않고 프리릴리즈에 첨부된 바로 그 zip을 올린다 (릴리즈 자산 = 스토어 패키지)
+      # Release 자산은 쓰기 권한자가 승인 대기 중에 바꿔치기할 수 있으므로,
+      # beta 잡이 만든 해시(잡 출력은 실행 중 변경 불가)와 일치할 때만 진행한다.
+      - name: 프리릴리즈 zip 내려받기 + 무결성 검증
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.beta.outputs.tag }}
+          EXPECTED_SHA256: ${{ needs.beta.outputs.zip_sha256 }}
+        run: |
+          gh release download "$TAG" --pattern "dotbugi-${TAG}.zip" --repo "$GITHUB_REPOSITORY"
+          echo "${EXPECTED_SHA256}  dotbugi-${TAG}.zip" | sha256sum -c -
+
+      - name: GCP 인증 (WIF → 서비스 계정)
+        id: gcp
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false # 액세스 토큰만 쓰므로 작업 디렉터리에 자격증명 파일을 남기지 않음
+
+      - name: Chrome Web Store 업로드 + 심사 제출 (beta)
+        env:
+          ACCESS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ vars.BETA_EXTENSION_ID }}
+          TAG: ${{ needs.beta.outputs.tag }}
+        run: .github/scripts/cws-publish.sh "dotbugi-${TAG}.zip"
+
+      - name: Discord 베타 스토어 결과 알림
+        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TAG: ${{ needs.beta.outputs.tag }}
+          JOB_STATUS: ${{ job.status }}
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const webhook = process.env.DISCORD_WEBHOOK_URL;
+            if (!webhook) return;
+            const tag = process.env.TAG;
+            const success = process.env.JOB_STATUS === 'success';
+            const res = await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                embeds: [{
+                  title: success ? `📤 베타 ${tag} 스토어 심사 제출 완료` : `⚠️ 베타 ${tag} 스토어 게시 실패`,
+                  url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                  description: success
+                    ? 'Google 심사를 통과하면 베타 항목 사용자에게 자동 배포됩니다.'
+                    : '워크플로 로그를 확인한 뒤 잡을 재실행해주세요.',
+                  color: success ? 0x57f287 : 0xed4245,
                 }],
               }),
             });
