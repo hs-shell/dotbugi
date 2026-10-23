@@ -46,6 +46,8 @@ export function useCourseData(courses: CourseBase[]) {
   const [remainingTime, setRemainingTime] = useState(0);
   const [isError, setIsError] = useState(false);
   const [pendingCourseIds, setPendingCourseIds] = useState<Set<string>>(new Set());
+  // 초기 로드(또는 그에 준하는 첫 과목 추가)가 끝났는지
+  const initialLoadDone = useRef(false);
 
   const useMockData = import.meta.env.VITE_MOCK && !import.meta.env.VITE_MOCK_COURSES;
 
@@ -140,18 +142,18 @@ export function useCourseData(courses: CourseBase[]) {
         loadDataFromStorage<Assign[]>('assign', (stored) => saveDataToStorage('assign', merge(stored, assigns)));
         loadDataFromStorage<Quiz[]>('quiz', (stored) => saveDataToStorage('quiz', merge(stored, quizzes)));
 
-        // State: 대시보드 표시용 날짜 필터링 적용
+        // State: 대시보드 표시용 날짜 필터링 적용. 새로고침 도중 끈 과목은 이미 state 에서 지워졌으므로 되살리지 않는다
         setVods((prev) => {
           const kept = prev.filter((v) => !refreshedCourseIds.has(v.courseId));
-          return [...kept, ...filterVodsForDisplay(vods)];
+          return [...kept, ...filterVodsForDisplay(vods.filter((v) => isTracked(v.courseId)))];
         });
         setAssigns((prev) => {
           const kept = prev.filter((a) => !refreshedCourseIds.has(a.courseId));
-          return [...kept, ...filterItemsForDisplay(assigns)];
+          return [...kept, ...filterItemsForDisplay(assigns.filter((a) => isTracked(a.courseId)))];
         });
         setQuizzes((prev) => {
           const kept = prev.filter((q) => !refreshedCourseIds.has(q.courseId));
-          return [...kept, ...filterItemsForDisplay(quizzes)];
+          return [...kept, ...filterItemsForDisplay(quizzes.filter((q) => isTracked(q.courseId)))];
         });
 
         setRefreshTime(new Date(fetchedAt).toLocaleTimeString());
@@ -223,6 +225,17 @@ export function useCourseData(courses: CourseBase[]) {
         deduplicateInto(merged, filteredNewQuizzes, seen, (q) => makeItemKey(q.courseId, q.title, q.dueDate ?? ''));
         return merged;
       });
+
+      // 추적 과목 0개로 시작하면 초기 로드가 건너뛰어지므로, 첫 추가가 그 역할(새로고침 시각 기록)을 대신한다.
+      // 추적 과목이 이 과목뿐이라 방금 가져온 데이터가 곧 전체 최신 데이터다
+      if (!initialLoadDone.current) {
+        initialLoadDone.current = true;
+        const fetchedAt = Date.now();
+        setRefreshTime(new Date(fetchedAt).toLocaleTimeString());
+        setRemainingTime(0);
+        setLastRequestTime(fetchedAt);
+        saveDataToStorage('lastRequestTime', fetchedAt.toString());
+      }
     } catch (error) {
       logger.course.warn('강의 추가 데이터 fetch 실패:', error);
     } finally {
@@ -295,7 +308,6 @@ export function useCourseData(courses: CourseBase[]) {
 
   // 초기 로드: 캐시 확인 후 fetch 또는 캐시 사용 (최초 1회만 실행)
   // 과목 목록 초기화가 끝나는 시점(useGetCourses 의 onInitialized)에 호출된다.
-  const initialLoadDone = useRef(false);
   const loadInitialData = useCallback(
     (initialCourses: CourseBase[]) => {
       if (initialCourses.length === 0) return;

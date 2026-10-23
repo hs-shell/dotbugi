@@ -33,5 +33,6 @@ function relay(): void {
   sessionStorage.removeItem(PENDING_TAB_STORAGE_KEY);
   const pending = parsePendingTarget(raw, Date.now());
   if (!pending) return;
-  chrome.runtime.sendMessage({ type: CONNECT_MESSAGE_TYPE, ...pending, session });
+  // background 는 응답 없이 확인 창만 열어 promise 가 "message port closed" 로 거부된다. 결과는 확인 창이 보여 주므로 무시한다
+  chrome.runtime.sendMessage({ type: CONNECT_MESSAGE_TYPE, ...pending, session }).catch(() => {});
 }

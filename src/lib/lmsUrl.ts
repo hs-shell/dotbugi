@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 /** LMS 출처 — 세션 전달·링크 열기의 보안 경계라 외부 패키지 값이 아닌 이 저장소에 고정한다 */
 export const LMS_ORIGIN = 'https://learn.hansung.ac.kr';
 
@@ -12,7 +14,17 @@ export function isLmsUrl(url: string | undefined): boolean {
   }
 }
 
+/** 차단한 URL 을 로그에 남길 때 쿼리의 식별값이 새지 않게 출처만 쓴다 */
+export function urlOriginForLog(url: string | undefined): string {
+  try {
+    return new URL(url ?? '').origin;
+  } catch {
+    return '(잘못된 URL)';
+  }
+}
+
 /** 스크래핑한 URL 은 LMS 페이지의 외부 링크일 수 있어 LMS 출처일 때만 연다 */
 export function openLmsUrl(url: string, target = '_blank', features?: string): void {
   if (isLmsUrl(url)) window.open(url, target, features);
+  else logger.general.warn('LMS 출처가 아닌 링크 열기를 막음:', urlOriginForLog(url));
 }
