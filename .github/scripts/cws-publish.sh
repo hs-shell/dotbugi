@@ -21,12 +21,21 @@ cws() {
 
 # 재실행 대비: 같은 버전이 이미 심사 중/게시됨이면 아무것도 하지 않는다.
 # (스토어는 같은 버전 재제출을 거부하므로 그대로 진행하면 재실행이 항상 실패한다)
+# 단, 거절·취소된 제출은 게시된 게 아니므로 성공으로 넘기지 않는다.
 VERSION=$(unzip -p "$ZIP" manifest.json | jq -r '.version')
-if cws "${API}/v2/${ITEM}:fetchStatus" | jq -e --arg v "$VERSION" \
-  '[.submittedItemRevisionStatus, .publishedItemRevisionStatus][]? | .distributionChannels[]? | select(.crxVersion == $v)' >/dev/null; then
-  echo "v${VERSION} 은 이미 심사 제출(또는 게시)됨 — 건너뜀"
-  exit 0
-fi
+STATE=$(cws "${API}/v2/${ITEM}:fetchStatus" | jq -r --arg v "$VERSION" \
+  'first([.submittedItemRevisionStatus, .publishedItemRevisionStatus][]? | select(any(.distributionChannels[]?; .crxVersion == $v)) | .state) // empty')
+case "$STATE" in
+  '') ;;
+  REJECTED | CANCELLED)
+    echo "::error::v${VERSION} 제출이 ${STATE} 상태입니다 — 개발자 대시보드에서 사유를 확인하세요 (재제출은 새 버전 필요)"
+    exit 1
+    ;;
+  *)
+    echo "v${VERSION} 은 이미 ${STATE} 상태 — 건너뜀"
+    exit 0
+    ;;
+esac
 
 echo "업로드: ${ZIP} (v${VERSION})"
 state=$(cws -X POST -T "$ZIP" "${API}/upload/v2/${ITEM}:upload" | tee /dev/stderr | jq -r '.uploadState')

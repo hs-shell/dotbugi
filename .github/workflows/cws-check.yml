@@ -30,7 +30,7 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
           token_format: access_token
-          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore.readonly # fetchStatus만 호출 → 읽기 전용
           create_credentials_file: false # 액세스 토큰만 쓰므로 작업 디렉터리에 자격증명 파일을 남기지 않음
 
       - name: 스토어 항목 상태 조회
