@@ -31,8 +31,11 @@ export function useCourseData(courses: CourseBase[]) {
   const [vods, setVods] = useState<Vod[]>([]);
   const [assigns, setAssigns] = useState<Assign[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  // refreshCourseData(비동기)에서 최신 quizzes 를 읽기 위한 ref — 렌더 중이 아니라 커밋 후 갱신한다.
   const quizzesRef = useRef(quizzes);
-  quizzesRef.current = quizzes;
+  useEffect(() => {
+    quizzesRef.current = quizzes;
+  }, [quizzes]);
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -51,15 +54,18 @@ export function useCourseData(courses: CourseBase[]) {
   useEffect(() => {
     if (!useMockData) return;
     let cancelled = false;
-    applyMock().then(() => {
+    loadMockData().then((mock) => {
       if (cancelled) return;
+      setVods(mock.vods);
+      setAssigns(mock.assigns);
+      setQuizzes(mock.quizzes);
       setRefreshTime(new Date().toLocaleTimeString());
       setRemainingTime(5);
     });
     return () => {
       cancelled = true;
     };
-  }, [applyMock, useMockData]);
+  }, [useMockData]);
 
   const refreshCourseData = useCallback(async () => {
     if (useMockData) {
@@ -244,11 +250,12 @@ export function useCourseData(courses: CourseBase[]) {
 
   // 캐시 TTL 기반 자동 갱신 타이머
   useEffect(() => {
-    if (remainingTime >= CACHE_TTL_MINUTES) {
-      refreshCourseData();
-      return;
-    }
-    const timer = setTimeout(() => setRemainingTime((prev) => prev + 1), REFRESH_INTERVAL_MS);
+    // 만료됐으면 즉시(다음 틱) 갱신, 아니면 한 주기 뒤 경과 시간을 올린다. 상태 변경은 타이머 콜백에서만 한다.
+    const expired = remainingTime >= CACHE_TTL_MINUTES;
+    const timer = setTimeout(
+      () => (expired ? refreshCourseData() : setRemainingTime((prev) => prev + 1)),
+      expired ? 0 : REFRESH_INTERVAL_MS
+    );
     return () => clearTimeout(timer);
   }, [remainingTime, refreshCourseData]);
 
@@ -270,6 +277,9 @@ export function useCourseData(courses: CourseBase[]) {
   }, [refreshCourseData]);
 
   // 초기 로드: 캐시 확인 후 fetch 또는 캐시 사용 (최초 1회만 실행)
+  // 과목 목록(외부 DOM/스토리지에서 비동기로 도착)이 준비된 시점에 한 번 동기화하는 effect 라,
+  // 로딩 상태·갱신 시각을 여기서 설정하는 것이 의도된 동작이다.
+  /* eslint-disable react-hooks/set-state-in-effect */
   const initialLoadDone = useRef(false);
   useEffect(() => {
     if (!courses || courses.length === 0) return;
@@ -304,6 +314,7 @@ export function useCourseData(courses: CourseBase[]) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courses]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return {
     vods,

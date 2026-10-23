@@ -127,6 +127,8 @@ export default function Dashboard() {
         const course = allCourses.find((c) => c.courseId === id);
         if (course) {
           addCourseData(course);
+          // 외부(DOM 토글→스토리지) 변경에 맞춰 과목 추가를 시작하는 동기화 — 로딩 알림 표시는 의도된 상태 변경
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           const notifId = pushNotification({
             type: 'loading',
             messageKey: 'courses.adding',
@@ -225,8 +227,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (import.meta.env.VITE_MOCK) {
+      // mock 빌드 전용: 시작 시 토큰 만료 상태를 재현한다 (calendarToken 초기값이 이미 null)
       removeCachedAuthToken('').catch(() => {});
-      setCalendarToken(null);
       showTokenExpiredNotif();
     } else {
       // 이전에 로그인한 적이 있는 사용자만 자동 토큰 가져오기

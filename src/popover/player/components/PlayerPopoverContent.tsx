@@ -38,6 +38,8 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
   }, [vods, currentVideoIndex]);
 
   const formatExpectedEndTime = (seconds: number): string => {
+    // "지금부터 남은 영상 길이" 기준 예상 종료 시각이라 렌더 시점의 현재 시각을 쓰는 것이 의도다.
+    // eslint-disable-next-line react-hooks/purity
     const endTime = new Date(Date.now() + seconds * 1000);
     const month = endTime.getMonth() + 1;
     const date = endTime.getDate();
@@ -100,7 +102,9 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     });
   }, [skipPlayerFilter, usePureMock]);
 
+  // 스토리지(외부)에서 목록을 읽어오는 동기화. setVods 는 비동기 콜백 안에서만 호출된다.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadUnattendedVods();
   }, [loadUnattendedVods]);
 
@@ -117,6 +121,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
 
   useEffect(() => {
     if (isPopoverOpen && !isPlaying && vods.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadUnattendedVods();
     }
   }, [isPlaying, vods, isPopoverOpen, loadUnattendedVods]);
