@@ -20,7 +20,7 @@
 
 ```mermaid
 flowchart LR
-  subgraph OWNER["프로젝트 오너 리뷰 필수"]
+  subgraph OWNER["프로젝트 오너 리뷰<br/>(Code Owners 강제는 메인테이너 합류 시 켬)"]
     direction TB
     W[".github/<br/>워크플로 · 스크립트 · CODEOWNERS"]
     M["manifest.config.ts<br/>권한 · OAuth client_id · 버전"]
@@ -38,7 +38,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-  PR["기능 PR"] --> G1{"머지 통제<br/>승인 1건 + CI<br/>(민감 경로는 오너 승인)"}
+  PR["기능 PR"] --> G1{"머지 통제<br/>승인 1건 + CI<br/>(Code Owners 강제 시<br/>민감 경로는 오너 승인)"}
   G1 -->|스쿼시 머지| RP["release-please<br/>Release PR 자동 갱신"]
   RP -->|Release PR 머지| REL["GitHub Release + zip<br/>(자동, sha256 기록)"]
   REL --> DC["Discord 알림<br/>승인 대기 + 변경 비교 링크"]
@@ -54,7 +54,7 @@ flowchart TD
 ```
 
 - 스토어 게시용 장기 비밀은 저장소에 없다. 토큰은 승인된 `stable`/`beta` 환경 잡에서만 발급된다 (GCP WIF 조건).
-- 배포 승인 요청은 Discord 로 온다. **승인 전 알림의 "변경 사항 보기" 링크로 직전 릴리즈 대비 변경을 확인한다.**
+- 배포 승인 요청은 Discord 로 온다. **승인 전 알림의 "변경 사항 보기" 링크로 직전 릴리즈 대비 변경을 확인한다** (스테이블만 해당, 베타는 Release 페이지에서 확인).
 
 ## 릴리즈 / 버전 규칙
 
@@ -82,10 +82,10 @@ flowchart TD
 ## 일상 운영
 
 - **머지**: 스쿼시 머지만 사용. PR 제목이 Conventional Commits 여야 release-please 가 버전을 산출한다.
-- **Dependabot**: 버전 업데이트는 주 1회 그룹 PR(npm minor/patch, actions), major 는 개별 PR. 보안 업데이트는 생태계별 1개 PR 로 즉시 열린다. CI 통과를 확인하고 머지하되, major 는 변경 로그를 확인한다.
-- **리뷰 배정**: PR 이 열리면 CODEOWNERS 에 따라 `@hs-shell/maintainers` 팀에 요청되고, 팀 자동 할당이 팀원 1명을 순번(round robin)으로 배정한다. 상태를 "Busy" 로 두면 배정에서 빠진다. 민감 경로는 오너에게도 함께 요청된다.
+- **Dependabot**: 버전 업데이트는 주 1회 그룹 PR(npm minor/patch, actions), npm major 는 개별 PR (actions 는 major 포함 한 PR). 보안 업데이트는 생태계별 1개 PR 로 즉시 열린다. CI 통과를 확인하고 머지하되, major 는 변경 로그를 확인한다.
+- **리뷰 배정**: PR 이 열리면 CODEOWNERS 에 따라 `@hs-shell/maintainers` 팀에 요청되고, 팀 자동 할당이 팀원 1명을 순번(round robin)으로 배정한다. 상태를 "Busy" 로 두면 배정에서 빠진다. 민감 경로 파일은 오너에게 요청된다 (그 외 파일도 함께 바뀌면 팀에도 요청).
 - **CodeRabbit**: 무료 한도가 시간당 1회라 여러 PR 을 동시에 올리면 리뷰가 밀린다. 필요하면 `@coderabbitai review` 로 재요청.
-- **스토어 게시 점검**: Actions → `CWS Auth Check` 수동 실행 (읽기 전용).
+- **스토어 게시 점검**: Actions → `CWS Auth Check` 수동 실행 (읽기 전용, 환경 승인 필요).
 
 ## 비상 대응 (배포 경로 침해 의심 시)
 
