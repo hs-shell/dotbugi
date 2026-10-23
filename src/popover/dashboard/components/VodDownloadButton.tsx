@@ -1,4 +1,4 @@
-import { Download, X } from 'lucide-react';
+import { Download, FolderOpen, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import type { VodDownloadState } from '@/hooks/useVodDownload';
@@ -37,6 +37,23 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
     );
   }
 
+  if (download.isSaved(vod)) {
+    // 이번 페이지에서 받은 강의는 새로 고칠 때까지 저장 위치 열기 버튼이 된다
+    return (
+      <button
+        type="button"
+        className={ICON_BUTTON}
+        aria-label={t('vodDownload.openLocation')}
+        onClick={(e) => {
+          e.stopPropagation();
+          download.openLocation(vod);
+        }}
+      >
+        <FolderOpen className={`${ICON} text-[#71717a] group-hover:text-[#18181b] transition-colors`} />
+      </button>
+    );
+  }
+
   const isBusy = download.activeUrl !== null;
   return (
     <button
@@ -45,7 +62,7 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
       className={`${ICON_BUTTON} ${isBusy ? 'opacity-40' : ''}`}
       aria-label={t('vodDownload.button')}
       aria-disabled={isBusy}
-      // 툴팁(Radix·title)은 대시보드 아래에 떠 보여서 두지 않고, 안내 문구는 시작 알림에 넣는다
+      // 툴팁(Radix·title)은 대시보드 아래에 떠 보여서 두지 않는다
       onClick={(e) => {
         // 행 클릭(강의 창 열기)으로 번지지 않게 막는다
         e.stopPropagation();

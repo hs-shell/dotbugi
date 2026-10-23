@@ -67,7 +67,8 @@
   "downloadLogs": "로그 다운로드",
   "vodDownload": {
     "button": "강의 다운로드",
-    "started": "다운로드 중 · 본인 학습용, 재배포 금지",
+    "started": "다운로드 중",
+    "openLocation": "저장 위치 열기",
     "cancel": "다운로드 취소",
     "done": "다운로드 완료",
     "cancelled": "다운로드를 취소했어요",

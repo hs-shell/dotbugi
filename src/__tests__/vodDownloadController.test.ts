@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { cancelVodDownload, getActiveVodDownload, runVodDownload } from '@/lib/vodDownload/controller';
+import {
+  cancelVodDownload,
+  getActiveVodDownload,
+  getSavedCmids,
+  openSavedLocation,
+  runVodDownload,
+} from '@/lib/vodDownload/controller';
 import { downloadVod, removeFile } from '@/lib/vodDownload/download';
 
 vi.mock('@/lib/vodDownload/download', () => ({ downloadVod: vi.fn(), removeFile: vi.fn() }));
@@ -71,5 +77,60 @@ describe('runVodDownload', () => {
     await vi.waitFor(() => expect(downloadVod).toHaveBeenCalled());
     cancelVodDownload();
     await expect(running).resolves.toBe('cancelled');
+  });
+});
+
+describe('저장 위치 (완료한 다운로드)', () => {
+  const VOD_A = 'https://learn.hansung.ac.kr/mod/vod/view.php?id=11';
+  const VOD_B = 'https://learn.hansung.ac.kr/mod/vod/view.php?id=22';
+  const savedHandle = { name: 'a.mp4' } as FileSystemFileHandle;
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    delete window.showSaveFilePicker;
+    delete window.showOpenFilePicker;
+  });
+
+  it('완료하면 그 cmid 만 저장 상태가 되고, 실패한 다운로드는 저장되지 않는다', async () => {
+    window.showSaveFilePicker = vi.fn().mockResolvedValue(savedHandle);
+    vi.mocked(downloadVod).mockRejectedValueOnce(new Error('네트워크')).mockResolvedValueOnce(undefined);
+
+    await expect(runVodDownload(VOD_B, 'b.mp4', () => {})).resolves.toBe('failed');
+    expect(getSavedCmids().has('22')).toBe(false);
+
+    const before = getSavedCmids();
+    await expect(runVodDownload(VOD_A, 'a.mp4', () => {})).resolves.toBe('done');
+    expect(getSavedCmids().has('11')).toBe(true);
+    expect(getSavedCmids().has('22')).toBe(false);
+    // 바뀌면 새 Set 이어야 useSyncExternalStore 가 다시 그린다
+    expect(getSavedCmids()).not.toBe(before);
+  });
+
+  it('저장 위치 열기는 저장한 파일 핸들을 startIn 으로 넘기고, 사용자가 닫으면(AbortError) 아무것도 안 한다', async () => {
+    const picker = vi.fn().mockRejectedValue(new DOMException('', 'AbortError'));
+    window.showOpenFilePicker = picker;
+
+    await openSavedLocation(VOD_A);
+
+    expect(picker).toHaveBeenCalledTimes(1);
+    expect(picker.mock.calls[0][0]).toMatchObject({ startIn: savedHandle });
+  });
+
+  it('startIn 으로 열지 못하면 startIn 없이 다시 연다, 받지 않은 강의는 열지 않는다', async () => {
+    const picker = vi.fn().mockRejectedValueOnce(new TypeError('bad startIn')).mockResolvedValueOnce([]);
+    window.showOpenFilePicker = picker;
+
+    await openSavedLocation(VOD_A);
+    expect(picker).toHaveBeenCalledTimes(2);
+    expect(picker.mock.calls[1][0]).not.toHaveProperty('startIn');
+
+    await openSavedLocation(VOD_B);
+    expect(picker).toHaveBeenCalledTimes(2);
+  });
+
+  it('저장 상태는 모듈 메모리뿐이라 새로 불러오면(페이지 새로 고침) 비어 있다', async () => {
+    vi.resetModules();
+    const fresh = await import('@/lib/vodDownload/controller');
+    expect(fresh.getSavedCmids().size).toBe(0);
   });
 });

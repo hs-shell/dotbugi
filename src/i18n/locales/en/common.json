@@ -67,7 +67,8 @@
   "downloadLogs": "Download Logs",
   "vodDownload": {
     "button": "Download lecture",
-    "started": "Downloading · For your own study only, do not redistribute",
+    "started": "Downloading…",
+    "openLocation": "Open save location",
     "cancel": "Cancel download",
     "done": "Download complete",
     "cancelled": "Download cancelled",
