@@ -1,26 +1,33 @@
 import { PopoverContent } from '@radix-ui/react-popover';
 import PlayerIframe from './PlayerIframe';
 import type { Vod } from '@/types';
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import { loadDataFromStorage } from '@/lib/storage';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableItem from './SortableItem';
-import { isAttended, isCurrentDateInRange } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
 interface PlayerPopoverContentProps {
   isPopoverOpen: boolean;
   isPlaying: boolean;
   setIsPlaying: Dispatch<SetStateAction<boolean>>;
+  vods: Vod[];
+  setVods: Dispatch<SetStateAction<Vod[]>>;
 }
 
-export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPlaying }: PlayerPopoverContentProps) {
+export default function PlayerPopoverContent({
+  isPopoverOpen,
+  isPlaying,
+  setIsPlaying,
+  vods,
+  setVods,
+}: PlayerPopoverContentProps) {
   const { t } = useTranslation('player');
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [vods, setVods] = useState<Vod[]>([]);
+  // 예상 종료 시각의 기준 시각. 렌더 중 현재 시각을 읽지 않도록 재생 시작·영상 전환 시점에 기록한다.
+  const [playbackBaseTime, setPlaybackBaseTime] = useState(0);
   const [isDone, setIsDone] = useState(false);
   const [isHover, setIsHover] = useState(false);
 
@@ -38,9 +45,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
   }, [vods, currentVideoIndex]);
 
   const formatExpectedEndTime = (seconds: number): string => {
-    // 예상 종료 시각은 "지금 시각 + 남은 영상 길이"이므로, 화면을 그리는 시점의 현재 시각을 쓰는 것이 의도된 동작이다.
-    // eslint-disable-next-line react-hooks/purity
-    const endTime = new Date(Date.now() + seconds * 1000);
+    const endTime = new Date(playbackBaseTime + seconds * 1000);
     const month = endTime.getMonth() + 1;
     const date = endTime.getDate();
     const hours = endTime.getHours();
@@ -59,72 +64,13 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
     }
 
     setCurrentVideoIndex((prev) => (prev + 1) % vods.length);
+    setPlaybackBaseTime(Date.now());
   }, [vods, currentVideoIndex, setIsPlaying]);
 
-  const skipPlayerFilter = !!import.meta.env.VITE_MOCK_COURSES;
-  const usePureMock = !!import.meta.env.VITE_MOCK && !import.meta.env.VITE_MOCK_COURSES;
-
-  const loadUnattendedVods = useCallback(async () => {
-    if (usePureMock) {
-      const { mockPlayerVodIds } = await import('@/mocks/mockData');
-      const BASE = 'https://learn.hansung.ac.kr/mod/vod/view.php?id=';
-      setVods(
-        mockPlayerVodIds.map((id, i) => ({
-          courseId: 'mock',
-          courseTitle: 'Player Test',
-          prof: '',
-          week: i + 1,
-          subject: `${i + 1}주차`,
-          title: `VOD-${id}`,
-          url: `${BASE}${id}`,
-          range: null,
-          length: '00:00',
-          isAttendance: 'X',
-          weeklyAttendance: 'X',
-        }))
-      );
-      return;
-    }
-    loadDataFromStorage<Vod[]>('vod', (data) => {
-      if (!data) return;
-      loadDataFromStorage<string[]>('hiddenTaskUrls', (hiddenUrls) => {
-        const hidden = new Set(hiddenUrls ?? []);
-        if (skipPlayerFilter) {
-          setVods(data.filter((vod) => !hidden.has(vod.url)));
-        } else {
-          setVods(
-            data.filter(
-              (vod) => !hidden.has(vod.url) && isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)
-            )
-          );
-        }
-      });
-    });
-  }, [skipPlayerFilter, usePureMock]);
-
-  // 스토리지에서 미시청 영상 목록을 읽어오는 동기화 effect. setVods 는 실제로는 비동기 콜백 안에서만 호출된다.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadUnattendedVods();
-  }, [loadUnattendedVods]);
-
-  // Dashboard에서 새로고침 시 storage 변경을 감지해서 player 목록 갱신
-  useEffect(() => {
-    const listener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
-      if ((changes.vod || changes.hiddenTaskUrls) && !isPlaying) {
-        loadUnattendedVods();
-      }
-    };
-    chrome.storage.onChanged.addListener(listener);
-    return () => chrome.storage.onChanged.removeListener(listener);
-  }, [loadUnattendedVods, isPlaying]);
-
-  useEffect(() => {
-    if (isPopoverOpen && !isPlaying && vods.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadUnattendedVods();
-    }
-  }, [isPlaying, vods, isPopoverOpen, loadUnattendedVods]);
+  const selectVideo: Dispatch<SetStateAction<number>> = (index) => {
+    setCurrentVideoIndex(index);
+    setPlaybackBaseTime(Date.now());
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -210,7 +156,7 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
                             vod={vod}
                             idx={idx}
                             currentVideoIndex={currentVideoIndex}
-                            setCurrentVideoIndex={setCurrentVideoIndex}
+                            setCurrentVideoIndex={selectVideo}
                           />
                         ))}
                       </div>
@@ -224,7 +170,10 @@ export default function PlayerPopoverContent({ isPopoverOpen, isPlaying, setIsPl
                     className={`w-full h-16 text-2xl font-semibold flex items-center justify-center transition-all duration-300 rounded-xl shrink-0 ${
                       isPlaying && 'hover:bg-red-700'
                     }`}
-                    onClick={() => setIsPlaying((prev) => !prev)}
+                    onClick={() => {
+                      if (!isPlaying) setPlaybackBaseTime(Date.now());
+                      setIsPlaying((prev) => !prev);
+                    }}
                     onMouseEnter={() => setIsHover(true)}
                     onMouseLeave={() => setIsHover(false)}
                   >
