@@ -1,6 +1,6 @@
 name: Discord 알림
 
-# 릴리즈 알림은 release.yaml 안에서 직접 보낸다.
+# 릴리즈 알림은 release-please.yml / release-beta.yml 안에서 직접 보낸다.
 # 이 워크플로는 이슈/PR/CI 실패 이벤트를 담당한다.
 on:
   issues:
