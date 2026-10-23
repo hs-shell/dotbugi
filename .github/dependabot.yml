@@ -1,4 +1,4 @@
-# Dependabot 버전 업데이트 설정
+# Dependabot 버전·보안 업데이트 설정
 # 보안 업데이트만으로는 SHA 고정된 액션과 npm 의존성이 계속 낡아지므로 주기적으로 갱신한다.
 # 커밋 접두사는 PR 제목 검증(pr-title.yml)을 통과하도록 Conventional Commits 타입으로 맞춘다.
 # (include: scope → 예: "ci(deps): bump ...", "build(deps-dev): bump ...")
@@ -13,6 +13,11 @@ updates:
     # 액션 업데이트는 서로 독립적이고 리뷰 부담이 작아 한 PR로 묶는다.
     groups:
       github-actions:
+        patterns:
+          - '*'
+      # 보안 업데이트는 주기와 무관하게 즉시 열리며, 버전 업데이트와 별도 PR로 묶는다.
+      github-actions-security:
+        applies-to: security-updates
         patterns:
           - '*'
     commit-message:
@@ -35,6 +40,13 @@ updates:
         update-types:
           - minor
           - patch
+      # 보안 업데이트는 대부분 빌드·테스트 도구의 전이 의존성이라 하나씩 받으면 lockfile 충돌만 반복된다.
+      # 한 PR로 묶고(열려 있는 동안 새 보안 업데이트가 같은 PR에 합류), CI(빌드·테스트)를 안전망으로 삼는다.
+      # 깨지는 패키지가 생기면 exclude-patterns 로 빼서 개별 PR로 받는다.
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - '*'
     commit-message:
       prefix: build
       prefix-development: build
