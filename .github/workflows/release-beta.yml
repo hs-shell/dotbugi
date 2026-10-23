@@ -59,6 +59,9 @@ jobs:
           RELEASE_CHANNEL: beta
           BETA_VERSION: ${{ steps.ver.outputs.manifest }}
 
+      - name: 릴리즈 manifest 검사 (key 미포함)
+        run: node .github/scripts/check-release-manifest.mjs
+
       - name: dist 압축
         id: zip
         env:

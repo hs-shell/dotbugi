@@ -20,6 +20,19 @@ npm run test       # 테스트
 
 `npm run build` 후 `chrome://extensions`에서 개발자 모드를 켜고 `dist/`를 **압축해제된 확장 프로그램으로 로드**해 확인합니다.
 
+### Google 캘린더 연동을 로컬에서 테스트하려면
+
+압축해제로 로드한 확장은 ID가 폴더 경로로 정해져 Google 로그인이 거부됩니다. 대신 **로컬 테스트 빌드**를 사용합니다.
+
+```bash
+npm run build:local                          # 정식 항목과 같은 확장 ID
+RELEASE_CHANNEL=beta npm run build:local     # 베타 항목과 같은 확장 ID
+```
+
+- manifest 에 스토어 항목의 공개 키(`key`)가 들어가 스토어 버전과 같은 확장 ID 가 되고, 초록색 `DEV` 아이콘과 `(Dev)` 이름으로 표시됩니다.
+- 같은 ID 의 스토어 버전이 설치돼 있으면 함께 로드할 수 없으니 **스토어 버전을 삭제**하거나 **별도 Chrome 프로필**에서 테스트하세요.
+- 이 빌드는 스토어에 올릴 수 없습니다 (CI 가 `key` 포함 여부를 검사).
+
 ## 3. 작업 흐름
 
 1. 저장소를 **Fork**하고 브랜치를 만듭니다. (`<type>/<짧은-설명>`, 예: `fix/vod-parse`, `feat/123-quiz-filter`)

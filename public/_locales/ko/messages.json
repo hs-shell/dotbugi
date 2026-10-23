@@ -5,6 +5,9 @@
   "extNameBeta": {
     "message": "HSU 돋부기 🔎 (Beta)"
   },
+  "extNameDev": {
+    "message": "HSU 돋부기 🔎 (Dev)"
+  },
   "extDescription": {
     "message": "한성대학교 LMS 강의, 과제, 퀴즈를 한 눈에!"
   }

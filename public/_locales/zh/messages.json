@@ -5,6 +5,9 @@
   "extNameBeta": {
     "message": "HSU Dotbugi 🔎 (Beta)"
   },
+  "extNameDev": {
+    "message": "HSU Dotbugi 🔎 (Dev)"
+  },
   "extDescription": {
     "message": "一目了然查看汉城大学LMS课程、作业和测验！"
   }
