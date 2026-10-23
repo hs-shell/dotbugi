@@ -39,8 +39,8 @@ export const CONNECT_PAGE_PATH = 'src/connect/index.html';
 export const CONNECT_WINDOW_WIDTH = 440;
 export const CONNECT_WINDOW_HEIGHT = 360;
 
-/** 선택 호스트 권한 (manifest optional_host_permissions 와 동일) */
-export const LOCAL_HOST_PERMISSION = 'http://127.0.0.1/*';
+/** 확인 코드(지문) 길이 — CLI 가 터미널에 같은 값을 보여 준다 */
+export const FINGERPRINT_LENGTH = 6;
 
 /** dotbugi-mcp 콜백 주소 */
 export const getCallbackUrl = (port: number) => `http://127.0.0.1:${port}/cb`;

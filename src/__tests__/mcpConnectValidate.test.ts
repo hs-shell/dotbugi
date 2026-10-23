@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { CONNECT_MESSAGE_TYPE } from '@/lib/mcpConnect/constants';
+import { toFingerprint } from '@/lib/mcpConnect/fingerprint';
 import {
   isLmsSender,
   isValidCode,
@@ -109,5 +110,11 @@ describe('parseConnectMessage', () => {
     expect(parseConnectMessage({ ...valid, port: '54321' })).toBeNull();
     expect(parseConnectMessage({ ...valid, code: 'x' })).toBeNull();
     expect(parseConnectMessage({ ...valid, session: 'x' })).toBeNull();
+  });
+});
+
+describe('toFingerprint', () => {
+  it('코드 앞 6자를 대문자 XXX-XXX 로 표시 (CLI 와 같은 규칙)', () => {
+    expect(toFingerprint('aB3dEf_rest-of-code')).toBe('AB3-DEF');
   });
 });

@@ -72,9 +72,6 @@ export function createManifest(mode?: string): ManifestV3Export {
     ],
     permissions: ['storage', 'identity'],
     host_permissions: ['https://*/*', 'http://*/*'],
-    // dotbugi-mcp 연결(#167): 선택 권한이라 기존 사용자 업데이트 시 비활성화되지 않는다.
-    // 지금은 위 http://*/* 가 이미 포함하지만, host 권한을 좁혀도 연결이 유지되도록 명시해 둔다.
-    optional_host_permissions: ['http://127.0.0.1/*'],
     oauth2: {
       client_id: clientId,
       scopes: ['https://www.googleapis.com/auth/calendar.events'],

@@ -25,7 +25,7 @@ In particular, the extension gathers:
 - **Quiz Information:** Quiz titles, schedules, questions, and answer details.
 - **Attendance and Submission Status:** Information on user attendance for lectures and submission statuses for assignments/quizzes.
 - **Google Calendar Integration Credentials:** Authentication tokens and credentials required to synchronize with Google Calendar.
-- **LMS Login Session (Authentication Information):** The Hansung University LMS session cookie (`MoodleSession`), read only when the user explicitly approves a dotbugi-mcp connection.
+- **LMS Login Session (Authentication Information):** The Hansung University LMS session cookie (`MoodleSession`), read when a dotbugi-mcp connection is requested, kept briefly inside the extension only, and handed to the same PC only if the user approves the connection.
 
 ## 3. Data Storage and Security
 
@@ -47,7 +47,7 @@ Only when the user runs `dotbugi-mcp login` on their own PC and clicks **Connect
 
 - The session is never sent to external servers or third parties, and is not sent anywhere other than the local address (`127.0.0.1`).
 - A pending request is kept briefly in the browser's session storage and is deleted as soon as the confirmation window opens.
-- Chrome may ask for an optional permission for `127.0.0.1` for this purpose. `127.0.0.1` refers to the user's own PC.
+- The confirmation window shows the same confirmation code as the terminal, and users are told to approve only when they match. `127.0.0.1` refers to the user's own PC.
 
 ## 4. Use of Collected Data
 
