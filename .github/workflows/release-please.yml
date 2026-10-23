@@ -48,6 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      zip_sha256: ${{ steps.zip.outputs.sha256 }}
     steps:
       - name: 리포지토리 체크아웃
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -67,9 +69,12 @@ jobs:
         run: npm run build
 
       - name: dist 압축
+        id: zip
         env:
           TAG: ${{ needs.release-please.outputs.tag_name }}
-        run: cd dist && zip -r "../dotbugi-${TAG}.zip" .
+        run: |
+          (cd dist && zip -r "../dotbugi-${TAG}.zip" .)
+          echo "sha256=$(sha256sum "dotbugi-${TAG}.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - name: 릴리즈에 zip 첨부
         env:
@@ -82,13 +87,15 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           STORE_ENABLED: ${{ vars.ENABLE_STORE_PUBLISH == 'true' }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+          JOB_STATUS: ${{ job.status }}
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const webhook = process.env.DISCORD_WEBHOOK_URL;
             if (!webhook) return;
-            const tag = '${{ needs.release-please.outputs.tag_name }}';
-            const success = '${{ job.status }}' === 'success';
+            const tag = process.env.TAG;
+            const success = process.env.JOB_STATUS === 'success';
             const awaitingStore = success && process.env.STORE_ENABLED === 'true';
             const repoUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`;
             // 스토어 게시가 켜져 있으면 같은 실행의 store 잡이 승인 대기 중 → 승인 화면(실행 페이지)으로 안내
@@ -135,11 +142,16 @@ jobs:
           persist-credentials: false
 
       # 다시 빌드하지 않고 GitHub Release에 첨부된 바로 그 zip을 올린다 (릴리즈 자산 = 스토어 패키지)
-      - name: 릴리즈 zip 내려받기
+      # Release 자산은 쓰기 권한자가 승인 대기 중에 바꿔치기할 수 있으므로,
+      # publish 잡이 만든 해시(잡 출력은 실행 중 변경 불가)와 일치할 때만 진행한다.
+      - name: 릴리즈 zip 내려받기 + 무결성 검증
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
-        run: gh release download "$TAG" --pattern "dotbugi-${TAG}.zip" --repo "$GITHUB_REPOSITORY"
+          EXPECTED_SHA256: ${{ needs.publish.outputs.zip_sha256 }}
+        run: |
+          gh release download "$TAG" --pattern "dotbugi-${TAG}.zip" --repo "$GITHUB_REPOSITORY"
+          echo "${EXPECTED_SHA256}  dotbugi-${TAG}.zip" | sha256sum -c -
 
       - name: GCP 인증 (WIF → 서비스 계정)
         id: gcp
@@ -163,13 +175,15 @@ jobs:
         if: always() && env.DISCORD_WEBHOOK_URL != ''
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+          JOB_STATUS: ${{ job.status }}
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const webhook = process.env.DISCORD_WEBHOOK_URL;
             if (!webhook) return;
-            const tag = '${{ needs.release-please.outputs.tag_name }}';
-            const success = '${{ job.status }}' === 'success';
+            const tag = process.env.TAG;
+            const success = process.env.JOB_STATUS === 'success';
             const res = await fetch(webhook, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
