@@ -108,6 +108,7 @@ export default function PlayerPopoverContent({
       side="right"
       sideOffset={8}
       forceMount
+      data-player-popover
       // 닫혀도 재생이 이어지게 항상 마운트한다. display 대신 visibility 로 숨겨야 페이드가 되고 위치도 다시 계산되지 않는다
       className={`p-0 transition-[opacity,visibility] border-none bg-transparent ${
         isPopoverOpen ? 'opacity-100 visible pointer-events-auto -z-50' : 'opacity-0 invisible pointer-events-none z-50'
