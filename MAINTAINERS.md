@@ -14,13 +14,43 @@
 - 메인테이너는 **Maintain** 까지. Maintain 은 보호 규칙·환경·Variables 를 바꿀 수 없다.
 - 오너·메인테이너 모두 GitHub 2단계 인증(가능하면 패스키) 필수.
 
+## 코드 오너십
+
+리뷰어 지정 규칙은 [`.github/CODEOWNERS`](./.github/CODEOWNERS) 에 있다. 배포·권한·공급망에 영향을 주는 경로는 메인테이너가 늘어나도 **프로젝트 오너 리뷰**를 유지한다.
+
+```mermaid
+flowchart LR
+  subgraph OWNER["프로젝트 오너 리뷰 필수"]
+    direction TB
+    W[".github/<br/>워크플로 · 스크립트 · CODEOWNERS"]
+    M["manifest.config.ts<br/>권한 · OAuth client_id · 버전"]
+    P["package.json · package-lock.json<br/>의존성(공급망)"]
+    R["release-please 설정<br/>버전 산출"]
+    H[".coderabbit.yaml · .husky/<br/>자동 리뷰 · 훅"]
+  end
+  subgraph TEAM["메인테이너 리뷰 (합류 전: 오너)"]
+    direction TB
+    S["src/ · docs/ · public/ 등<br/>그 외 전부"]
+  end
+```
+
 ## 배포 구조와 통제 지점
 
-```text
-PR 머지 (승인 1건 + CI)            ← 머지 통제
-  → Release PR 머지 → GitHub Release + zip (자동)
-  → stable/beta 환경 배포 승인      ← 배포 통제 (승인자: 오너)
-  → GCP WIF 토큰 발급 → 스토어 업로드·심사 제출
+```mermaid
+flowchart TD
+  PR["기능 PR"] --> G1{"머지 통제<br/>승인 1건 + CI<br/>(민감 경로는 오너 승인)"}
+  G1 -->|스쿼시 머지| RP["release-please<br/>Release PR 자동 갱신"]
+  RP -->|Release PR 머지| REL["GitHub Release + zip<br/>(자동, sha256 기록)"]
+  REL --> DC["Discord 알림<br/>승인 대기 + 변경 비교 링크"]
+  DC --> G2{"배포 통제<br/>stable/beta 환경 승인<br/>(승인자: 오너)"}
+  G2 -->|승인| WIF["GCP WIF<br/>단기 토큰 발급"]
+  WIF --> CWS["zip 해시 검증 →<br/>스토어 업로드 · 심사 제출"]
+  CWS --> GR["Google 심사 통과 →<br/>사용자 자동 업데이트"]
+
+  classDef gate fill:#fff3cd,stroke:#d4a017,color:#000
+  classDef auto fill:#e7f1ff,stroke:#4a7fd0,color:#000
+  class G1,G2 gate
+  class RP,REL,DC,WIF,CWS auto
 ```
 
 - 스토어 게시용 장기 비밀은 저장소에 없다. 토큰은 승인된 `stable`/`beta` 환경 잡에서만 발급된다 (GCP WIF 조건).
