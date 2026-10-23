@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, changeLanguage, type LanguageCode } from '@/i18n';
-import { Globe, Github, X, Download } from 'lucide-react';
+import { Globe, X, Download } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { GithubIcon } from '@/components/icons/GithubIcon';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import GoogleCalendar from '@/assets/calendar.webp';
 import GmailIcon from '@/assets/gmail.webp';
@@ -179,7 +180,7 @@ function GitHubStarBanner() {
         className="flex flex-col items-center text-center w-full rounded-2xl px-4 py-4 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500 group"
       >
         <div className="flex items-center justify-center mb-2 space-x-2">
-          <Github size={26} className="text-zinc-600 group-hover:text-zinc-900" />
+          <GithubIcon size={26} className="text-zinc-600 group-hover:text-zinc-900" />
           <div className="relative w-6 h-6">
             <svg
               viewBox="0 0 24 24"
