@@ -121,14 +121,24 @@ export function useCourseData(courses: CourseBase[]) {
           })
         );
 
-        // Storage: 전체 데이터 저장 (강의 페이지 등에서 사용)
-        saveDataToStorage('vod', vods);
-        saveDataToStorage('assign', assigns);
-        saveDataToStorage('quiz', quizzes);
-
-        // State: 대시보드 표시용 날짜 필터링 적용
         // refreshCourseData 실행 중 addCourseData로 추가된 다른 과목 데이터를 보존
         const refreshedCourseIds = new Set(targetCourses.map((c) => c.courseId));
+
+        // Storage: 전체 데이터 저장 (강의 페이지 등에서 사용). 대상 과목만 교체해 그사이 저장된 다른 과목을 지우지 않는다
+        loadDataFromStorage<Vod[]>('vod', (stored) => {
+          const kept = (stored ?? []).filter((v) => !refreshedCourseIds.has(v.courseId));
+          saveDataToStorage('vod', [...kept, ...vods]);
+        });
+        loadDataFromStorage<Assign[]>('assign', (stored) => {
+          const kept = (stored ?? []).filter((a) => !refreshedCourseIds.has(a.courseId));
+          saveDataToStorage('assign', [...kept, ...assigns]);
+        });
+        loadDataFromStorage<Quiz[]>('quiz', (stored) => {
+          const kept = (stored ?? []).filter((q) => !refreshedCourseIds.has(q.courseId));
+          saveDataToStorage('quiz', [...kept, ...quizzes]);
+        });
+
+        // State: 대시보드 표시용 날짜 필터링 적용
         setVods((prev) => {
           const kept = prev.filter((v) => !refreshedCourseIds.has(v.courseId));
           return [...kept, ...filterVodsForDisplay(vods)];

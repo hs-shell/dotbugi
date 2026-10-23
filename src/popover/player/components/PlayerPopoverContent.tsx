@@ -88,6 +88,9 @@ export default function PlayerPopoverContent({
       const oldIndex = vods.findIndex((v) => `${v.week}-${v.title}` === active.id);
       const newIndex = vods.findIndex((v) => `${v.week}-${v.title}` === over.id);
       setVods((items) => arrayMove(items, oldIndex, newIndex));
+      // 재정렬로 지금 순번의 영상이 바뀌면 예상 종료 시각의 기준도 새 영상 시작으로 옮긴다
+      const moved = arrayMove(vods, oldIndex, newIndex);
+      if (isPlaying && moved[currentVideoIndex] !== vods[currentVideoIndex]) setPlaybackBaseTime(Date.now());
     }
   };
 
