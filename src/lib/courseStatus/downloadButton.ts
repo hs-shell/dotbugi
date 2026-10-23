@@ -23,7 +23,7 @@ button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;ju
 button:hover{background:#e4e4e7;color:#18181b}
 button:active{background:#d4d4d8}
 button:focus-visible{outline:2px solid #a1a1aa;outline-offset:1px}
-button[hidden],span[hidden]{display:none}
+button[hidden],.msg:empty{display:none}
 svg{width:16px;height:16px}
 .progress{color:#f59e0b;font-variant-numeric:tabular-nums}
 .cancel svg{display:none}
@@ -41,24 +41,28 @@ export function createDownloadButton(vodUrl: string, cmid: string, fileName: str
   root.innerHTML = `<style>${STYLE}</style>
 <button type="button" class="start">${DOWNLOAD_ICON}</button>
 <button type="button" class="cancel" hidden><span class="progress"></span>${CANCEL_ICON}</button>
-<span class="msg" hidden></span>`;
+<span class="msg" role="status" aria-live="polite"></span>`;
 
   const start = root.querySelector('.start') as HTMLButtonElement;
   const cancel = root.querySelector('.cancel') as HTMLButtonElement;
   const progress = root.querySelector('.progress') as HTMLSpanElement;
   const msg = root.querySelector('.msg') as HTMLSpanElement;
-  start.title = t('vodDownload.notice');
-  start.setAttribute('aria-label', t('vodDownload.button'));
-  cancel.title = t('vodDownload.cancel');
-  cancel.setAttribute('aria-label', t('vodDownload.cancel'));
+  // 저장된 언어는 버튼을 만든 뒤 비동기로 적용될 수 있어 언어가 바뀔 때마다 다시 단다
+  const applyLabels = () => {
+    start.title = t('vodDownload.notice');
+    start.setAttribute('aria-label', t('vodDownload.button'));
+    cancel.title = t('vodDownload.cancel');
+    cancel.setAttribute('aria-label', t('vodDownload.cancel'));
+  };
+  applyLabels();
+  i18n.on('languageChanged', applyLabels);
 
   let msgTimer: ReturnType<typeof setTimeout> | undefined;
   const showMessage = (key: string, ok = false) => {
     clearTimeout(msgTimer);
     msg.textContent = t(key);
     msg.classList.toggle('ok', ok);
-    msg.hidden = false;
-    msgTimer = setTimeout(() => (msg.hidden = true), MESSAGE_DURATION_MS);
+    msgTimer = setTimeout(() => (msg.textContent = ''), MESSAGE_DURATION_MS);
   };
 
   // 버튼이 활동 링크 근처에 있어 클릭이 링크 이동·LMS 핸들러로 번지지 않게 막는다
@@ -69,7 +73,7 @@ export function createDownloadButton(vodUrl: string, cmid: string, fileName: str
 
   start.addEventListener('click', async (e) => {
     swallow(e);
-    msg.hidden = true;
+    msg.textContent = '';
     const result = await runVodDownload(vodUrl, fileName, (ratio) => {
       start.hidden = true;
       cancel.hidden = false;

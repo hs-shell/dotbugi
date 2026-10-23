@@ -1,15 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { cancelVodDownload, runVodDownload } from '@/lib/vodDownload/controller';
-import { downloadVod } from '@/lib/vodDownload/download';
+import { cancelVodDownload, getActiveVodDownload, runVodDownload } from '@/lib/vodDownload/controller';
+import { downloadVod, removeFile } from '@/lib/vodDownload/download';
 
-vi.mock('@/lib/vodDownload/download', () => ({ downloadVod: vi.fn() }));
+vi.mock('@/lib/vodDownload/download', () => ({ downloadVod: vi.fn(), removeFile: vi.fn() }));
 
 const handle = {} as FileSystemFileHandle;
 
 describe('runVodDownload', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.clearAllMocks();
     delete window.showSaveFilePicker;
   });
 
@@ -24,11 +25,35 @@ describe('runVodDownload', () => {
     await vi.waitFor(() => expect(downloadVod).toHaveBeenCalled());
     expect(addSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
 
+    // 다른 버튼(대시보드 등)이 구독해 볼 수 있는 진행 상태
+    expect(getActiveVodDownload()).toEqual({ vodUrl: 'u1', percent: 0 });
     await expect(runVodDownload('u2', 'b.mp4', () => {})).resolves.toBe('busy');
 
     finish();
     await expect(first).resolves.toBe('done');
+    expect(getActiveVodDownload()).toBeNull();
     expect(removeSpy).toHaveBeenCalledWith('beforeunload', addSpy.mock.calls[0][1]);
+  });
+
+  it('저장 대화상자가 열린 사이 다른 다운로드가 시작되면 busy 로 끝내고 빈 파일을 지운다', async () => {
+    let pick!: (h: FileSystemFileHandle) => void;
+    const picked = { name: 'second' } as unknown as FileSystemFileHandle;
+    window.showSaveFilePicker = vi
+      .fn()
+      .mockImplementationOnce(() => new Promise<FileSystemFileHandle>((resolve) => (pick = resolve)))
+      .mockResolvedValueOnce(handle);
+    let finish!: () => void;
+    vi.mocked(downloadVod).mockImplementation(() => new Promise<void>((resolve) => (finish = resolve)));
+
+    const second = runVodDownload('u2', 'b.mp4', () => {}); // 대화상자 열림 (아직 선택 전)
+    const first = runVodDownload('u1', 'a.mp4', () => {});
+    await vi.waitFor(() => expect(downloadVod).toHaveBeenCalled());
+    pick(picked);
+
+    await expect(second).resolves.toBe('busy');
+    expect(removeFile).toHaveBeenCalledWith(picked);
+    finish();
+    await first;
   });
 
   it('취소하면 cancelled, 저장 대화상자를 닫으면 dismissed, 미지원이면 unsupported', async () => {

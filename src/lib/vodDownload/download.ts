@@ -54,8 +54,9 @@ export async function downloadVod(
   signal: AbortSignal,
   onProgress: (ratio: number) => void
 ): Promise<void> {
-  const writable = await handle.createWritable();
+  let writable: FileSystemWritableFileStream | null = null;
   try {
+    writable = await handle.createWritable();
     const viewerUrl = toViewerUrl(vodUrl);
     if (!viewerUrl) throw new Error('VOD 주소에서 id 를 찾지 못함');
     const m3u8 = extractM3u8Url(await fetchHtml(viewerUrl, signal));
@@ -82,9 +83,13 @@ export async function downloadVod(
     }
     await writable.close();
   } catch (error) {
-    await writable.abort().catch(() => {});
-    // remove() 는 Chrome 전용이라 없으면 건너뛴다
-    await (handle as FileSystemFileHandle & { remove?: () => Promise<void> }).remove?.().catch(() => {});
+    await writable?.abort().catch(() => {});
+    await removeFile(handle);
     throw error;
   }
+}
+
+/** 저장 대화상자가 만든 빈 파일을 지운다 (remove() 는 Chrome 전용이라 없으면 건너뛴다) */
+export async function removeFile(handle: FileSystemFileHandle): Promise<void> {
+  await (handle as FileSystemFileHandle & { remove?: () => Promise<void> }).remove?.().catch(() => {});
 }

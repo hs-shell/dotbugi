@@ -1,12 +1,34 @@
 import { logger } from '@/lib/logger';
-import { downloadVod } from './download';
+import { downloadVod, removeFile } from './download';
 import { EncryptedHlsError } from './playlist';
 
 /** i18n 키 `vodDownload.<결과>` 와 이름을 맞춘다 (dismissed 는 저장 대화상자를 닫은 경우라 알리지 않음) */
 export type VodDownloadResult = 'done' | 'cancelled' | 'failed' | 'encrypted' | 'unsupported' | 'busy' | 'dismissed';
 
+export interface ActiveVodDownload {
+  vodUrl: string;
+  percent: number;
+}
+
 // 대시보드와 강의 페이지 버튼이 같은 content script 모듈을 공유하므로 페이지 전체에서 한 번에 하나만 받는다
 let active: AbortController | null = null;
+let snapshot: ActiveVodDownload | null = null;
+const listeners = new Set<() => void>();
+
+function setSnapshot(next: ActiveVodDownload | null) {
+  snapshot = next;
+  listeners.forEach((listener) => listener());
+}
+
+/** 어느 버튼에서 시작했든 진행 상태를 보여 주도록 구독한다 (useSyncExternalStore 형식) */
+export function subscribeVodDownload(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+export function getActiveVodDownload(): ActiveVodDownload | null {
+  return snapshot;
+}
 
 // 같은 탭에서 다른 페이지로 가면 다운로드가 조용히 끊기므로 브라우저 확인 창으로 한 번 막는다
 function warnBeforeUnload(event: BeforeUnloadEvent) {
@@ -35,15 +57,22 @@ export async function runVodDownload(
   } catch {
     return 'dismissed';
   }
-  // 대화상자가 열린 사이 다른 버튼에서 시작했을 수 있다
-  if (active) return 'busy';
+  // 대화상자가 열린 사이 다른 버튼에서 시작했을 수 있다 — 대화상자가 만든 빈 파일은 지운다
+  if (active) {
+    await removeFile(handle);
+    return 'busy';
+  }
 
   const controller = new AbortController();
   active = controller;
   window.addEventListener('beforeunload', warnBeforeUnload);
+  const report = (ratio: number) => {
+    setSnapshot({ vodUrl, percent: Math.floor(ratio * 100) });
+    onProgress(ratio);
+  };
   try {
-    onProgress(0);
-    await downloadVod(vodUrl, handle, controller.signal, onProgress);
+    report(0);
+    await downloadVod(vodUrl, handle, controller.signal, report);
     return 'done';
   } catch (error) {
     if (controller.signal.aborted) return 'cancelled';
@@ -52,6 +81,7 @@ export async function runVodDownload(
     return error instanceof EncryptedHlsError ? 'encrypted' : 'failed';
   } finally {
     active = null;
+    setSnapshot(null);
     window.removeEventListener('beforeunload', warnBeforeUnload);
   }
 }

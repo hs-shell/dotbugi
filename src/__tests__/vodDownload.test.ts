@@ -242,6 +242,14 @@ describe('downloadVod', () => {
     expect(remove).toHaveBeenCalled();
   });
 
+  it('쓰기 스트림을 못 열어도 대화상자가 만든 빈 파일을 지운다', async () => {
+    const { handle, remove } = makeHandle();
+    (handle.createWritable as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('denied'));
+
+    await expect(downloadVod(VOD_URL, handle, new AbortController().signal, () => {})).rejects.toThrow('denied');
+    expect(remove).toHaveBeenCalled();
+  });
+
   it('암호화된 재생 목록이면 세그먼트를 받지 않고 정리한다', async () => {
     const fetchMock = await setup('#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI="k"\n#EXTINF:10,\ns.ts\n');
     const { writable, handle } = makeHandle();

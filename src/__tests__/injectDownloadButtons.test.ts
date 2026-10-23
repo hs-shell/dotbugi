@@ -3,6 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { injectDownloadButtons } from '@/lib/courseStatus/injectDownloadButtons';
 import { runVodDownload } from '@/lib/vodDownload/controller';
 
+// 언어 전환을 흉내 내려고 현재 언어를 키 앞에 붙인다
+const i18nState = vi.hoisted(() => ({ lang: 'ko', handlers: [] as (() => void)[] }));
+vi.mock('@/i18n', () => ({
+  default: {
+    t: (key: string) => `${i18nState.lang}:${key}`,
+    on: (_event: string, handler: () => void) => i18nState.handlers.push(handler),
+  },
+}));
+
 vi.mock('@/lib/vodDownload/controller', () => ({
   runVodDownload: vi.fn().mockResolvedValue('dismissed'),
   cancelVodDownload: vi.fn(),
@@ -48,6 +57,7 @@ const COURSE_PAGE = `
 describe('injectDownloadButtons', () => {
   beforeEach(() => {
     document.body.innerHTML = COURSE_PAGE;
+    i18nState.lang = 'ko';
     vi.mocked(runVodDownload).mockClear();
   });
 
@@ -82,5 +92,17 @@ describe('injectDownloadButtons', () => {
       '자료구조-1주차 [3월 2일 - 3월 8일]-배열 _ 리스트.mp4',
       expect.any(Function)
     );
+  });
+
+  it('저장된 언어가 나중에 적용되면 라벨을 다시 단다', () => {
+    injectDownloadButtons('자료구조');
+    const button = document.querySelector(HOST)?.shadowRoot?.querySelector('button');
+    expect(button?.title).toBe('ko:vodDownload.notice');
+
+    i18nState.lang = 'en';
+    i18nState.handlers.forEach((handler) => handler());
+
+    expect(button?.title).toBe('en:vodDownload.notice');
+    expect(button?.getAttribute('aria-label')).toBe('en:vodDownload.button');
   });
 });
