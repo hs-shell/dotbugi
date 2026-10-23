@@ -74,5 +74,8 @@ jobs:
       - name: 타입 체크 + 빌드
         run: npm run build
 
+      - name: 릴리즈 manifest 검사 (key 미포함)
+        run: node .github/scripts/check-release-manifest.mjs
+
       - name: 테스트
         run: npm run test
