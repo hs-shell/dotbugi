@@ -1,8 +1,8 @@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import icon from '@/assets/icon.webp';
 import exit from '@/assets/exit.webp';
-import { TAB_TYPE } from '@/types';
+import { TAB_TYPE, type CourseBase } from '@/types';
 import { OctagonAlert } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useGetCourses } from '@/hooks/useGetCourses';
@@ -19,6 +19,7 @@ import NotificationBubble, { type Notification } from './components/Notification
 import { useTranslation } from 'react-i18next';
 import { isAttended } from '@/lib/utils';
 import { makeVodGroupKey } from '@/lib/generateKey';
+import { diffTrackedCourseIds } from '@/lib/diffTrackedCourseIds';
 import Setting from './components/Setting';
 import { useHiddenTasks } from '@/hooks/useHiddenTasks';
 import {
@@ -44,7 +45,15 @@ let notifIdCounter = 0;
 
 export default function Dashboard() {
   const { t } = useTranslation('common');
-  const { allCourses, trackedCourses, trackedCourseIds, isInitialized } = useGetCourses();
+  // useCourseData 가 useGetCourses 의 결과를 받으므로, 초기화 콜백은 ref 를 거쳐 나중에 정해지는 loadInitialData 를 부른다.
+  const loadInitialDataRef = useRef<((courses: CourseBase[]) => void) | null>(null);
+  // 토글 비교 기준(아래 스토리지 리스너). 초기화 콜백에서 바로 잡아야 커밋 전에 온 변경도 놓치지 않는다
+  const trackedIdsRef = useRef<string[] | null>(null);
+  const handleCoursesInitialized = useCallback((courses: CourseBase[]) => {
+    trackedIdsRef.current = courses.map((c) => c.courseId);
+    loadInitialDataRef.current?.(courses);
+  }, []);
+  const { allCourses, trackedCourses, trackedCourseIds, isInitialized } = useGetCourses(handleCoursesInitialized);
 
   const {
     vods,
@@ -54,10 +63,15 @@ export default function Dashboard() {
     remainingTime,
     isError,
     refreshCourseData,
+    loadInitialData,
     addCourseData,
     removeCourseData,
     pendingCourseIds,
   } = useCourseData(trackedCourses);
+  // MOCK_COURSES 모드는 useGetCourses 의 마운트 effect 에서 초기화 콜백을 부르므로, 그보다 먼저 도는 layout effect 로 연결한다.
+  useLayoutEffect(() => {
+    loadInitialDataRef.current = loadInitialData;
+  }, [loadInitialData]);
 
   const { hiddenUrls, hideTask, hideTasks, unhideTask, isHidden } = useHiddenTasks();
 
@@ -103,44 +117,36 @@ export default function Dashboard() {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)));
   }, []);
 
-  // DOM 토글에서 trackedCourseIds 변경 시 데이터 추가/삭제
-  const prevTrackedIdsRef = useRef<Set<string> | null>(null);
+  // 강의 목록 토글이 trackedCourseIds 를 바꾸면(스토리지 변경 이벤트) 그 자리에서 데이터 추가/삭제와 알림을 처리한다.
+  // 비교 기준은 마지막으로 반영된 목록이다. 초기화 전(null)에 온 변경은 초기 로드가 처리하므로 기준만 잡는다.
   const courseNotifMapRef = useRef<Map<string, string>>(new Map());
   useEffect(() => {
-    if (!isInitialized) return;
+    trackedIdsRef.current = isInitialized ? trackedCourseIds : null;
+  }, [isInitialized, trackedCourseIds]);
 
-    const currSet = new Set(trackedCourseIds);
+  useEffect(() => {
+    const listener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      const nextIds = changes.trackedCourseIds?.newValue as string[] | undefined;
+      if (!nextIds) return;
+      const prevIds = trackedIdsRef.current;
+      // 렌더 반영 전에 연달아 바뀌어도 직전 변경을 기준으로 비교하도록 바로 갱신한다.
+      trackedIdsRef.current = nextIds;
+      if (prevIds === null) return;
 
-    if (prevTrackedIdsRef.current === null) {
-      // 최초 스토리지 로드 완료 — useCourseData의 초기 로드가 처리
-      prevTrackedIdsRef.current = currSet;
-      return;
-    }
-
-    const prevSet = prevTrackedIdsRef.current;
-    prevTrackedIdsRef.current = currSet;
-
-    const allCourseIds = new Set(allCourses.map((c) => c.courseId));
-
-    for (const id of trackedCourseIds) {
-      if (!prevSet.has(id) && allCourseIds.has(id)) {
+      const { added, removed } = diffTrackedCourseIds(prevIds, nextIds);
+      for (const id of added) {
         const course = allCourses.find((c) => c.courseId === id);
-        if (course) {
-          addCourseData(course);
-          // 강의 페이지의 토글(스토리지 변경)에 맞춰 과목 데이터를 추가하는 동기화 effect 이므로, 로딩 알림을 띄우는 것은 의도된 동작이다.
-          // eslint-disable-next-line react-hooks/set-state-in-effect
-          const notifId = pushNotification({
-            type: 'loading',
-            messageKey: 'courses.adding',
-            messageParams: { name: course.courseTitle },
-          });
-          courseNotifMapRef.current.set(id, notifId);
-        }
+        if (!course) continue;
+        addCourseData(course);
+        const notifId = pushNotification({
+          type: 'loading',
+          messageKey: 'courses.adding',
+          messageParams: { name: course.courseTitle },
+        });
+        courseNotifMapRef.current.set(id, notifId);
       }
-    }
 
-    for (const id of prevSet) {
-      if (!currSet.has(id)) {
+      for (const id of removed) {
         removeCourseData(id);
         const course = allCourses.find((c) => c.courseId === id);
         if (course) {
@@ -152,8 +158,10 @@ export default function Dashboard() {
           });
         }
       }
-    }
-  }, [isInitialized, trackedCourseIds, allCourses, addCourseData, removeCourseData, pushNotification]);
+    };
+    chrome.storage.onChanged.addListener(listener);
+    return () => chrome.storage.onChanged.removeListener(listener);
+  }, [allCourses, addCourseData, removeCourseData, pushNotification]);
 
   // 과목 추가 fetch 완료 시 알림을 loading → success로 전환
   useEffect(() => {

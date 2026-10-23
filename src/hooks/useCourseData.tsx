@@ -36,6 +36,11 @@ export function useCourseData(courses: CourseBase[]) {
   useEffect(() => {
     quizzesRef.current = quizzes;
   }, [quizzes]);
+  // 새로고침 저장 시점의 추적 과목 — 새로고침 도중 추적을 끈 과목을 storage 에 되살리지 않기 위해
+  const coursesRef = useRef(courses);
+  useEffect(() => {
+    coursesRef.current = courses;
+  }, [courses]);
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -67,91 +72,102 @@ export function useCourseData(courses: CourseBase[]) {
     };
   }, [useMockData]);
 
-  const refreshCourseData = useCallback(async () => {
-    if (useMockData) {
-      await applyMock();
-      setRefreshTime(new Date().toLocaleTimeString());
-      setRemainingTime(0);
-      setIsPending(false);
-      return;
-    }
-
-    try {
-      setIsError(false);
-      setIsPending(true);
-      const fetchedAt = Date.now();
-
-      const vods: Vod[] = [];
-      const assigns: Assign[] = [];
-      const quizzes: Quiz[] = [];
-      const seenVods = new Set<string>();
-      const seenAssigns = new Set<string>();
-      const seenQuizzes = new Set<string>();
-
-      // 현재 상태의 퀴즈 데이터를 courseId별로 그룹핑 (마감된 퀴즈 캐시용)
-      const cachedQuizMap = new Map<string, Quiz[]>();
-      for (const q of quizzesRef.current) {
-        const arr = cachedQuizMap.get(q.courseId) ?? [];
-        arr.push(q);
-        cachedQuizMap.set(q.courseId, arr);
+  // 초기 로드는 과목 목록 state 가 반영되기 전에 시작되므로 대상 과목을 인자로 받는다.
+  const refreshCourseData = useCallback(
+    async (targetCourses: CourseBase[] = courses) => {
+      if (useMockData) {
+        await applyMock();
+        setRefreshTime(new Date().toLocaleTimeString());
+        setRemainingTime(0);
+        setIsPending(false);
+        return;
       }
 
-      await Promise.all(
-        courses.map(async (course) => {
-          const scraped = await scrapeCourseData(
-            course.courseId,
-            cachedQuizMap.get(course.courseId),
-            course.isCommunity
-          );
+      try {
+        setIsError(false);
+        setIsPending(true);
+        const fetchedAt = Date.now();
 
-          deduplicateInto(
-            vods,
-            mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray),
-            seenVods,
-            (v) => makeVodKey(v.courseId, v.title, v.week)
-          );
-          deduplicateInto(assigns, mergeDueDateItems(course, scraped.assignDataArray), seenAssigns, (a) =>
-            makeItemKey(a.courseId, a.title, a.dueDate ?? '')
-          );
-          deduplicateInto(quizzes, mergeDueDateItems(course, scraped.quizDataArray), seenQuizzes, (q) =>
-            makeItemKey(q.courseId, q.title, q.dueDate ?? '')
-          );
-        })
-      );
+        const vods: Vod[] = [];
+        const assigns: Assign[] = [];
+        const quizzes: Quiz[] = [];
+        const seenVods = new Set<string>();
+        const seenAssigns = new Set<string>();
+        const seenQuizzes = new Set<string>();
 
-      // Storage: 전체 데이터 저장 (강의 페이지 등에서 사용)
-      saveDataToStorage('vod', vods);
-      saveDataToStorage('assign', assigns);
-      saveDataToStorage('quiz', quizzes);
+        // 현재 상태의 퀴즈 데이터를 courseId별로 그룹핑 (마감된 퀴즈 캐시용)
+        const cachedQuizMap = new Map<string, Quiz[]>();
+        for (const q of quizzesRef.current) {
+          const arr = cachedQuizMap.get(q.courseId) ?? [];
+          arr.push(q);
+          cachedQuizMap.set(q.courseId, arr);
+        }
 
-      // State: 대시보드 표시용 날짜 필터링 적용
-      // refreshCourseData 실행 중 addCourseData로 추가된 다른 과목 데이터를 보존
-      const refreshedCourseIds = new Set(courses.map((c) => c.courseId));
-      setVods((prev) => {
-        const kept = prev.filter((v) => !refreshedCourseIds.has(v.courseId));
-        return [...kept, ...filterVodsForDisplay(vods)];
-      });
-      setAssigns((prev) => {
-        const kept = prev.filter((a) => !refreshedCourseIds.has(a.courseId));
-        return [...kept, ...filterItemsForDisplay(assigns)];
-      });
-      setQuizzes((prev) => {
-        const kept = prev.filter((q) => !refreshedCourseIds.has(q.courseId));
-        return [...kept, ...filterItemsForDisplay(quizzes)];
-      });
+        await Promise.all(
+          targetCourses.map(async (course) => {
+            const scraped = await scrapeCourseData(
+              course.courseId,
+              cachedQuizMap.get(course.courseId),
+              course.isCommunity
+            );
 
-      setRefreshTime(new Date(fetchedAt).toLocaleTimeString());
-      setRemainingTime(0);
-      setLastRequestTime(fetchedAt);
-      saveDataToStorage('lastRequestTime', fetchedAt.toString());
-    } catch (error) {
-      logger.course.error('강의 데이터 새로고침 실패:', error);
-      clearLastRequestTime();
-      setIsError(true);
-    } finally {
-      setIsPending(false);
-    }
-  }, [courses, applyMock, useMockData]);
+            deduplicateInto(
+              vods,
+              mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray),
+              seenVods,
+              (v) => makeVodKey(v.courseId, v.title, v.week)
+            );
+            deduplicateInto(assigns, mergeDueDateItems(course, scraped.assignDataArray), seenAssigns, (a) =>
+              makeItemKey(a.courseId, a.title, a.dueDate ?? '')
+            );
+            deduplicateInto(quizzes, mergeDueDateItems(course, scraped.quizDataArray), seenQuizzes, (q) =>
+              makeItemKey(q.courseId, q.title, q.dueDate ?? '')
+            );
+          })
+        );
+
+        // refreshCourseData 실행 중 addCourseData로 추가된 다른 과목 데이터를 보존
+        const refreshedCourseIds = new Set(targetCourses.map((c) => c.courseId));
+
+        // Storage: 전체 데이터 저장 (강의 페이지 등에서 사용). 대상 과목만 교체해 그사이 저장된 다른 과목은 지우지 않고,
+        // 쓰는 시점에 추적하지 않는 과목(새로고침 도중 끈 과목·지난 학기)은 남기지 않는다
+        const isTracked = (courseId: string) => coursesRef.current.some((c) => c.courseId === courseId);
+        const merge = <T extends { courseId: string }>(stored: T[] | null, fresh: T[]) => [
+          ...(stored ?? []).filter((x) => !refreshedCourseIds.has(x.courseId) && isTracked(x.courseId)),
+          ...fresh.filter((x) => isTracked(x.courseId)),
+        ];
+        loadDataFromStorage<Vod[]>('vod', (stored) => saveDataToStorage('vod', merge(stored, vods)));
+        loadDataFromStorage<Assign[]>('assign', (stored) => saveDataToStorage('assign', merge(stored, assigns)));
+        loadDataFromStorage<Quiz[]>('quiz', (stored) => saveDataToStorage('quiz', merge(stored, quizzes)));
+
+        // State: 대시보드 표시용 날짜 필터링 적용
+        setVods((prev) => {
+          const kept = prev.filter((v) => !refreshedCourseIds.has(v.courseId));
+          return [...kept, ...filterVodsForDisplay(vods)];
+        });
+        setAssigns((prev) => {
+          const kept = prev.filter((a) => !refreshedCourseIds.has(a.courseId));
+          return [...kept, ...filterItemsForDisplay(assigns)];
+        });
+        setQuizzes((prev) => {
+          const kept = prev.filter((q) => !refreshedCourseIds.has(q.courseId));
+          return [...kept, ...filterItemsForDisplay(quizzes)];
+        });
+
+        setRefreshTime(new Date(fetchedAt).toLocaleTimeString());
+        setRemainingTime(0);
+        setLastRequestTime(fetchedAt);
+        saveDataToStorage('lastRequestTime', fetchedAt.toString());
+      } catch (error) {
+        logger.course.error('강의 데이터 새로고침 실패:', error);
+        clearLastRequestTime();
+        setIsError(true);
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [courses, applyMock, useMockData]
+  );
 
   const addCourseData = useCallback(async (course: CourseBase) => {
     setPendingCourseIds((prev) => new Set(prev).add(course.courseId));
@@ -278,44 +294,43 @@ export function useCourseData(courses: CourseBase[]) {
   }, [refreshCourseData]);
 
   // 초기 로드: 캐시 확인 후 fetch 또는 캐시 사용 (최초 1회만 실행)
-  // 이 effect 는 과목 목록(DOM·스토리지에서 비동기로 도착)이 준비되면 한 번 실행되어 데이터를 불러온다.
-  // 이때 로딩 상태와 마지막 갱신 시각을 바꾸는 것은 의도된 동작이므로 해당 규칙을 이 구간에서만 끈다.
-  /* eslint-disable react-hooks/set-state-in-effect */
+  // 과목 목록 초기화가 끝나는 시점(useGetCourses 의 onInitialized)에 호출된다.
   const initialLoadDone = useRef(false);
-  useEffect(() => {
-    if (!courses || courses.length === 0) return;
-    if (initialLoadDone.current) return;
-    initialLoadDone.current = true;
+  const loadInitialData = useCallback(
+    (initialCourses: CourseBase[]) => {
+      if (initialCourses.length === 0) return;
+      if (initialLoadDone.current) return;
+      initialLoadDone.current = true;
 
-    const lastRequest = getLastRequestTime();
-    const now = Date.now();
+      const lastRequest = getLastRequestTime();
+      const now = Date.now();
 
-    if (lastRequest) {
-      setRefreshTime(new Date(lastRequest).toLocaleTimeString());
-    }
+      if (lastRequest) {
+        setRefreshTime(new Date(lastRequest).toLocaleTimeString());
+      }
 
-    if (!lastRequest || now - lastRequest >= CACHE_TTL_MS) {
-      setIsPending(true);
-      refreshCourseData();
-    } else {
-      const trackedIds = new Set(courses.map((c) => c.courseId));
-      const byTracked = <T extends { courseId: string }>(items: T[]) =>
-        items.filter((item) => trackedIds.has(item.courseId));
+      if (!lastRequest || now - lastRequest >= CACHE_TTL_MS) {
+        setIsPending(true);
+        refreshCourseData(initialCourses);
+      } else {
+        const trackedIds = new Set(initialCourses.map((c) => c.courseId));
+        const byTracked = <T extends { courseId: string }>(items: T[]) =>
+          items.filter((item) => trackedIds.has(item.courseId));
 
-      setRemainingTime((now - lastRequest) / REFRESH_INTERVAL_MS);
-      loadDataFromStorage<Vod[]>('vod', (data) => {
-        if (data) setVods(filterVodsForDisplay(byTracked(data)));
-      });
-      loadDataFromStorage<Assign[]>('assign', (data) => {
-        if (data) setAssigns(filterItemsForDisplay(byTracked(data)));
-      });
-      loadDataFromStorage<Quiz[]>('quiz', (data) => {
-        if (data) setQuizzes(filterItemsForDisplay(byTracked(data)));
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courses]);
-  /* eslint-enable react-hooks/set-state-in-effect */
+        setRemainingTime((now - lastRequest) / REFRESH_INTERVAL_MS);
+        loadDataFromStorage<Vod[]>('vod', (data) => {
+          if (data) setVods(filterVodsForDisplay(byTracked(data)));
+        });
+        loadDataFromStorage<Assign[]>('assign', (data) => {
+          if (data) setAssigns(filterItemsForDisplay(byTracked(data)));
+        });
+        loadDataFromStorage<Quiz[]>('quiz', (data) => {
+          if (data) setQuizzes(filterItemsForDisplay(byTracked(data)));
+        });
+      }
+    },
+    [refreshCourseData]
+  );
 
   return {
     vods,
@@ -326,6 +341,7 @@ export function useCourseData(courses: CourseBase[]) {
     refreshTime,
     isError,
     refreshCourseData,
+    loadInitialData,
     addCourseData,
     removeCourseData,
     pendingCourseIds,
