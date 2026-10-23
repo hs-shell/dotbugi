@@ -18,12 +18,13 @@ const STYLE = `
 :host{all:initial;display:inline-flex;align-items:center;gap:6px;margin-left:6px;vertical-align:middle;
   font:600 11px/1.4 system-ui,-apple-system,sans-serif}
 button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:4px;
-  height:22px;min-width:22px;padding:0 6px;border-radius:9999px;cursor:pointer;color:#a1a1aa;
-  border:1px solid transparent;transition:background .2s,color .2s}
-button:hover{background:#f4f4f5;color:#18181b}
+  height:24px;min-width:24px;padding:0 4px;border-radius:6px;cursor:pointer;color:#71717a;
+  transition:background .15s,color .15s}
+button:hover{background:#e4e4e7;color:#18181b}
+button:active{background:#d4d4d8}
 button:focus-visible{outline:2px solid #a1a1aa;outline-offset:1px}
 button[hidden],span[hidden]{display:none}
-svg{width:14px;height:14px}
+svg{width:16px;height:16px}
 .progress{color:#f59e0b;font-variant-numeric:tabular-nums}
 .cancel svg{display:none}
 .cancel:hover .progress{display:none}
