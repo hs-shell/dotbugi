@@ -13,6 +13,6 @@ export function isLmsUrl(url: string | undefined): boolean {
 }
 
 /** 스크래핑한 URL 은 LMS 페이지의 외부 링크일 수 있어 LMS 출처일 때만 연다 */
-export function openLmsUrl(url: string, target = '_blank'): void {
-  if (isLmsUrl(url)) window.open(url, target);
+export function openLmsUrl(url: string, target = '_blank', features?: string): void {
+  if (isLmsUrl(url)) window.open(url, target, features);
 }

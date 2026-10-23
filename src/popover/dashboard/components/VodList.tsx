@@ -95,7 +95,7 @@ export default function VodList({ courseData, onHideTask, onHideTasks }: VideoPr
                         <ContextMenuTrigger asChild>
                           <div
                             className="w-full px-4 py-3 bg-[rgb(246,250,255)] hover:bg-[rgb(238,246,255)] cursor-pointer transition-colors duration-300"
-                            onClick={() => openLmsUrl(vod.url.replace('view', 'viewer'), 'VodContentWindow')}
+                            onClick={() => openLmsUrl(vod.url.replace('view', 'viewer'), '_blank', 'VodContentWindow')}
                           >
                             <div className="font-medium text-ellipsis line-clamp-1" style={{ fontWeight: 550 }}>
                               {vod.title}

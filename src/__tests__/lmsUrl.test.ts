@@ -23,6 +23,16 @@ describe('openLmsUrl', () => {
     openLmsUrl('https://evil.com/');
     expect(open).not.toHaveBeenCalled();
     openLmsUrl('https://learn.hansung.ac.kr/mod/assign/view.php?id=1');
-    expect(open).toHaveBeenCalledWith('https://learn.hansung.ac.kr/mod/assign/view.php?id=1', '_blank');
+    expect(open).toHaveBeenCalledWith('https://learn.hansung.ac.kr/mod/assign/view.php?id=1', '_blank', undefined);
+  });
+
+  it('features 를 넘기면 팝업 창 옵션을 그대로 전달', () => {
+    const open = vi.spyOn(window, 'open').mockReturnValue(null);
+    openLmsUrl('https://learn.hansung.ac.kr/mod/vod/viewer.php?id=1', '_blank', 'VodContentWindow');
+    expect(open).toHaveBeenCalledWith(
+      'https://learn.hansung.ac.kr/mod/vod/viewer.php?id=1',
+      '_blank',
+      'VodContentWindow'
+    );
   });
 });
