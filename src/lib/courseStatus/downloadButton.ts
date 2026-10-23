@@ -103,7 +103,7 @@ export function createDownloadButton(vodUrl: string, cmid: string, fileName: str
     swallow(e);
     msg.textContent = '';
     const result = await runVodDownload(vodUrl, fileName, (ratio) => {
-      if (ratio === 0) showMessage('vodDownload.started', true);
+      if (ratio === 0) showMessage('vodDownload.started');
     });
     if (result !== 'dismissed') showMessage(`vodDownload.${result}`, result === 'done');
   });

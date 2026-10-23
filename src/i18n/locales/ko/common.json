@@ -67,7 +67,7 @@
   "downloadLogs": "로그 다운로드",
   "vodDownload": {
     "button": "강의 다운로드",
-    "started": "다운로드 중",
+    "started": "다운로드 중…",
     "saved": "저장됨",
     "cancel": "다운로드 취소",
     "done": "다운로드 완료",
