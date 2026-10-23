@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.2.1](https://github.com/hs-shell/dotbugi/compare/v5.2.0...v5.2.1) (2026-10-23)
+
+
+### Bug Fixes
+
+* 닫힌 플레이어 팝오버가 메인 페이지 클릭을 가로채지 않게 ([#191](https://github.com/hs-shell/dotbugi/issues/191)) ([9240788](https://github.com/hs-shell/dotbugi/commit/924078810db9bb320a95214689ae24b8be64ae06))
+* 닫힌 플레이어 팝오버의 위치 래퍼가 페이지 클릭을 가로채지 않게 ([9240788](https://github.com/hs-shell/dotbugi/commit/924078810db9bb320a95214689ae24b8be64ae06))
+
 ## [5.2.0](https://github.com/hs-shell/dotbugi/compare/v5.1.0...v5.2.0) (2026-10-23)
 
 
