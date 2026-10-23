@@ -16,8 +16,7 @@ export interface ActiveVodDownload {
 // 대시보드와 강의 페이지 버튼이 같은 content script 모듈을 공유하므로 페이지 전체에서 한 번에 하나만 받는다
 let active: AbortController | null = null;
 let snapshot: ActiveVodDownload | null = null;
-// 받기를 마친 VOD(cmid) 의 저장 파일 — 모듈 메모리라 페이지를 새로 고치면 사라진다
-const savedHandles = new Map<string, FileSystemFileHandle>();
+// 받기를 마친 VOD(cmid) — 모듈 메모리라 페이지를 새로 고치면 사라진다
 let savedCmids: ReadonlySet<string> = new Set();
 const listeners = new Set<() => void>();
 
@@ -43,31 +42,11 @@ export function getSavedCmids(): ReadonlySet<string> {
   return savedCmids;
 }
 
-function markSaved(vodUrl: string, handle: FileSystemFileHandle) {
+function markSaved(vodUrl: string) {
   const cmid = toCmid(vodUrl);
   if (!cmid) return;
-  savedHandles.set(cmid, handle);
-  savedCmids = new Set(savedHandles.keys());
+  savedCmids = new Set(savedCmids).add(cmid);
   notify();
-}
-
-const isAbortError = (error: unknown) => error instanceof DOMException && error.name === 'AbortError';
-
-/**
- * 저장한 파일이 있는 폴더에서 파일 열기 대화상자를 연다 (확장 권한 없이 저장 위치를 보여 줄 수 있는 유일한 방법).
- * 고른 파일로는 아무것도 하지 않는다. 클릭 핸들러 안에서 불러야 한다.
- */
-export async function openSavedLocation(vodUrl: string): Promise<void> {
-  const cmid = toCmid(vodUrl);
-  const handle = cmid ? savedHandles.get(cmid) : undefined;
-  if (!handle || !window.showOpenFilePicker) return;
-  try {
-    await window.showOpenFilePicker({ startIn: handle, types: MP4_TYPES });
-  } catch (error) {
-    if (isAbortError(error)) return;
-    // startIn 에 핸들을 못 쓰는 환경이면 기본 위치로라도 연다
-    await window.showOpenFilePicker({ types: MP4_TYPES }).catch(() => {});
-  }
 }
 
 // 같은 탭에서 다른 페이지로 가면 다운로드가 조용히 끊기므로 브라우저 확인 창으로 한 번 막는다
@@ -113,7 +92,7 @@ export async function runVodDownload(
   try {
     report(0);
     await downloadVod(vodUrl, handle, controller.signal, report);
-    markSaved(vodUrl, handle);
+    markSaved(vodUrl);
     return 'done';
   } catch (error) {
     if (controller.signal.aborted) return 'cancelled';

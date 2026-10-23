@@ -68,7 +68,7 @@
   "vodDownload": {
     "button": "Download lecture",
     "started": "Downloading…",
-    "openLocation": "Open save location",
+    "saved": "Saved",
     "cancel": "Cancel download",
     "done": "Download complete",
     "cancelled": "Download cancelled",

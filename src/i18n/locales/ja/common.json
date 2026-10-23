@@ -68,7 +68,7 @@
   "vodDownload": {
     "button": "講義をダウンロード",
     "started": "ダウンロード中…",
-    "openLocation": "保存場所を開く",
+    "saved": "保存済み",
     "cancel": "ダウンロードをキャンセル",
     "done": "ダウンロード完了",
     "cancelled": "ダウンロードをキャンセルしました",

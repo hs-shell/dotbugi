@@ -1,4 +1,4 @@
-import { Download, FolderOpen, X } from 'lucide-react';
+import { Check, Download, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import type { VodDownloadState } from '@/hooks/useVodDownload';
@@ -38,19 +38,15 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
   }
 
   if (download.isSaved(vod)) {
-    // 이번 페이지에서 받은 강의는 새로 고칠 때까지 저장 위치 열기 버튼이 된다
+    // 이번 페이지에서 받은 강의는 새로 고칠 때까지 초록 체크 (누를 수 없음 — 클릭은 행으로 그대로 간다)
     return (
-      <button
-        type="button"
-        className={ICON_BUTTON}
-        aria-label={t('vodDownload.openLocation')}
-        onClick={(e) => {
-          e.stopPropagation();
-          download.openLocation(vod);
-        }}
+      <span
+        role="img"
+        aria-label={t('vodDownload.saved')}
+        className="shrink-0 h-[28px] w-[28px] p-[6px] flex items-center justify-center"
       >
-        <FolderOpen className={`${ICON} text-[#71717a] group-hover:text-[#18181b] transition-colors`} />
-      </button>
+        <Check className={`${ICON} text-[#16a34a] dotbugi-saved-in`} />
+      </span>
     );
   }
 

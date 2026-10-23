@@ -69,7 +69,7 @@
   "vodDownload": {
     "button": "下载课程",
     "started": "下载中…",
-    "openLocation": "打开保存位置",
+    "saved": "已保存",
     "cancel": "取消下载",
     "done": "下载完成",
     "cancelled": "已取消下载",

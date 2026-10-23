@@ -68,7 +68,7 @@
   "vodDownload": {
     "button": "강의 다운로드",
     "started": "다운로드 중",
-    "openLocation": "저장 위치 열기",
+    "saved": "저장됨",
     "cancel": "다운로드 취소",
     "done": "다운로드 완료",
     "cancelled": "다운로드를 취소했어요",

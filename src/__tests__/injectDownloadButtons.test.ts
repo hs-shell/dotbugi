@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { injectDownloadButtons } from '@/lib/courseStatus/injectDownloadButtons';
-import { openSavedLocation, runVodDownload } from '@/lib/vodDownload/controller';
+import { runVodDownload } from '@/lib/vodDownload/controller';
 
 // 언어 전환을 흉내 내려고 현재 언어를 키 앞에 붙인다
 const i18nState = vi.hoisted(() => ({ lang: 'ko', handlers: [] as (() => void)[] }));
@@ -16,7 +16,6 @@ const savedState = vi.hoisted(() => ({ cmids: new Set<string>() }));
 vi.mock('@/lib/vodDownload/controller', () => ({
   runVodDownload: vi.fn().mockResolvedValue('dismissed'),
   cancelVodDownload: vi.fn(),
-  openSavedLocation: vi.fn(),
   getActiveVodDownload: () => null,
   getSavedCmids: () => savedState.cmids,
   subscribeVodDownload: () => () => {},
@@ -112,20 +111,18 @@ describe('injectDownloadButtons', () => {
     expect(button?.getAttribute('aria-label')).toBe('en:vodDownload.button');
   });
 
-  it('이번 페이지에서 받은 강의는 폴더 버튼만 보이고 누르면 저장 위치를 연다', () => {
+  it('이번 페이지에서 받은 강의는 초록 체크만 보인다 (버튼 아님)', () => {
     savedState.cmids = new Set(['103']);
     injectDownloadButtons('자료구조');
 
     const [first, second] = Array.from(document.querySelectorAll(HOST)).map((h) => h.shadowRoot);
-    expect(first?.querySelector<HTMLButtonElement>('.folder')?.hidden).toBe(true);
+    expect(first?.querySelector<HTMLElement>('.saved')?.hidden).toBe(true);
     expect(first?.querySelector<HTMLButtonElement>('.start')?.hidden).toBe(false);
 
-    const folder = second?.querySelector<HTMLButtonElement>('.folder');
-    expect(folder?.hidden).toBe(false);
+    const saved = second?.querySelector<HTMLElement>('.saved');
+    expect(saved?.hidden).toBe(false);
+    expect(saved?.tagName).toBe('SPAN');
+    expect(saved?.getAttribute('aria-label')).toBe('ko:vodDownload.saved');
     expect(second?.querySelector<HTMLButtonElement>('.start')?.hidden).toBe(true);
-    expect(folder?.getAttribute('aria-label')).toBe('ko:vodDownload.openLocation');
-
-    folder?.click();
-    expect(openSavedLocation).toHaveBeenCalledWith('https://learn.hansung.ac.kr/mod/vod/view.php?id=103');
   });
 });
