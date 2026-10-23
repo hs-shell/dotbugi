@@ -100,6 +100,18 @@ jobs:
             const repoUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`;
             // 스토어 게시가 켜져 있으면 같은 실행의 store 잡이 승인 대기 중 → 승인 화면(실행 페이지)으로 안내
             const url = awaitingStore ? `${repoUrl}/actions/runs/${context.runId}` : `${repoUrl}/releases/tag/${tag}`;
+            // 승인자가 직전 스테이블 대비 변경 내역을 바로 검토할 수 있도록 비교 링크를 만든다.
+            // 베타(프리릴리즈)·드래프트·현재 태그는 제외. 조회 실패는 알림 자체를 막지 않도록 무시한다.
+            let compareLink = '';
+            if (success) {
+              try {
+                const { data: releases } = await github.rest.repos.listReleases({ ...context.repo, per_page: 20 });
+                const prev = releases.find((r) => !r.prerelease && !r.draft && r.tag_name !== tag);
+                if (prev) compareLink = `\n\n[변경 사항 보기](${repoUrl}/compare/${prev.tag_name}...${tag})`;
+              } catch (e) {
+                core.warning(`이전 릴리즈 조회 실패: ${e.message}`);
+              }
+            }
             const res = await fetch(webhook, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -114,8 +126,8 @@ jobs:
                   description: !success
                     ? '워크플로 로그를 확인해주세요.'
                     : awaitingStore
-                      ? 'GitHub Release가 생성되었습니다. 제목을 눌러 **Review deployments → Approve** 하면 스토어 업로드·심사 제출이 진행됩니다.'
-                      : '새 버전이 발행되었습니다.',
+                      ? 'GitHub Release가 생성되었습니다. 제목을 눌러 **Review deployments → Approve** 하면 스토어 업로드·심사 제출이 진행됩니다.' + compareLink
+                      : '새 버전이 발행되었습니다.' + compareLink,
                   color: !success ? 0xed4245 : awaitingStore ? 0xfee75c : 0x57f287,
                 }],
               }),
