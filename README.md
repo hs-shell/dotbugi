@@ -100,7 +100,7 @@ npm run build
 
 이 프로젝트는 **이슈 우선** 정책을 따른다. 모든 변경은 이슈를 먼저 등록하고 PR에서 참조해야 한다(`1 PR = 1 Issue`).
 
-- 시작하기 전에 [CONTRIBUTING.md](./CONTRIBUTING.md)와 [행동 강령](./CODE_OF_CONDUCT.md)을 읽어 주세요.
+- 시작하기 전에 [CONTRIBUTING.md](./CONTRIBUTING.md)를 읽어 주세요.
 - 커밋과 PR 제목은 [Conventional Commits](https://www.conventionalcommits.org/)를 따른다.
 
 <br><br>
