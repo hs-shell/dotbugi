@@ -1,4 +1,4 @@
-import { BASE_LINK } from '@/constants/links';
+import { BASE_LINK } from '@dotbugi/lms-parser';
 import {
   CONNECT_CODE_PATTERN,
   CONNECT_HASH_PATTERN,
