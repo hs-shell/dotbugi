@@ -1,0 +1,22 @@
+# 코드 오너 — PR 리뷰어 자동 지정 (Dependabot PR 포함)
+# 브랜치 보호의 "Require review from Code Owners" 를 켜면 해당 경로는 오너 승인 없이 머지할 수 없다.
+# '*' 은 메인테이너 팀 → 팀 설정의 자동 할당(round robin)으로 팀원 1명에게 리뷰가 배정된다.
+# 아래 민감 경로는 메인테이너가 늘어나도 프로젝트 오너로 유지한다. (MAINTAINERS.md)
+# 나중에 매칭된 규칙이 우선한다.
+
+*                               @hs-shell/maintainers
+
+# ── 배포·권한·공급망에 직접 영향을 주는 경로 (프로젝트 오너 리뷰 필수) ──
+# 워크플로/스크립트: 스토어 게시·GCP 토큰 발급 경로
+/.github/                       @6-keem
+# 확장 권한·OAuth client_id·버전
+/manifest.config.ts             @6-keem
+# 의존성(공급망)
+/package.json                   @6-keem
+/package-lock.json              @6-keem
+# 릴리즈 버전 산출
+/release-please-config.json     @6-keem
+/.release-please-manifest.json  @6-keem
+# 자동 리뷰·훅 설정
+/.coderabbit.yaml               @6-keem
+/.husky/                        @6-keem
