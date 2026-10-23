@@ -61,7 +61,7 @@ npm install
 npm run build
 ```
 
-`chrome://extensions`에서 개발자 모드를 켜고 빌드된 `dist/` 폴더를 **압축해제된 확장 프로그램으로 로드**한다. 자세한 개발 환경과 작업 절차는 [CONTRIBUTING.md](./CONTRIBUTING.md)를 참고한다.
+`chrome://extensions`에서 개발자 모드를 켜고 빌드된 `dist/` 폴더를 **압축해제된 확장 프로그램으로 로드**한다. 전체 명령어(mock·로컬 테스트·문서 빌드 등)와 작업 절차는 [CONTRIBUTING.md](./CONTRIBUTING.md#2-개발-환경)를 참고한다.
 
 <br><br>
 

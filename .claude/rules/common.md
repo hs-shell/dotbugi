@@ -24,6 +24,6 @@ PR 전에 통과시킨다 (`pr-checks` 워크플로와 동일 조건):
 | 타입 체크 + 빌드 | `npm run build` (`tsc -b && vite build`) |
 | 테스트           | `npm run test` (vitest)                  |
 
-확장 동작 확인은 `npm run build` 후 `dist/`를 `chrome://extensions`에서 압축해제 로드.
+확장 동작 확인은 `npm run build` 후 `dist/`를 `chrome://extensions`에서 압축해제 로드. Google 캘린더(OAuth) 확인이 필요하면 `npm run build:local` (스토어와 같은 확장 ID).
 
 > 이 프로젝트는 Rust/Python/DB 가 없다 — fmt/clippy/ruff/pytest/migration 류 검증은 해당 없음.

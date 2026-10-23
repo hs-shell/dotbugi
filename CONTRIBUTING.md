@@ -12,11 +12,30 @@
 
 ```bash
 npm install        # 의존성 설치 (husky git hook 자동 설정)
-npm run dev        # Vite 개발 서버
-npm run build      # 타입 체크 + 프로덕션 빌드
-npm run lint       # ESLint
-npm run test       # 테스트
 ```
+
+### 명령어
+
+| 명령                   | 용도                                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `npm run dev`          | Vite 개발 서버 (UI 확인용, 확장 플러그인 제외)                                                             |
+| `npm run build`        | 타입 체크 + 프로덕션 빌드 → `dist/` (스토어 업로드용과 동일)                                               |
+| `npm run build:mock`   | mock 데이터 빌드 (LMS 로그인 없이 화면 확인)                                                               |
+| `npm run build:local`  | 로컬 테스트 빌드 — 스토어와 같은 확장 ID, `DEV` 표시 ([아래](#google-캘린더-연동을-로컬에서-테스트하려면)) |
+| `npm run preview`      | 프로덕션 빌드 미리보기                                                                                     |
+| `npm run lint`         | ESLint                                                                                                     |
+| `npm run format`       | Prettier 일괄 포맷                                                                                         |
+| `npm run test`         | 테스트 1회 실행 (Vitest)                                                                                   |
+| `npm run test:watch`   | 테스트 감시 모드                                                                                           |
+| `npm run docs:dev`     | 문서 사이트(VitePress) 개발 서버                                                                           |
+| `npm run docs:build`   | 문서 사이트 빌드                                                                                           |
+| `npm run docs:preview` | 문서 사이트 빌드 미리보기                                                                                  |
+
+베타 채널로 빌드하려면 앞에 `RELEASE_CHANNEL=beta` 를 붙입니다. (예: `RELEASE_CHANNEL=beta npm run build`)
+
+PR 전에 CI 와 같은 검사를 로컬에서 돌려 보세요: `npx prettier --check .` → `npm run lint` → `npm run build` → `npm run test`
+
+### 확장 로드
 
 `npm run build` 후 `chrome://extensions`에서 개발자 모드를 켜고 `dist/`를 **압축해제된 확장 프로그램으로 로드**해 확인합니다.
 

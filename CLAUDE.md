@@ -80,13 +80,18 @@ Dotbugi (돋부기) is a Chrome Extension (Manifest V3) for Hansung University s
 ## Build & Development Commands
 
 ```bash
-npm run dev       # Vite dev server
-npm run build     # TypeScript check + Vite production build
-npm run lint      # ESLint
-npm run test      # Vitest
-npm run format    # Prettier write
-npm run preview   # Preview production build
+npm run dev           # Vite dev server (crx plugin excluded)
+npm run build         # TypeScript check + Vite production build (store upload)
+npm run build:mock    # Mock-data build (no LMS login needed)
+npm run build:local   # Local test build: manifest `key` → same extension ID as store, DEV icon/name (never upload)
+npm run lint          # ESLint
+npm run test          # Vitest (test:watch for watch mode)
+npm run format        # Prettier write
+npm run preview       # Preview production build
+npm run docs:dev      # VitePress docs dev server (docs:build / docs:preview)
 ```
+
+Prefix `RELEASE_CHANNEL=beta` for beta-channel builds. Full command reference: `CONTRIBUTING.md` §2.
 
 To test the extension, load `dist/` as an unpacked extension in Chrome (`chrome://extensions`).
 
