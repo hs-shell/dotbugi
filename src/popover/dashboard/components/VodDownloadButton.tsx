@@ -11,7 +11,7 @@ interface VodDownloadButtonProps {
 
 // 강의 페이지 버튼(downloadButton.ts)과 같은 비율·색. rem 은 LMS 페이지 html 글꼴 크기를 따라 달라지므로 px·hex 로 고정한다
 const ICON_BUTTON =
-  'group shrink-0 h-[28px] min-w-[28px] p-[6px] flex items-center justify-center rounded-[6px] border border-transparent bg-transparent cursor-pointer transition-colors duration-150 hover:bg-[#dbeafe] hover:border-[#93c5fd] active:bg-[#bfdbfe] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]';
+  'group shrink-0 h-[28px] min-w-[28px] p-[6px] flex items-center justify-center rounded-[6px] border border-transparent bg-transparent cursor-pointer transition-colors duration-150 hover:bg-[#e4e4e7] active:bg-[#d4d4d8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a1a1aa]';
 const ICON = 'w-[16px] h-[16px] shrink-0';
 
 export default function VodDownloadButton({ vod, download }: VodDownloadButtonProps) {
@@ -32,7 +32,7 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
         <span className="text-[11px] font-semibold text-[#f59e0b] tabular-nums group-hover:hidden">
           {download.percent}%
         </span>
-        <X className={`${ICON} text-[#1d4ed8] hidden group-hover:block`} />
+        <X className={`${ICON} text-[#18181b] hidden group-hover:block`} />
       </button>
     );
   }
@@ -52,7 +52,7 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
         download.start(vod);
       }}
     >
-      <Download className={`${ICON} text-[#71717a] group-hover:text-[#1d4ed8] transition-colors`} />
+      <Download className={`${ICON} text-[#71717a] group-hover:text-[#18181b] transition-colors`} />
     </button>
   );
 }

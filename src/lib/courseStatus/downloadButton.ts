@@ -20,9 +20,9 @@ const STYLE = `
 button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:4px;
   height:24px;min-width:24px;padding:0 4px;border-radius:6px;cursor:pointer;color:#71717a;
   border:1px solid transparent;transition:background .15s,color .15s,border-color .15s}
-button:hover{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}
-button:active{background:#bfdbfe}
-button:focus-visible{outline:2px solid #3b82f6;outline-offset:1px}
+button:hover{background:#e4e4e7;color:#18181b}
+button:active{background:#d4d4d8}
+button:focus-visible{outline:2px solid #a1a1aa;outline-offset:1px}
 button[hidden],.msg:empty{display:none}
 svg{width:16px;height:16px}
 .progress{color:#f59e0b;font-variant-numeric:tabular-nums}
