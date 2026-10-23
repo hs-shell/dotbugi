@@ -4,18 +4,22 @@ import { initReactI18next } from 'react-i18next';
 import koCommon from './locales/ko/common.json';
 import koPopover from './locales/ko/popover.json';
 import koPlayer from './locales/ko/player.json';
+import koConnect from './locales/ko/connect.json';
 
 import enCommon from './locales/en/common.json';
 import enPopover from './locales/en/popover.json';
 import enPlayer from './locales/en/player.json';
+import enConnect from './locales/en/connect.json';
 
 import jaCommon from './locales/ja/common.json';
 import jaPopover from './locales/ja/popover.json';
 import jaPlayer from './locales/ja/player.json';
+import jaConnect from './locales/ja/connect.json';
 
 import zhCommon from './locales/zh/common.json';
 import zhPopover from './locales/zh/popover.json';
 import zhPlayer from './locales/zh/player.json';
+import zhConnect from './locales/zh/connect.json';
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'ko', label: '한국어' },
@@ -33,10 +37,10 @@ function detectLanguage(): LanguageCode {
 }
 
 const resources = {
-  ko: { common: koCommon, popover: koPopover, player: koPlayer },
-  en: { common: enCommon, popover: enPopover, player: enPlayer },
-  ja: { common: jaCommon, popover: jaPopover, player: jaPlayer },
-  zh: { common: zhCommon, popover: zhPopover, player: zhPlayer },
+  ko: { common: koCommon, popover: koPopover, player: koPlayer, connect: koConnect },
+  en: { common: enCommon, popover: enPopover, player: enPlayer, connect: enConnect },
+  ja: { common: jaCommon, popover: jaPopover, player: jaPlayer, connect: jaConnect },
+  zh: { common: zhCommon, popover: zhPopover, player: zhPlayer, connect: zhConnect },
 };
 
 i18n.use(initReactI18next).init({
@@ -44,7 +48,7 @@ i18n.use(initReactI18next).init({
   lng: detectLanguage(),
   fallbackLng: 'ko',
   defaultNS: 'common',
-  ns: ['common', 'popover', 'player'],
+  ns: ['common', 'popover', 'player', 'connect'],
   interpolation: { escapeValue: false },
 });
 

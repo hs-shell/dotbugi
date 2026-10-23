@@ -1,0 +1,13 @@
+{
+  "title": "要连接 Claude（dotbugi-mcp）吗？",
+  "description": "当前的 LMS 登录会话只会发送给在本机运行的 dotbugi-mcp（端口 {{port}}），不会发送到外部服务器。",
+  "fingerprintLabel": "确认码：",
+  "fingerprintNotice": "仅当与终端中 dotbugi-mcp login 显示的确认码一致时才点击“连接”。如果不是您本人运行的，请取消。",
+  "connect": "连接",
+  "connecting": "连接中…",
+  "cancel": "取消",
+  "noPending": "没有待处理的连接请求。请在终端重新运行 dotbugi-mcp login。",
+  "success": "已连接。可以关闭此窗口。",
+  "httpError": "连接失败（HTTP {{status}}）。请重新运行 dotbugi-mcp login。",
+  "networkError": "连接失败：请确认 dotbugi-mcp 正在等待。"
+}

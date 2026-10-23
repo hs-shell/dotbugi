@@ -1,0 +1,13 @@
+{
+  "title": "Claude(dotbugi-mcp)와 연결할까요?",
+  "description": "현재 LMS 로그인 세션을 이 PC에서 실행 중인 dotbugi-mcp(포트 {{port}})에만 전달합니다. 외부 서버로는 보내지 않습니다.",
+  "fingerprintLabel": "확인 코드:",
+  "fingerprintNotice": "터미널의 dotbugi-mcp login 이 보여 준 확인 코드와 같을 때만 [연결]을 누르세요. 직접 실행하지 않았다면 취소하세요.",
+  "connect": "연결",
+  "connecting": "연결 중…",
+  "cancel": "취소",
+  "noPending": "대기 중인 연결 요청이 없습니다. 터미널에서 dotbugi-mcp login을 다시 실행하세요.",
+  "success": "연결 완료. 이 창을 닫아도 됩니다.",
+  "httpError": "연결 실패 (HTTP {{status}}). dotbugi-mcp login을 다시 실행하세요.",
+  "networkError": "연결 실패: dotbugi-mcp가 대기 중인지 확인하세요."
+}
