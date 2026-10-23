@@ -26,6 +26,15 @@ PR 머지 (승인 1건 + CI)            ← 머지 통제
 - 스토어 게시용 장기 비밀은 저장소에 없다. 토큰은 승인된 `stable`/`beta` 환경 잡에서만 발급된다 (GCP WIF 조건).
 - 배포 승인 요청은 Discord 로 온다. **승인 전 알림의 "변경 사항 보기" 링크로 직전 릴리즈 대비 변경을 확인한다.**
 
+## 릴리즈 / 버전 규칙
+
+릴리즈는 **release-please** 로 관리한다 (통합과 배포 분리).
+
+- 평소 PR 을 main 에 머지해도 릴리즈는 나가지 않는다. release-please 가 Conventional Commits 를 읽어 **Release PR**(버전 범프 + CHANGELOG)을 자동으로 만들고 갱신한다.
+- 발행하려면 **Release PR 을 머지**한다 → 태그 + GitHub Release + (활성화 시) stable 환경 승인 후 Chrome Web Store 게시.
+- 버전은 커밋 타입에서 자동 산출된다 (`feat` → minor, `fix` → patch, `feat!`/`BREAKING CHANGE` → major). `build`/`ci`/`docs`/`chore` 는 버전을 올리지 않는다.
+- **베타**: `Release Beta` 워크플로를 수동 실행하면 `vX.Y.Z-beta.N` 프리릴리즈가 발행된다 (스토어 manifest 버전은 `X.Y.Z.N`). 별도 베타 브랜치는 두지 않는다.
+
 ## 메인테이너 합류 시 체크리스트 (오너)
 
 혼자 운영할 때는 승인해 줄 사람이 없어 꺼 둔 설정들을, 메인테이너가 생기면 켠다.
