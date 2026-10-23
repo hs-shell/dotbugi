@@ -1,8 +1,8 @@
-import { BASE_LINK } from '@dotbugi/lms-parser';
 import {
   CONNECT_CODE_PATTERN,
   CONNECT_HASH_PATTERN,
   CONNECT_MESSAGE_TYPE,
+  LMS_ORIGIN,
   MAX_CALLBACK_PORT,
   MIN_CALLBACK_PORT,
   SESSION_COOKIE_NAME,
@@ -66,7 +66,7 @@ export function readSessionCookie(cookie: string): string | null {
 export function isLmsSender(url: string | undefined): boolean {
   if (!url) return false;
   try {
-    return new URL(url).origin === BASE_LINK;
+    return new URL(url).origin === LMS_ORIGIN;
   } catch {
     return false;
   }
