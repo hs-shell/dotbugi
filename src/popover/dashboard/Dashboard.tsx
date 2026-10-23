@@ -47,7 +47,12 @@ export default function Dashboard() {
   const { t } = useTranslation('common');
   // useCourseData 가 useGetCourses 의 결과를 받으므로, 초기화 콜백은 ref 를 거쳐 나중에 정해지는 loadInitialData 를 부른다.
   const loadInitialDataRef = useRef<((courses: CourseBase[]) => void) | null>(null);
-  const handleCoursesInitialized = useCallback((courses: CourseBase[]) => loadInitialDataRef.current?.(courses), []);
+  // 토글 비교 기준(아래 스토리지 리스너). 초기화 콜백에서 바로 잡아야 커밋 전에 온 변경도 놓치지 않는다
+  const trackedIdsRef = useRef<string[] | null>(null);
+  const handleCoursesInitialized = useCallback((courses: CourseBase[]) => {
+    trackedIdsRef.current = courses.map((c) => c.courseId);
+    loadInitialDataRef.current?.(courses);
+  }, []);
   const { allCourses, trackedCourses, trackedCourseIds, isInitialized } = useGetCourses(handleCoursesInitialized);
 
   const {
@@ -114,7 +119,6 @@ export default function Dashboard() {
 
   // 강의 목록 토글이 trackedCourseIds 를 바꾸면(스토리지 변경 이벤트) 그 자리에서 데이터 추가/삭제와 알림을 처리한다.
   // 비교 기준은 마지막으로 반영된 목록이다. 초기화 전(null)에 온 변경은 초기 로드가 처리하므로 기준만 잡는다.
-  const trackedIdsRef = useRef<string[] | null>(null);
   const courseNotifMapRef = useRef<Map<string, string>>(new Map());
   useEffect(() => {
     trackedIdsRef.current = isInitialized ? trackedCourseIds : null;

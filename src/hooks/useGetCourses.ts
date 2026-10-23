@@ -19,6 +19,7 @@ function getMockCourses(): CourseBase[] | null {
 const ENV_MOCK_COURSES = import.meta.env.VITE_MOCK ? getMockCourses() : null;
 
 // onInitialized: 과목 목록과 추적 과목이 처음 정해진 시점에 추적 과목으로 호출된다 (초기 데이터 로드 연결용).
+// 마운트 effect 의존성이므로 안정된 참조(useCallback)여야 한다 — 매 렌더 새 함수면 DOM 파싱·저장이 반복된다.
 export const useGetCourses = (onInitialized?: (trackedCourses: CourseBase[]) => void) => {
   const [allCourses, setAllCourses] = useState<CourseBase[]>(() => ENV_MOCK_COURSES ?? []);
   const [trackedCourseIds, setTrackedCourseIdsState] = useState<string[] | null>(
