@@ -31,7 +31,7 @@ export function useCourseData(courses: CourseBase[]) {
   const [vods, setVods] = useState<Vod[]>([]);
   const [assigns, setAssigns] = useState<Assign[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  // refreshCourseData(비동기)에서 최신 quizzes 를 읽기 위한 ref — 렌더 중이 아니라 커밋 후 갱신한다.
+  // 비동기 함수 refreshCourseData 에서 최신 quizzes 를 읽기 위한 ref. 렌더 중에는 ref 를 바꿀 수 없으므로 화면 반영 후에 갱신한다.
   const quizzesRef = useRef(quizzes);
   useEffect(() => {
     quizzesRef.current = quizzes;
@@ -250,7 +250,8 @@ export function useCourseData(courses: CourseBase[]) {
 
   // 캐시 TTL 기반 자동 갱신 타이머
   useEffect(() => {
-    // 만료됐으면 즉시(다음 틱) 갱신, 아니면 한 주기 뒤 경과 시간을 올린다. 상태 변경은 타이머 콜백에서만 한다.
+    // 캐시가 만료됐으면 바로 갱신을 시작하고, 아니면 한 주기 뒤에 경과 시간을 1 올린다.
+    // effect 안에서 직접 상태를 바꾸지 않도록 두 경우 모두 타이머 콜백에서 처리한다.
     const expired = remainingTime >= CACHE_TTL_MINUTES;
     const timer = setTimeout(
       () => (expired ? refreshCourseData() : setRemainingTime((prev) => prev + 1)),
@@ -277,8 +278,8 @@ export function useCourseData(courses: CourseBase[]) {
   }, [refreshCourseData]);
 
   // 초기 로드: 캐시 확인 후 fetch 또는 캐시 사용 (최초 1회만 실행)
-  // 과목 목록(외부 DOM/스토리지에서 비동기로 도착)이 준비된 시점에 한 번 동기화하는 effect 라,
-  // 로딩 상태·갱신 시각을 여기서 설정하는 것이 의도된 동작이다.
+  // 이 effect 는 과목 목록(DOM·스토리지에서 비동기로 도착)이 준비되면 한 번 실행되어 데이터를 불러온다.
+  // 이때 로딩 상태와 마지막 갱신 시각을 바꾸는 것은 의도된 동작이므로 해당 규칙을 이 구간에서만 끈다.
   /* eslint-disable react-hooks/set-state-in-effect */
   const initialLoadDone = useRef(false);
   useEffect(() => {

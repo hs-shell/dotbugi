@@ -26,7 +26,7 @@ export function useDashboardFilters({ vods, assigns, quizzes, activeTab }: UseDa
   const [filters, setFilters] = useState(INITIAL_FILTERS);
 
   // 탭이 바뀌면 검색어·필터 패널을 초기화한다.
-  // effect 로 하면 이전 탭 값으로 한 번 렌더된 뒤 다시 렌더되므로, 렌더 중 이전 탭과 비교해 바로 맞춘다.
+  // useEffect 로 처리하면 이전 탭의 검색어로 한 번 그려진 뒤 다시 그려지므로, 렌더 중에 이전 탭과 비교해 바로 초기화한다.
   const [prevTab, setPrevTab] = useState(activeTab);
   if (prevTab !== activeTab) {
     setPrevTab(activeTab);
