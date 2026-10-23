@@ -56,6 +56,8 @@ docs: 기여 가이드 추가
 
 ## 릴리즈 / 버전 규칙 (메인테이너용)
 
+> 권한·배포 승인·운영 절차는 [MAINTAINERS.md](./MAINTAINERS.md) 참고.
+
 릴리즈는 **release-please**로 관리됩니다 (통합과 배포 분리).
 
 - 평소 PR을 main에 머지하면 릴리즈가 나가지 **않습니다.** release-please가 Conventional Commits를 읽어 **"Release PR"**(버전 범프 + CHANGELOG)을 자동으로 만들고 갱신합니다.
