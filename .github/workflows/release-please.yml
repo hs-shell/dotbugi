@@ -28,7 +28,7 @@ jobs:
       # (GITHUB_TOKEN이 만든 PR/커밋은 다른 워크플로를 트리거하지 않음)
       - name: GitHub App 토큰 발급
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
@@ -52,12 +52,12 @@ jobs:
       zip_sha256: ${{ steps.zip.outputs.sha256 }}
     steps:
       - name: 리포지토리 체크아웃
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           persist-credentials: false
 
       - name: Node.js 설정
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: npm
@@ -89,7 +89,7 @@ jobs:
           STORE_ENABLED: ${{ vars.ENABLE_STORE_PUBLISH == 'true' }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
           JOB_STATUS: ${{ job.status }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const webhook = process.env.DISCORD_WEBHOOK_URL;
@@ -149,7 +149,7 @@ jobs:
       id-token: write # WIF(OIDC) 토큰 발급용
     steps:
       - name: 리포지토리 체크아웃
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           persist-credentials: false
 
@@ -189,7 +189,7 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
           JOB_STATUS: ${{ job.status }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const webhook = process.env.DISCORD_WEBHOOK_URL;

@@ -31,12 +31,12 @@ jobs:
       zip_sha256: ${{ steps.zip.outputs.sha256 }}
     steps:
       - name: 리포지토리 체크아웃
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           persist-credentials: false
 
       - name: Node.js 설정
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: npm
@@ -86,7 +86,7 @@ jobs:
           STORE_ENABLED: ${{ vars.ENABLE_STORE_PUBLISH == 'true' }}
           TAG: ${{ steps.ver.outputs.tag }}
           JOB_STATUS: ${{ job.status }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const webhook = process.env.DISCORD_WEBHOOK_URL;
@@ -134,7 +134,7 @@ jobs:
       id-token: write # WIF(OIDC) 토큰 발급용
     steps:
       - name: 리포지토리 체크아웃
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           persist-credentials: false
 
@@ -174,7 +174,7 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           TAG: ${{ needs.beta.outputs.tag }}
           JOB_STATUS: ${{ job.status }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const webhook = process.env.DISCORD_WEBHOOK_URL;
