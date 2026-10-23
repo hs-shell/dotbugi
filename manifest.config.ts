@@ -15,6 +15,12 @@ export function createManifest(mode?: string): ManifestV3Export {
   // 이름에 (Beta) 가 붙고, 별도 아이콘/OAuth client_id 로 분기된다.
   const isBeta = process.env.RELEASE_CHANNEL === 'beta';
 
+  // 베타 빌드는 스토어 게시 여부와 무관하게 프리릴리즈 zip으로 배포되므로,
+  // client_id 가 비어 있으면 Calendar 연동이 깨진 산출물이 나간다 → 빌드 단계에서 막는다.
+  if (isBeta && mode !== 'mock' && !BETA_CLIENT_ID) {
+    throw new Error('BETA_CLIENT_ID 가 비어 있습니다. 베타용 OAuth client_id 발급 후 설정하세요. (#112)');
+  }
+
   const clientId = mode === 'mock' ? DEV_CLIENT_ID : isBeta ? BETA_CLIENT_ID : PROD_CLIENT_ID;
   const iconPrefix = isBeta ? 'icon-beta' : 'icon';
 
