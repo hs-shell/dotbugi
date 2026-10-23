@@ -201,3 +201,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 플레이어 팝오버는 닫혀도 마운트돼 있다(재생 유지). Radix 위치 래퍼는 내용 크기만큼 남아 클릭을 가로채므로 닫힌 동안만 통과시킨다 */
+[data-radix-popper-content-wrapper]:has(> [data-player-popover][data-state='closed']) {
+  pointer-events: none;
+}
