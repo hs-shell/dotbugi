@@ -98,6 +98,18 @@ describe('parsePlaylist', () => {
     expect(() => parsePlaylist(text, base)).toThrow();
   });
 
+  it('EXTINF 합으로 전체 길이를 낸다', () => {
+    const result = parsePlaylist(media(), base);
+    expect(result.kind === 'media' && result.durationSec).toBe(20);
+  });
+
+  it('DISCONTINUITY·MAP·BYTERANGE 는 지원하지 않는다고 거부', () => {
+    expect(() => parsePlaylist(media('#EXT-X-DISCONTINUITY\n'), base)).toThrow('#EXT-X-DISCONTINUITY');
+    expect(() => parsePlaylist(media('#EXT-X-MAP:URI="init.mp4"\n'), base)).toThrow('#EXT-X-MAP');
+    expect(() => parsePlaylist(media('#EXT-X-BYTERANGE:100@0\n'), base)).toThrow('#EXT-X-BYTERANGE');
+    expect(parsePlaylist(media('#EXT-X-DISCONTINUITY-SEQUENCE:0\n'), base).kind).toBe('media');
+  });
+
   it('m3u8 이 아니면 거부', () => {
     expect(() => parsePlaylist('<html></html>', base)).toThrow();
   });
@@ -170,12 +182,50 @@ describe('downloadVod', () => {
 
     await downloadVod(VOD_URL, handle, new AbortController().signal, (r) => progress.push(r));
 
-    expect(writable.write).toHaveBeenCalledTimes(2);
+    // 세그먼트 2개 + 끝에서 길이를 고친 init 세그먼트를 맨 앞에 덮어쓰기
+    expect(writable.write).toHaveBeenCalledTimes(3);
+    expect(writable.write).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'write', position: 0 }));
     expect(writable.close).toHaveBeenCalled();
     expect(writable.abort).not.toHaveBeenCalled();
     expect(progress).toEqual([0.5, 1]);
     for (const [, init] of fetchMock.mock.calls as unknown as [URL, RequestInit][]) {
       expect(init).toMatchObject({ credentials: 'omit', redirect: 'error' });
+    }
+    const { fetchHtml } = await import('@/lib/fetchHtml');
+    expect(vi.mocked(fetchHtml).mock.calls.at(-1)?.[1]).toBeInstanceOf(AbortSignal);
+  });
+
+  it('CDN 5xx·네트워크 오류는 잠시 뒤 재시도하고, 4xx(토큰 만료)는 바로 실패한다', async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = await setup(PLAYLIST);
+      let segmentCalls = 0;
+      fetchMock.mockImplementation(async (url: URL) => {
+        if (url.pathname.endsWith('.m3u8')) return new Response(PLAYLIST);
+        segmentCalls++;
+        if (segmentCalls === 1) throw new TypeError('Failed to fetch');
+        if (segmentCalls === 2) return new Response('', { status: 503 });
+        return new Response(new Uint8Array([1]));
+      });
+      const ok = makeHandle();
+      const done = downloadVod(VOD_URL, ok.handle, new AbortController().signal, () => {});
+      await vi.runAllTimersAsync();
+      await expect(done).resolves.toBeUndefined();
+      expect(segmentCalls).toBe(4);
+
+      fetchMock.mockImplementation(async (url: URL) =>
+        url.pathname.endsWith('.m3u8') ? new Response(PLAYLIST) : new Response('', { status: 403 })
+      );
+      const before = fetchMock.mock.calls.length;
+      const failed = makeHandle();
+      await expect(downloadVod(VOD_URL, failed.handle, new AbortController().signal, () => {})).rejects.toThrow(
+        'CDN HTTP 403'
+      );
+      // 재생 목록 1번 + 세그먼트 1번(재시도 없음)
+      expect(fetchMock.mock.calls.length - before).toBe(2);
+      expect(failed.writable.abort).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
     }
   });
 

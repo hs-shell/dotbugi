@@ -73,7 +73,8 @@
     "cancelled": "다운로드를 취소했어요",
     "failed": "다운로드에 실패했어요",
     "encrypted": "암호화된 영상이라 다운로드할 수 없어요",
-    "unsupported": "이 브라우저는 파일 저장을 지원하지 않아요"
+    "unsupported": "이 브라우저는 파일 저장을 지원하지 않아요",
+    "busy": "이미 다운로드 중이에요"
   },
   "calendar": {
     "bannerTitle": "Google Calendar 연동",

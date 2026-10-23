@@ -9,7 +9,7 @@ function wait(ms: number) {
  * LMS 페이지를 fetch하고 DOM으로 파싱하여 반환
  * 네트워크 에러(Failed to fetch) 시 최대 2회 재시도
  */
-export async function fetchHtml(link: string): Promise<Document> {
+export async function fetchHtml(link: string, signal?: AbortSignal): Promise<Document> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -17,6 +17,7 @@ export async function fetchHtml(link: string): Promise<Document> {
       const response = await fetch(link, {
         method: 'GET',
         credentials: 'include',
+        signal,
       });
 
       if (!response.ok) {
@@ -34,6 +35,7 @@ export async function fetchHtml(link: string): Promise<Document> {
       }
 
       // 네트워크 에러(Failed to fetch)만 재시도
+      if (signal?.aborted) throw error;
       if (attempt < MAX_RETRIES) {
         await wait(RETRY_DELAY_MS * (attempt + 1));
       }

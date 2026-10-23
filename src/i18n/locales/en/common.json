@@ -73,7 +73,8 @@
     "cancelled": "Download cancelled",
     "failed": "Download failed",
     "encrypted": "This video is encrypted and cannot be downloaded",
-    "unsupported": "This browser does not support saving files"
+    "unsupported": "This browser does not support saving files",
+    "busy": "Another download is already in progress"
   },
   "calendar": {
     "bannerTitle": "Google Calendar Sync",

@@ -74,7 +74,8 @@
     "cancelled": "已取消下载",
     "failed": "下载失败",
     "encrypted": "视频已加密，无法下载",
-    "unsupported": "此浏览器不支持保存文件"
+    "unsupported": "此浏览器不支持保存文件",
+    "busy": "已有下载正在进行"
   },
   "calendar": {
     "bannerTitle": "Google Calendar 同步",

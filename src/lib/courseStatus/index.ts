@@ -16,6 +16,7 @@ import {
 import { injectBadgesIntoDOM } from './badge';
 import { highlightCurrentWeek } from './currentWeek';
 import { showStatusBar } from './statusBar';
+import { injectDownloadButtons } from './injectDownloadButtons';
 
 // Course info from DOM
 
@@ -71,6 +72,7 @@ export async function injectCourseStatus() {
   const courseId = match[1];
 
   highlightCurrentWeek();
+  injectDownloadButtons(parseCourseInfoFromDOM(courseId).courseTitle);
 
   const [trackedIds, communityIds] = await Promise.all([
     load<string[]>('trackedCourseIds'),

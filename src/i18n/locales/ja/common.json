@@ -73,7 +73,8 @@
     "cancelled": "ダウンロードをキャンセルしました",
     "failed": "ダウンロードに失敗しました",
     "encrypted": "暗号化された動画のためダウンロードできません",
-    "unsupported": "このブラウザはファイル保存に対応していません"
+    "unsupported": "このブラウザはファイル保存に対応していません",
+    "busy": "すでにダウンロード中です"
   },
   "calendar": {
     "bannerTitle": "Google Calendar 連携",
