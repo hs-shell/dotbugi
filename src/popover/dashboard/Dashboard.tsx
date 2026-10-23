@@ -474,7 +474,7 @@ export default function Dashboard() {
         </StickyPopoverTrigger>
         {/* translate-x 대신 transform: v3 처럼 !important 로 enter 애니메이션의 zoom·slide 를 덮어 페이드인만 남긴다 */}
         <PopoverContent
-          className="bg-white rounded-3xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[350px] h-[550px] [transform:translateX(-8px)] duration-200"
+          className="bg-white rounded-3xl border-none shadow-2xl shadow-zinc-600 px-0 py-0 flex flex-col items-center justify-center w-[350px] h-[550px] [transform:translateX(-8px)]"
           side="top"
           sideOffset={8}
         >
