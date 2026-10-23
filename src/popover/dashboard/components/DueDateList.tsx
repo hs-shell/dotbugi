@@ -1,3 +1,4 @@
+import { openLmsUrl } from '@/lib/lmsUrl';
 import { calculateDueDate, calculateRemainingTime } from '@/lib/utils';
 import { Card, CardFooter, CardHeader } from '@/components/ui/card';
 import { TimeDifferenceResult } from '@/types';
@@ -48,7 +49,7 @@ export default function DueDateList<T extends DueDateItem>({
           <ContextMenu key={`${course.title}-${index}`}>
             <ContextMenuTrigger asChild>
               <Card
-                onClick={() => window.open(course.url, '_blank')}
+                onClick={() => openLmsUrl(course.url)}
                 className={`cursor-pointer w-full rounded-2xl shadow-md bg-white overflow-hidden border-0 border-l-4 ${getBorderClass(course, timeDifference)} hover:bg-zinc-100 transition-all duration-200`}
               >
                 <CardHeader className="flex flex-row items-center justify-between p-5 pb-3">

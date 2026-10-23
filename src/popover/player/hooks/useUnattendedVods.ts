@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { Vod } from '@/types';
+import { isLmsUrl } from '@/lib/lmsUrl';
 import { loadDataFromStorage } from '@/lib/storage';
 import { isAttended, isCurrentDateInRange } from '@/lib/utils';
 
@@ -37,11 +38,15 @@ export function useUnattendedVods(isPlaying: boolean) {
       loadDataFromStorage<string[]>('hiddenTaskUrls', (hiddenUrls) => {
         const hidden = new Set(hiddenUrls ?? []);
         if (skipPlayerFilter) {
-          setVods(data.filter((vod) => !hidden.has(vod.url)));
+          setVods(data.filter((vod) => !hidden.has(vod.url) && isLmsUrl(vod.url)));
         } else {
           setVods(
             data.filter(
-              (vod) => !hidden.has(vod.url) && isCurrentDateInRange(vod.range) && !isAttended(vod.isAttendance)
+              (vod) =>
+                !hidden.has(vod.url) &&
+                isLmsUrl(vod.url) &&
+                isCurrentDateInRange(vod.range) &&
+                !isAttended(vod.isAttendance)
             )
           );
         }
