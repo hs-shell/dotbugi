@@ -9,9 +9,10 @@ interface VodDownloadButtonProps {
   download: VodDownloadState;
 }
 
-// 평소엔 투명, 행 배경(연파랑) 위에서도 hover·누름이 확실히 보이도록 파랑 계열로 (강의 페이지 버튼과 같은 색)
+// 강의 페이지 버튼(downloadButton.ts)과 같은 비율·색. rem 은 LMS 페이지 html 글꼴 크기를 따라 달라지므로 px·hex 로 고정한다
 const ICON_BUTTON =
-  'group shrink-0 h-8 min-w-8 flex items-center justify-center rounded-md border border-transparent bg-transparent cursor-pointer transition-colors duration-150 hover:bg-blue-100 hover:border-blue-300 active:bg-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
+  'group shrink-0 h-[28px] min-w-[28px] p-[6px] flex items-center justify-center rounded-[6px] border border-transparent bg-transparent cursor-pointer transition-colors duration-150 hover:bg-[#dbeafe] hover:border-[#93c5fd] active:bg-[#bfdbfe] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]';
+const ICON = 'w-[16px] h-[16px] shrink-0';
 
 export default function VodDownloadButton({ vod, download }: VodDownloadButtonProps) {
   const { t } = useTranslation('common');
@@ -21,17 +22,17 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
     return (
       <button
         type="button"
-        className={`${ICON_BUTTON} px-1`}
+        className={`${ICON_BUTTON} px-[4px]`}
         aria-label={t('vodDownload.cancel')}
         onClick={(e) => {
           e.stopPropagation();
           download.cancel();
         }}
       >
-        <span className="text-xs font-semibold text-amber-500 tabular-nums group-hover:hidden">
+        <span className="text-[11px] font-semibold text-[#f59e0b] tabular-nums group-hover:hidden">
           {download.percent}%
         </span>
-        <X className="w-[18px] h-[18px] text-blue-700 hidden group-hover:block" />
+        <X className={`${ICON} text-[#1d4ed8] hidden group-hover:block`} />
       </button>
     );
   }
@@ -51,7 +52,7 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
         download.start(vod);
       }}
     >
-      <Download className="w-[18px] h-[18px] text-zinc-500 group-hover:text-blue-700 transition-colors" />
+      <Download className={`${ICON} text-[#71717a] group-hover:text-[#1d4ed8] transition-colors`} />
     </button>
   );
 }
