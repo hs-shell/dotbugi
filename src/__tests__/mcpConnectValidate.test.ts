@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { CONNECT_MESSAGE_TYPE } from '@/lib/mcpConnect/constants';
+import { CONNECT_MESSAGE_TYPE, getPendingStorageKey, REQUEST_ID_PATTERN } from '@/lib/mcpConnect/constants';
 import { toFingerprint } from '@/lib/mcpConnect/fingerprint';
 import {
   isLmsSender,
@@ -116,5 +116,15 @@ describe('parseConnectMessage', () => {
 describe('toFingerprint', () => {
   it('코드 앞 6자를 대문자 XXX-XXX 로 표시 (CLI 와 같은 규칙)', () => {
     expect(toFingerprint('aB3dEf_rest-of-code')).toBe('AB3-DEF');
+  });
+});
+
+describe('getPendingStorageKey / REQUEST_ID_PATTERN', () => {
+  it('요청 식별자별로 다른 저장소 키', () => {
+    expect(getPendingStorageKey('a')).not.toBe(getPendingStorageKey('b'));
+  });
+  it('randomUUID 형식만 허용', () => {
+    expect(REQUEST_ID_PATTERN.test('123e4567-e89b-42d3-a456-426614174000')).toBe(true);
+    expect(REQUEST_ID_PATTERN.test('../other-key')).toBe(false);
   });
 });

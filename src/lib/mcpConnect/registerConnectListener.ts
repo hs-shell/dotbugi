@@ -2,7 +2,8 @@ import {
   CONNECT_PAGE_PATH,
   CONNECT_WINDOW_HEIGHT,
   CONNECT_WINDOW_WIDTH,
-  PENDING_SESSION_STORAGE_KEY,
+  getPendingStorageKey,
+  REQUEST_ID_PARAM,
 } from './constants';
 import { isLmsSender, parseConnectMessage } from './validate';
 
@@ -18,17 +19,19 @@ export function registerConnectListener(): void {
     if (!request) return;
 
     // storage.session 은 기본적으로 확장 페이지·서비스 워커만 접근 가능(content script 불가)
+    const requestId = crypto.randomUUID();
+    const storageKey = getPendingStorageKey(requestId);
     chrome.storage.session
-      .set({ [PENDING_SESSION_STORAGE_KEY]: request })
+      .set({ [storageKey]: request })
       .then(() =>
         chrome.windows.create({
           type: 'popup',
-          url: chrome.runtime.getURL(CONNECT_PAGE_PATH),
+          url: chrome.runtime.getURL(`${CONNECT_PAGE_PATH}?${REQUEST_ID_PARAM}=${requestId}`),
           width: CONNECT_WINDOW_WIDTH,
           height: CONNECT_WINDOW_HEIGHT,
         })
       )
       // 확인 창을 못 열면 세션이 저장소에 남지 않도록 즉시 지운다
-      .catch(() => chrome.storage.session.remove(PENDING_SESSION_STORAGE_KEY));
+      .catch(() => chrome.storage.session.remove(storageKey));
   });
 }

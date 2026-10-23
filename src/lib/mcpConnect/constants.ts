@@ -31,8 +31,16 @@ export const CONNECT_TTL_MS = 5 * 60_000;
 /** content script → background 메시지 타입 */
 export const CONNECT_MESSAGE_TYPE = 'dotbugiMcpConnect';
 
-/** chrome.storage.session 키 — 확인 창이 읽어 갈 대기 요청 */
-export const PENDING_SESSION_STORAGE_KEY = 'mcpConnectPending';
+/** chrome.storage.session 키 — 확인 창이 읽어 갈 대기 요청. 창마다 요청 식별자로 분리해 서로 덮어쓰지 않는다 */
+const PENDING_SESSION_STORAGE_PREFIX = 'mcpConnectPending:';
+export const getPendingStorageKey = (requestId: string) => `${PENDING_SESSION_STORAGE_PREFIX}${requestId}`;
+
+/** 확인 창 URL 의 요청 식별자 쿼리 이름과 형식 (crypto.randomUUID) */
+export const REQUEST_ID_PARAM = 'id';
+export const REQUEST_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+/** dotbugi-mcp 콜백 응답 대기 한도 — 넘으면 실패로 보고 창을 다시 쓸 수 있게 한다 */
+export const CALLBACK_TIMEOUT_MS = 10_000;
 
 /** 확인 창(확장 페이지) 경로 — vite.config.ts 의 build input 과 같은 경로 */
 export const CONNECT_PAGE_PATH = 'src/connect/index.html';

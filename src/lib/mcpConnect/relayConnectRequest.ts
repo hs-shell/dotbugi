@@ -7,6 +7,15 @@ import { parseConnectHash, parsePendingTarget, readSessionCookie } from './valid
  * LMS 페이지 출처의 localhost fetch 는 Chrome 로컬 네트워크 접근 제한으로 막히므로 실제 전송은 확장 페이지가 한다.
  */
 export function relayConnectRequest(): void {
+  // 사이트 데이터 차단 등으로 sessionStorage 가 예외를 던져도 팝오버 초기화는 계속되게 연결 기능만 중단한다
+  try {
+    relay();
+  } catch {
+    /* 연결 기능만 건너뛴다 */
+  }
+}
+
+function relay(): void {
   const target = parseConnectHash(location.hash);
   if (target) {
     sessionStorage.setItem(PENDING_TAB_STORAGE_KEY, JSON.stringify({ ...target, exp: Date.now() + CONNECT_TTL_MS }));
