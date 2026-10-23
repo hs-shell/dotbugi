@@ -7,7 +7,7 @@
   "connecting": "接続中…",
   "cancel": "キャンセル",
   "noPending": "保留中の接続リクエストはありません。ターミナルで dotbugi-mcp login を再実行してください。",
-  "success": "接続しました。このウィンドウを閉じても構いません。",
+  "success": "接続しました。{{seconds}}秒後にこのウィンドウを閉じます。",
   "httpError": "接続に失敗しました（HTTP {{status}}）。dotbugi-mcp login を再実行してください。",
   "networkError": "接続に失敗しました：dotbugi-mcp が待機中か確認してください。"
 }

@@ -7,7 +7,7 @@
   "connecting": "Connecting…",
   "cancel": "Cancel",
   "noPending": "No pending connection request. Run dotbugi-mcp login again in your terminal.",
-  "success": "Connected. You can close this window.",
+  "success": "Connected. This window will close in {{seconds}} seconds.",
   "httpError": "Connection failed (HTTP {{status}}). Run dotbugi-mcp login again.",
   "networkError": "Connection failed: make sure dotbugi-mcp is waiting."
 }

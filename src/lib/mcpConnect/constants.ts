@@ -52,3 +52,6 @@ export const FINGERPRINT_LENGTH = 6;
 
 /** dotbugi-mcp 콜백 주소 */
 export const getCallbackUrl = (port: number) => `http://127.0.0.1:${port}/cb`;
+
+/** 연결 성공 후 확인 창을 자동으로 닫기까지의 시간 (결과를 읽을 여유) */
+export const CONNECT_WINDOW_AUTO_CLOSE_MS = 5000;
