@@ -323,6 +323,8 @@ export function useCourseData(courses: CourseBase[]) {
 
       if (!lastRequest || now - lastRequest >= CACHE_TTL_MS) {
         setIsPending(true);
+        // 추적 과목 state 가 아직 커밋되지 않았을 수 있어, 새로고침 결과를 거르는 기준을 먼저 맞춘다
+        coursesRef.current = initialCourses;
         refreshCourseData(initialCourses);
       } else {
         const trackedIds = new Set(initialCourses.map((c) => c.courseId));
