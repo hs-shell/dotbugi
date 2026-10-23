@@ -80,7 +80,10 @@ jobs:
               // 모델이 number를 문자열로 줄 수 있으므로 숫자로 정규화 후 비교
               duplicates = (JSON.parse(content).duplicates || [])
                 .map((d) => ({ ...d, number: Number(d.number) }))
-                .filter((d) => candidates.some((c) => c.number === d.number));
+                .filter((d) => candidates.some((c) => c.number === d.number))
+                // 같은 번호 중복 제거 + 최대 3개로 제한 (스팸성 장문 댓글 방지)
+                .filter((d, i, arr) => arr.findIndex((x) => x.number === d.number) === i)
+                .slice(0, 3);
             } catch (e) {
               core.warning(`분석 중 오류: ${e.message}`);
               return;
@@ -92,7 +95,27 @@ jobs:
             }
 
             // 3) 댓글 + 라벨
-            const lines = duplicates.map((d) => `- #${d.number} — ${d.reason}`).join('\n');
+            // reason은 모델의 자유 출력이라 신뢰할 수 없다. 새 이슈 본문에 프롬프트 인젝션을 넣어
+            // 피싱 링크·@멘션·이미지·장문 스팸을 봇 명의로 게시하게 만들 수 있으므로 정제 후 사용한다.
+            const sanitizeReason = (s) => {
+              let t = String(s ?? '');
+              t = t.replace(/!\[[^\]]*\]\([^)]*\)/g, ''); // 마크다운 이미지 제거
+              t = t.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1'); // 마크다운 링크 → 텍스트만
+              t = t.replace(/<[^>]*>/g, ''); // HTML 태그 제거
+              t = t.replace(/(?:https?|ftp):\/\/\S+/gi, ''); // URL 제거
+              t = t.replace(/www\.\S+/gi, ''); // www. 자동 링크 제거
+              t = t.replace(/[`<>\r\n\t]/g, ' '); // 백틱·꺾쇠·개행 제거
+              t = t.replace(/@/g, '＠'); // @멘션 무력화 (전각 문자로 치환)
+              t = t.replace(/\s+/g, ' ').trim();
+              const chars = [...t];
+              return chars.length > 100 ? `${chars.slice(0, 100).join('').trimEnd()}…` : t;
+            };
+            const lines = duplicates
+              .map((d) => {
+                const reason = sanitizeReason(d.reason);
+                return reason ? `- #${d.number} — ${reason}` : `- #${d.number}`;
+              })
+              .join('\n');
             const body = [
               '🔁 **유사한 이슈가 있는 것 같아요.**',
               '아래 이슈와 중복이 아닌지 확인해주세요. 같은 내용이라면 이 이슈를 닫고 기존 이슈에 의견을 남겨주시면 됩니다.',
