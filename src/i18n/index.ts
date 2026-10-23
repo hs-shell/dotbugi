@@ -50,7 +50,7 @@ i18n.use(initReactI18next).init({
 
 // chrome.storage에서 저장된 언어 설정을 불러와서 적용
 if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-  chrome.storage.local.get('language', (result) => {
+  chrome.storage.local.get<{ language?: string }>('language', (result) => {
     if (result.language && i18n.language !== result.language) {
       i18n.changeLanguage(result.language);
     }

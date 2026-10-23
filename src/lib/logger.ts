@@ -40,7 +40,7 @@ function formatEntry(level: LogLevel, args: unknown[]): LogEntry {
 async function persist(category: LogCategory, entry: LogEntry) {
   try {
     const key = STORAGE_PREFIX + category;
-    const result = await chrome.storage.local.get(key);
+    const result = await chrome.storage.local.get<Record<string, LogEntry[] | undefined>>(key);
     const logs: LogEntry[] = result[key] ?? [];
     logs.push(entry);
     if (logs.length > MAX_LOGS_PER_CATEGORY) logs.splice(0, logs.length - MAX_LOGS_PER_CATEGORY);
@@ -83,7 +83,7 @@ export const logger: CategoryLogger & Record<LogCategory, CategoryLogger> = {
 // 기존 단일 키 → 카테고리별 마이그레이션 (1회성)
 (async () => {
   try {
-    const result = await chrome.storage.local.get(OLD_STORAGE_KEY);
+    const result = await chrome.storage.local.get<Record<string, LogEntry[] | undefined>>(OLD_STORAGE_KEY);
     const oldLogs: LogEntry[] | undefined = result[OLD_STORAGE_KEY];
     if (!oldLogs || oldLogs.length === 0) return;
     const key = STORAGE_PREFIX + 'general';
@@ -97,7 +97,7 @@ export const logger: CategoryLogger & Record<LogCategory, CategoryLogger> = {
 export async function getLogs(): Promise<Record<LogCategory, LogEntry[]>> {
   try {
     const keys = LOG_CATEGORIES.map((c) => STORAGE_PREFIX + c);
-    const result = await chrome.storage.local.get(keys);
+    const result = await chrome.storage.local.get<Record<string, LogEntry[] | undefined>>(keys);
     const logs = {} as Record<LogCategory, LogEntry[]>;
     for (const category of LOG_CATEGORIES) {
       logs[category] = result[STORAGE_PREFIX + category] ?? [];
@@ -130,7 +130,9 @@ const STORAGE_DUMP_KEYS = [
 
 async function getStorageDump(): Promise<string> {
   try {
-    const result = await chrome.storage.local.get([...STORAGE_DUMP_KEYS]);
+    const result = await chrome.storage.local.get<{ trackedCourseIds?: string[]; [key: string]: unknown }>([
+      ...STORAGE_DUMP_KEYS,
+    ]);
     const trackedIds = new Set<string>(result.trackedCourseIds ?? []);
 
     // 트래킹 중인 강의 데이터만 포함
