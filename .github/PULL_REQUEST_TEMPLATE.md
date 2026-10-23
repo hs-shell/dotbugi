@@ -1,5 +1,5 @@
 <!--
-PR 제목은 Conventional Commits 형식을 권장합니다. 예) feat: 과제 마감 알림 추가
+PR 제목은 Conventional Commits 형식이어야 합니다 (스쿼시 커밋 메시지·버전 산출에 사용). 예) feat: 과제 마감 알림 추가
 -->
 
 ## 관련 이슈
@@ -26,12 +26,14 @@ Closes #
 - [ ] 📝 문서 (`docs`)
 - [ ] ♻️ 리팩터링 (`refactor`)
 - [ ] 🎨 스타일/포맷 (`style`)
-- [ ] ⚙️ 빌드/CI (`chore`, `ci`)
+- [ ] ⚡ 성능 개선 (`perf`)
+- [ ] ✅ 테스트 (`test`)
+- [ ] ⚙️ 빌드/CI/기타 (`build`, `ci`, `chore`, `revert`)
 
 ## 체크리스트
 
 - [ ] 이 PR과 연결된 이슈가 존재합니다.
-- [ ] 로컬에서 `npm run lint` 와 `npm run build` 가 통과합니다.
+- [ ] 로컬에서 `npx prettier --check .` / `npm run lint` / `npm run build` / `npm run test` 가 통과합니다.
 - [ ] 변경 사항을 직접 테스트했습니다.
 - [ ] CodeRabbit / 리뷰어 피드백을 반영할 준비가 되어 있습니다.
 

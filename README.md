@@ -74,7 +74,7 @@ npm run build
 - React 18 + TypeScript
 - Vite + [@crxjs/vite-plugin](https://github.com/crxjs/chrome-extension-tools) (Manifest V3)
 - shadcn/ui (Radix primitives) + Tailwind CSS
-- framer-motion
+- Motion (`motion/react`)
 
 #### Extension (진입점 2개)
 
@@ -82,7 +82,7 @@ npm run build
 - Background Service Worker (`src/background.ts`) — `chrome.identity`로 Google OAuth 토큰 중개, 설치·아이콘 클릭 시 문서 사이트 열기
 
 > [!NOTE]
-> LMS API가 아니라 페이지 HTML을 DOMParser로 스크래핑해 데이터를 수집하며, 결과는 Chrome 스토리지에 24시간 TTL로 캐시한다.
+> LMS API가 아니라 페이지 HTML을 DOMParser로 스크래핑해 데이터를 수집하며, 결과는 `chrome.storage.local`에 저장하고 1시간 주기(TTL)로 갱신한다.
 
 <br><br>
 

@@ -17,12 +17,13 @@ paths:
 
 PR 전에 통과시킨다 (`pr-checks` 워크플로와 동일 조건):
 
-| 대상             | 검증                                     |
-| ---------------- | ---------------------------------------- |
-| 포맷             | `npx prettier --check .`                 |
-| 린트             | `npm run lint`                           |
-| 타입 체크 + 빌드 | `npm run build` (`tsc -b && vite build`) |
-| 테스트           | `npm run test` (vitest)                  |
+| 대상                 | 검증                                                                             |
+| -------------------- | -------------------------------------------------------------------------------- |
+| 포맷                 | `npx prettier --check .`                                                         |
+| 린트                 | `npm run lint`                                                                   |
+| 타입 체크 + 빌드     | `npm run build` (`tsc -b && vite build`)                                         |
+| 릴리즈 manifest 검사 | `node .github/scripts/check-release-manifest.mjs` (빌드 직후, `key` 미포함 확인) |
+| 테스트               | `npm run test` (vitest)                                                          |
 
 확장 동작 확인은 `npm run build` 후 `dist/`를 `chrome://extensions`에서 압축해제 로드. Google 캘린더(OAuth) 확인이 필요하면 `npm run build:local` (스토어와 같은 확장 ID).
 
