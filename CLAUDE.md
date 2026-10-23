@@ -108,7 +108,7 @@ To test the extension, load `dist/` as an unpacked extension in Chrome (`chrome:
 1. **Content Script** (`src/popover/index.tsx`) — Injects the dashboard, video player, course toggles, and course-status badges (`injectCourseStatus`) into the LMS pages using Shadow DOM for style isolation.
 2. **Background Service Worker** (`src/background.ts`) — Brokers Google OAuth tokens via `chrome.identity` (message passing) and opens the docs site on install / toolbar-icon click.
 
-**Data flow:** The extension scrapes raw HTML from LMS pages using DOMParser (not an API), orchestrated by `src/lib/fetchCourseData.ts` and individual fetch modules (`fetchVodList.ts`, `fetchVodAttendance.ts`, `fetchVodProgress.ts`, `fetchAssign.ts`, `fetchQuiz.ts`; HTML → DOMParser in `fetchHtml.ts`). Results are stored in `chrome.storage.local`; refresh uses a 1-hour TTL (`src/lib/cache.ts`, last-request time kept in page `localStorage`). The main data hook is `src/hooks/useCourseData.tsx`.
+**Data flow:** The extension scrapes raw HTML from LMS pages using DOMParser (not an API), via the shared package [`@dotbugi/lms-parser`](https://github.com/hs-shell/dotbugi-lms-parser) (parsers, LMS keywords, links — shared with dotbugi-mcp). `src/lib/fetchCourseData.ts` injects the browser `fetchHtml` (`src/lib/fetchHtml.ts`: `fetch(credentials: 'include')` + DOMParser, with retry) and the logger into the package's `scrapeCourseData`. Parser fixes go to the package repo. Results are stored in `chrome.storage.local`; refresh uses a 1-hour TTL (`src/lib/cache.ts`, last-request time kept in page `localStorage`). The main data hook is `src/hooks/useCourseData.tsx`.
 
 **Key patterns:**
 

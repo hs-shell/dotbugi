@@ -1,7 +1,8 @@
+import { BASE_LINK } from '@dotbugi/lms-parser';
+
 import { Vod, Assign, Quiz } from '@/types';
 import { isAttended } from '@/lib/attendance';
 import { isCurrentDateByDate, parseDate, calculateDueDate, extractEndDate } from '@/lib/dateUtils';
-import { BASE_LINK } from '@/constants/links';
 import i18n from '@/i18n';
 
 // ── Types ───────────────────────────────────────────────────────────

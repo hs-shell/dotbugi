@@ -1,6 +1,6 @@
 import { CourseBase } from '@/types';
 import { saveDataToStorage, loadDataFromStorage } from '@/lib/storage';
-import { parseCoursesFromDOM } from '@/lib/parseCourses';
+import { parseCoursesFromDOM } from '@dotbugi/lms-parser';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
 function getMockCourses(): CourseBase[] | null {
@@ -78,7 +78,7 @@ export const useGetCourses = () => {
       return;
     }
 
-    const parsed = parseCoursesFromDOM();
+    const parsed = parseCoursesFromDOM(document);
     initCourses(parsed);
   }, []);
 

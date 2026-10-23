@@ -1,10 +1,10 @@
 import { loadDataFromStorage, saveDataToStorage } from '@/lib/storage';
-import { parseCoursesFromDOM } from '@/lib/parseCourses';
+import { parseCoursesFromDOM } from '@dotbugi/lms-parser';
 
 const TOGGLE_ATTR = 'data-dotbugi-toggle';
 
 export function injectCourseToggles() {
-  const allCourses = parseCoursesFromDOM();
+  const allCourses = parseCoursesFromDOM(document);
   if (allCourses.length === 0) return;
 
   // 커뮤니티 강좌 ID 저장 (강의 페이지 배지 주입 시 참조)
