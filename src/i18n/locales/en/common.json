@@ -67,7 +67,7 @@
   "downloadLogs": "Download Logs",
   "vodDownload": {
     "button": "Download lecture",
-    "notice": "For your own study only. Redistribution is prohibited.",
+    "started": "Downloading · For your own study only, do not redistribute",
     "cancel": "Cancel download",
     "done": "Download complete",
     "cancelled": "Download cancelled",

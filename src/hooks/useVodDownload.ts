@@ -24,7 +24,11 @@ export function useVodDownload(notify: (n: Omit<Notification, 'id'>) => void): V
 
   const start = useCallback(
     async (vod: Vod) => {
-      const result = await runVodDownload(vod.url, toVodFileName([vod.courseTitle, vod.subject, vod.title]), () => {});
+      const fileName = toVodFileName([vod.courseTitle, vod.subject, vod.title]);
+      const result = await runVodDownload(vod.url, fileName, (ratio) => {
+        // 시작할 때 한 번 본인 학습용·재배포 금지 안내를 띄운다
+        if (ratio === 0) notify({ type: 'loading', messageKey: 'vodDownload.started', autoDismiss: true });
+      });
       if (result === 'dismissed') return;
       const type = result === 'done' ? 'success' : result === 'cancelled' || result === 'busy' ? 'warning' : 'error';
       notify({ type, messageKey: `vodDownload.${result}`, autoDismiss: true });

@@ -19,10 +19,10 @@ const STYLE = `
   font:600 11px/1.4 system-ui,-apple-system,sans-serif}
 button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:4px;
   height:24px;min-width:24px;padding:0 4px;border-radius:6px;cursor:pointer;color:#71717a;
-  transition:background .15s,color .15s}
-button:hover{background:#e4e4e7;color:#18181b}
-button:active{background:#d4d4d8}
-button:focus-visible{outline:2px solid #a1a1aa;outline-offset:1px}
+  border:1px solid transparent;transition:background .15s,color .15s,border-color .15s}
+button:hover{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}
+button:active{background:#bfdbfe}
+button:focus-visible{outline:2px solid #3b82f6;outline-offset:1px}
 button[hidden],.msg:empty{display:none}
 svg{width:16px;height:16px}
 .progress{color:#f59e0b;font-variant-numeric:tabular-nums}
@@ -47,11 +47,10 @@ export function createDownloadButton(vodUrl: string, cmid: string, fileName: str
   const cancel = root.querySelector('.cancel') as HTMLButtonElement;
   const progress = root.querySelector('.progress') as HTMLSpanElement;
   const msg = root.querySelector('.msg') as HTMLSpanElement;
-  // 저장된 언어는 버튼을 만든 뒤 비동기로 적용될 수 있어 언어가 바뀔 때마다 다시 단다
+  // 저장된 언어는 버튼을 만든 뒤 비동기로 적용될 수 있어 언어가 바뀔 때마다 다시 단다.
+  // title 툴팁은 두지 않는다 (안내 문구는 시작할 때 상태 문구로 보인다)
   const applyLabels = () => {
-    start.title = t('vodDownload.notice');
     start.setAttribute('aria-label', t('vodDownload.button'));
-    cancel.title = t('vodDownload.cancel');
     cancel.setAttribute('aria-label', t('vodDownload.cancel'));
   };
   applyLabels();
@@ -75,6 +74,7 @@ export function createDownloadButton(vodUrl: string, cmid: string, fileName: str
     swallow(e);
     msg.textContent = '';
     const result = await runVodDownload(vodUrl, fileName, (ratio) => {
+      if (ratio === 0) showMessage('vodDownload.started', true);
       start.hidden = true;
       cancel.hidden = false;
       progress.textContent = `${Math.floor(ratio * 100)}%`;

@@ -9,9 +9,9 @@ interface VodDownloadButtonProps {
   download: VodDownloadState;
 }
 
-// 평소엔 투명, hover·누름에서 배경이 드러나는 아이콘 버튼 (DashboardHeader·Setting 의 hover 회색 패턴)
+// 평소엔 투명, 행 배경(연파랑) 위에서도 hover·누름이 확실히 보이도록 파랑 계열로 (강의 페이지 버튼과 같은 색)
 const ICON_BUTTON =
-  'group shrink-0 h-8 min-w-8 flex items-center justify-center rounded-md bg-transparent cursor-pointer transition-colors duration-150 hover:bg-zinc-200 active:bg-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400';
+  'group shrink-0 h-8 min-w-8 flex items-center justify-center rounded-md border border-transparent bg-transparent cursor-pointer transition-colors duration-150 hover:bg-blue-100 hover:border-blue-300 active:bg-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
 
 export default function VodDownloadButton({ vod, download }: VodDownloadButtonProps) {
   const { t } = useTranslation('common');
@@ -23,7 +23,6 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
         type="button"
         className={`${ICON_BUTTON} px-1`}
         aria-label={t('vodDownload.cancel')}
-        title={t('vodDownload.cancel')}
         onClick={(e) => {
           e.stopPropagation();
           download.cancel();
@@ -32,7 +31,7 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
         <span className="text-xs font-semibold text-amber-500 tabular-nums group-hover:hidden">
           {download.percent}%
         </span>
-        <X className="w-[18px] h-[18px] text-zinc-900 hidden group-hover:block" />
+        <X className="w-[18px] h-[18px] text-blue-700 hidden group-hover:block" />
       </button>
     );
   }
@@ -45,16 +44,14 @@ export default function VodDownloadButton({ vod, download }: VodDownloadButtonPr
       className={`${ICON_BUTTON} ${isBusy ? 'opacity-40' : ''}`}
       aria-label={t('vodDownload.button')}
       aria-disabled={isBusy}
-      // Radix Tooltip 은 포커스로도 열리고(저장 대화상자에서 돌아올 때 등) shadow root 밖 body 로 포털돼
-      // 대시보드 아래에 스타일 없이 떠서, 마우스를 올렸을 때만 뜨는 기본 title 을 쓴다
-      title={t('vodDownload.notice')}
+      // 툴팁(Radix·title)은 대시보드 아래에 떠 보여서 두지 않고, 안내 문구는 시작 알림에 넣는다
       onClick={(e) => {
         // 행 클릭(강의 창 열기)으로 번지지 않게 막는다
         e.stopPropagation();
         download.start(vod);
       }}
     >
-      <Download className="w-[18px] h-[18px] text-zinc-500 group-hover:text-zinc-900 transition-colors" />
+      <Download className="w-[18px] h-[18px] text-zinc-500 group-hover:text-blue-700 transition-colors" />
     </button>
   );
 }

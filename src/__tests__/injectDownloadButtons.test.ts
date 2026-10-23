@@ -97,12 +97,12 @@ describe('injectDownloadButtons', () => {
   it('저장된 언어가 나중에 적용되면 라벨을 다시 단다', () => {
     injectDownloadButtons('자료구조');
     const button = document.querySelector(HOST)?.shadowRoot?.querySelector('button');
-    expect(button?.title).toBe('ko:vodDownload.notice');
+    expect(button?.getAttribute('aria-label')).toBe('ko:vodDownload.button');
+    expect(button?.hasAttribute('title')).toBe(false);
 
     i18nState.lang = 'en';
     i18nState.handlers.forEach((handler) => handler());
 
-    expect(button?.title).toBe('en:vodDownload.notice');
     expect(button?.getAttribute('aria-label')).toBe('en:vodDownload.button');
   });
 });
