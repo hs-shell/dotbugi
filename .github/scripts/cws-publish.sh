@@ -19,7 +19,16 @@ cws() {
   curl -sS --fail-with-body -H "Authorization: Bearer ${ACCESS_TOKEN}" "$@"
 }
 
-echo "업로드: ${ZIP}"
+# 재실행 대비: 같은 버전이 이미 심사 중/게시됨이면 아무것도 하지 않는다.
+# (스토어는 같은 버전 재제출을 거부하므로 그대로 진행하면 재실행이 항상 실패한다)
+VERSION=$(unzip -p "$ZIP" manifest.json | jq -r '.version')
+if cws "${API}/v2/${ITEM}:fetchStatus" | jq -e --arg v "$VERSION" \
+  '[.submittedItemRevisionStatus, .publishedItemRevisionStatus][]? | .distributionChannels[]? | select(.crxVersion == $v)' >/dev/null; then
+  echo "v${VERSION} 은 이미 심사 제출(또는 게시)됨 — 건너뜀"
+  exit 0
+fi
+
+echo "업로드: ${ZIP} (v${VERSION})"
 state=$(cws -X POST -T "$ZIP" "${API}/upload/v2/${ITEM}:upload" | tee /dev/stderr | jq -r '.uploadState')
 
 # 큰 패키지는 비동기 처리되어 IN_PROGRESS 로 돌아온다 → fetchStatus 로 완료 대기
