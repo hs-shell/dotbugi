@@ -83,7 +83,8 @@ jobs:
             --target "$GITHUB_SHA"
 
       - name: Discord 베타 알림 (노랑)
-        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        # 웹훅 미설정 여부는 스크립트에서 판단한다 (단계 자신의 env 는 같은 단계의 if 에서 보이지 않음)
+        if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           STORE_ENABLED: ${{ vars.ENABLE_STORE_PUBLISH == 'true' }}
@@ -172,7 +173,8 @@ jobs:
         run: .github/scripts/cws-publish.sh "dotbugi-${TAG}.zip"
 
       - name: Discord 베타 스토어 결과 알림
-        if: always() && env.DISCORD_WEBHOOK_URL != ''
+        # 웹훅 미설정 여부는 스크립트에서 판단한다 (단계 자신의 env 는 같은 단계의 if 에서 보이지 않음)
+        if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           TAG: ${{ needs.beta.outputs.tag }}
