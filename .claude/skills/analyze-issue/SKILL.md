@@ -19,15 +19,15 @@ gh issue view <번호> --repo hs-shell/dotbugi --json number,title,body,labels,a
 증상에서 출발해 관련 코드를 찾아 들어간다.
 
 1. **위치 찾기**: `hedwig-cg search "<영어 키워드>"`로 관련 파일을 먼저 좁힌다(쿼리는 영어). seed `file:line`을 `Read`로 열고, 구체 심볼은 `Grep`으로 확인.
-   - 영역 힌트: VOD/출석 → `src/lib/fetchVodAttendance.ts`·`fetchVodProgress.ts`, 과제 → `fetchAssign.ts`, 퀴즈 → `fetchQuiz.ts`, 집계 → `fetchCourseData.ts`·`useCourseData.tsx`, 중복 → 키 생성기(`makeVodKey` 등), UI → `src/popover/`.
-2. **원인 가설**: 어떤 코드 경로에서 증상이 나오는지 가설을 세우고 코드로 검증한다. LMS HTML 파싱 문제면 해당 셀렉터/키워드(`src/lib/lmsKeywords.ts`)와 파싱 로직을 본다.
+   - 영역 힌트: LMS 파싱(VOD/출석/과제/퀴즈) → 공용 패키지 `@dotbugi/lms-parser`(hs-shell/dotbugi-lms-parser — 수정은 그 저장소에), 주입·집계 → `src/lib/fetchCourseData.ts`·`fetchHtml.ts`·`useCourseData.tsx`, 중복 → 키 생성기(`makeVodKey` 등), UI → `src/popover/`.
+2. **원인 가설**: 어떤 코드 경로에서 증상이 나오는지 가설을 세우고 코드로 검증한다. LMS HTML 파싱 문제면 패키지의 셀렉터/키워드(`lmsKeywords`)와 파싱 로직을 본다.
 3. **유효성/중복**: 재현 가능한지, 정보가 충분한지, 중복인지 — `gh issue list --repo hs-shell/dotbugi --search "<키워드>" --state all`.
 
 ## 3단계: 개발자에게 보고 (대화)
 
 다음을 대화로 정리한다. 확인된 사실과 추측을 구분하고 파일·라인을 인용한다.
 
-- **원인 추정**: `src/lib/fetchVodAttendance.ts:NN` — 무엇이 왜 문제인지
+- **원인 추정**: `src/lib/fetchCourseData.ts:NN` — 무엇이 왜 문제인지
 - **영향 범위**: 어떤 기능이 깨지는지
 - **유효성**: 유효 / 정보 부족 / 중복(→ `#N`) / 범위 밖
 - **권장 다음 단계**: 수정 방향, 착수 가능하면 `/implement <번호>`
