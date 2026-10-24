@@ -23,7 +23,7 @@ vi.mock('@/lib/vodDownload/controller', () => ({
 
 const HOST = '[data-dotbugi-download]';
 
-// 강의 페이지 축약본: 1주차에 VOD 2개 + 과제 1개, 2주차에 숨김(dimmed) VOD 1개
+// 강의 페이지 축약본: 1주차에 VOD 2개 + 과제 1개, 2주차에 숨김(dimmed) VOD 1개 + 열람 기간이 지나 링크 없는 VOD 1개
 const COURSE_PAGE = `
 <ul>
   <li id="section-1">
@@ -54,6 +54,12 @@ const COURSE_PAGE = `
           <a href="https://learn.hansung.ac.kr/mod/vod/view.php?id=201"><span class="instancename">숨김 강의</span></a>
         </div>
       </li>
+      <li class="activity vod modtype_vod " id="module-202">
+        <div class="availability dimmed"><div class="activityinstance">
+          <div class=" dimmed_text"><span class="instancename">5장 5.1-2<span class="accesshide "> 동영상</span></span></div>
+          <span class="displayoptions"><span class="text-ubstrap">&nbsp;2023-02-21 00:00:00 ~ 2023-04-10 23:59:59</span></span>
+        </div></div>
+      </li>
     </ul>
   </li>
 </ul>`;
@@ -66,19 +72,26 @@ describe('injectDownloadButtons', () => {
     vi.mocked(runVodDownload).mockClear();
   });
 
-  it('VOD 활동에만, 링크 바로 뒤에 붙인다 (과제·숨김 VOD 제외)', () => {
+  it('VOD 활동에만, 링크 바로 뒤에 붙인다 (과제 제외, 숨김 VOD 포함)', () => {
     injectDownloadButtons('자료구조');
 
     const hosts = Array.from(document.querySelectorAll(HOST));
-    expect(hosts.map((h) => h.getAttribute('data-dotbugi-download'))).toEqual(['101', '103']);
-    for (const host of hosts) expect(host.previousElementSibling?.tagName).toBe('A');
+    expect(hosts.map((h) => h.getAttribute('data-dotbugi-download'))).toEqual(['101', '103', '201', '202']);
+    for (const host of hosts.slice(0, 3)) expect(host.previousElementSibling?.tagName).toBe('A');
+  });
+
+  it('링크 없는 dimmed VOD 는 module id 로 주소를 만들어 강의명 뒤에 붙인다', () => {
+    injectDownloadButtons('자료구조');
+
+    const host = document.querySelector(`${HOST}[data-dotbugi-download="202"]`);
+    expect(host?.previousElementSibling?.classList.contains('dimmed_text')).toBe(true);
   });
 
   it('다시 불러도 중복되지 않는다', () => {
     injectDownloadButtons('자료구조');
     injectDownloadButtons('자료구조');
 
-    expect(document.querySelectorAll(HOST)).toHaveLength(2);
+    expect(document.querySelectorAll(HOST)).toHaveLength(4);
   });
 
   it('클릭은 링크 이동으로 번지지 않고 과목-주차-강의명 파일명으로 다운로드를 시작한다', () => {
