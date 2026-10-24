@@ -15,9 +15,10 @@ interface CachedToken {
   expiresAt: number;
 }
 
+// 브랜드 정보를 못 읽으면 기존 Chrome 경로(getAuthToken)로 둔다 — 잘 되던 Chrome 로그인을 바꾸지 않게
 export function isGoogleChrome(): boolean {
   const brands = (navigator as Navigator & { userAgentData?: { brands: { brand: string }[] } }).userAgentData?.brands;
-  return brands?.some((b) => b.brand === 'Google Chrome') ?? false;
+  return !brands?.length || brands.some((b) => b.brand === 'Google Chrome');
 }
 
 export function buildAuthUrl(redirectUri: string, state: string, interactive: boolean): string {

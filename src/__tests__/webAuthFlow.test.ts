@@ -39,8 +39,14 @@ describe('webAuthFlow', () => {
       });
     setBrands(['Chromium', 'Google Chrome', 'Not-A.Brand']);
     expect(isGoogleChrome()).toBe(true);
+    // Dia 실측값
     setBrands(['Chromium', 'Not-A.Brand']);
     expect(isGoogleChrome()).toBe(false);
+    // 못 읽으면 기존 경로
+    setBrands([]);
+    expect(isGoogleChrome()).toBe(true);
+    Object.defineProperty(navigator, 'userAgentData', { value: undefined, configurable: true });
+    expect(isGoogleChrome()).toBe(true);
   });
 
   it('비대화형 요청에만 prompt=none 을 붙인다', () => {
