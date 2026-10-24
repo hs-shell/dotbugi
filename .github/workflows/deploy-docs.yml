@@ -48,6 +48,8 @@ jobs:
 
   deploy:
     needs: build
+    # push 트리거는 main 전용이지만 workflow_dispatch 는 아무 브랜치에서나 가능하므로 배포는 main 만 허용한다
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # actions/deploy-pages 가 요구하는 최소 권한만 배포 잡에 부여한다.
     permissions:

@@ -1,3 +1,5 @@
+import { isLmsUrl, LMS_ORIGIN, urlOriginForLog } from '@/lib/lmsUrl';
+
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
@@ -10,11 +12,14 @@ function wait(ms: number) {
  * 네트워크 에러(Failed to fetch) 시 최대 2회 재시도
  */
 export async function fetchHtml(link: string, signal?: AbortSignal): Promise<Document> {
+  // 쿠키(credentials)를 실어 보내므로 스크래핑한 외부 링크로는 요청하지 않는다. 상대 주소는 LMS 기준으로 해석
+  const url = new URL(link, LMS_ORIGIN).href;
+  if (!isLmsUrl(url)) throw new Error(`LMS 출처가 아닌 주소 요청을 막음: ${urlOriginForLog(url)}`);
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(link, {
+      const response = await fetch(url, {
         method: 'GET',
         credentials: 'include',
         signal,

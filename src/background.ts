@@ -1,7 +1,9 @@
 import { registerConnectListener } from '@/lib/mcpConnect/registerConnectListener';
 import { clearWebAuthToken, getWebAuthToken, isGoogleChrome } from '@/lib/webAuthFlow';
 
-chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // OAuth 토큰을 다루므로 이 확장 자신의 컨텍스트(콘텐츠 스크립트 등)가 보낸 메시지만 받는다
+  if (sender.id !== chrome.runtime.id) return;
   if (message.action === 'getAuthToken' && !isGoogleChrome()) {
     getWebAuthToken(message.interactive ?? true).then(
       (token) => sendResponse({ token }),

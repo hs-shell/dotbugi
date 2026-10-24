@@ -23,6 +23,8 @@ permissions:
 jobs:
   # ── 1) 베타 빌드 + 프리릴리즈 생성 (승인 없이 자동) ──────────────────────
   beta:
+    # 다른 브랜치에서 dispatch 하면 보호 규칙·필수 검사를 거치지 않은 코드가 발행되므로 main 만 허용한다
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -74,11 +76,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.ver.outputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           gh release create "$TAG" "dotbugi-${TAG}.zip" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$TAG" \
-            --notes "베타(프리릴리즈) 빌드 — main @ ${GITHUB_SHA}" \
+            --notes "베타(프리릴리즈) 빌드 — ${REF_NAME} @ ${GITHUB_SHA}" \
             --prerelease \
             --target "$GITHUB_SHA"
 
@@ -119,6 +122,7 @@ jobs:
                       : '베타(프리릴리즈) 빌드가 발행되었습니다.',
                   color: success ? 0xfee75c : 0xed4245,
                 }],
+                allowed_mentions: { parse: [] },
               }),
             });
             if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);
@@ -130,7 +134,7 @@ jobs:
   # 승인 전에는 GCP 토큰 자체가 발급되지 않는다(WIF 조건이 stable/beta 환경을 요구).
   store:
     needs: beta
-    if: vars.ENABLE_STORE_PUBLISH == 'true'
+    if: github.ref == 'refs/heads/main' && vars.ENABLE_STORE_PUBLISH == 'true'
     environment: beta
     runs-on: ubuntu-latest
     permissions:
@@ -198,6 +202,7 @@ jobs:
                     : '워크플로 로그를 확인한 뒤 잡을 재실행해주세요.',
                   color: success ? 0x57f287 : 0xed4245,
                 }],
+                allowed_mentions: { parse: [] },
               }),
             });
             if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);

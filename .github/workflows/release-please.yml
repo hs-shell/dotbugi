@@ -134,6 +134,7 @@ jobs:
                       : '새 버전이 발행되었습니다.' + compareLink,
                   color: !success ? 0xed4245 : awaitingStore ? 0xfee75c : 0x57f287,
                 }],
+                allowed_mentions: { parse: [] },
               }),
             });
             if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);
@@ -213,6 +214,7 @@ jobs:
                     : '워크플로 로그를 확인한 뒤 잡을 재실행해주세요.',
                   color: success ? 0x57f287 : 0xed4245,
                 }],
+                allowed_mentions: { parse: [] },
               }),
             });
             if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);
