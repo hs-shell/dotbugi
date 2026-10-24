@@ -1,7 +1,14 @@
 import { registerConnectListener } from '@/lib/mcpConnect/registerConnectListener';
+import { clearWebAuthToken, getWebAuthToken, isGoogleChrome } from '@/lib/webAuthFlow';
 
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-  if (message.action === 'getAuthToken') {
+  if (message.action === 'getAuthToken' && !isGoogleChrome()) {
+    getWebAuthToken(message.interactive ?? true).then(
+      (token) => sendResponse({ token }),
+      (e: unknown) => sendResponse({ token: null, error: e instanceof Error ? e.message : String(e) })
+    );
+    return true;
+  } else if (message.action === 'getAuthToken') {
     chrome.identity.getAuthToken({ interactive: message.interactive ?? true }, (token) => {
       if (chrome.runtime.lastError || !token) {
         sendResponse({ token: null, error: chrome.runtime.lastError?.message });
@@ -9,6 +16,12 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
         sendResponse({ token });
       }
     });
+    return true;
+  } else if (message.action === 'removeCachedAuthToken' && !isGoogleChrome()) {
+    clearWebAuthToken(message.token).then(
+      () => sendResponse({ success: true }),
+      () => sendResponse({ success: false })
+    );
     return true;
   } else if (message.action === 'removeCachedAuthToken') {
     chrome.identity.removeCachedAuthToken({ token: message.token }, () => {
