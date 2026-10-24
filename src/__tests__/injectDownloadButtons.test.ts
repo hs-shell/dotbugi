@@ -24,6 +24,7 @@ vi.mock('@/lib/vodDownload/controller', () => ({
 const HOST = '[data-dotbugi-download]';
 
 // 강의 페이지 축약본: 1주차에 VOD 2개 + 과제 1개, 2주차에 숨김(dimmed) VOD 1개 + 열람 기간이 지나 링크 없는 VOD 1개
+// + 아직 공개 전(사용 제한) VOD 1개
 const COURSE_PAGE = `
 <ul>
   <li id="section-1">
@@ -60,6 +61,13 @@ const COURSE_PAGE = `
           <span class="displayoptions"><span class="text-ubstrap">&nbsp;2023-02-21 00:00:00 ~ 2023-04-10 23:59:59</span></span>
         </div></div>
       </li>
+      <li class="activity vod modtype_vod " id="module-203">
+        <div class="availability dimmed"><div class="availabilityinfo "><strong>2026년 10월 29일</strong> 부터 사용가능</div>
+        <div class="activityinstance">
+          <a class=" dimmed conditionalhidden" href="https://learn.hansung.ac.kr/mod/vod/view.php?id=203"><span class="accesshide ">학생에게 비공개:동영상</span><span class="instancename">미공개<span class="accesshide "> 동영상</span></span></a>
+          <span class="displayoptions"><span class="text-ubstrap">&nbsp;2024-12-01 00:00:00 ~ 2028-12-30 23:59:00</span></span>
+        </div></div>
+      </li>
     </ul>
   </li>
 </ul>`;
@@ -72,7 +80,7 @@ describe('injectDownloadButtons', () => {
     vi.mocked(runVodDownload).mockClear();
   });
 
-  it('VOD 활동에만, 링크 바로 뒤에 붙인다 (과제 제외, 숨김 VOD 포함)', () => {
+  it('VOD 활동에만, 링크 바로 뒤에 붙인다 (과제·공개 전 VOD 제외, 숨김 VOD 포함)', () => {
     injectDownloadButtons('자료구조');
 
     const hosts = Array.from(document.querySelectorAll(HOST));

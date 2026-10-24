@@ -19,6 +19,9 @@ interface StatusInfo {
 
 const BADGE_ATTR = 'data-dotbugi-status';
 
+// 아직 공개 전(사용 제한)인 활동: li 대신 안쪽 링크에 dimmed 가 붙는다 — 열 수도 받을 수도 없어 표시를 붙이지 않는다
+export const UNAVAILABLE_LINK_SELECTOR = 'a.dimmed';
+
 const STATUS_COLORS: Record<StatusType, { bg: string; text: string; border: string }> = {
   completed: { bg: '#dcfce7', text: '#166534', border: '#86efac' },
   inProgress: { bg: '#dbeafe', text: '#1e40af', border: '#93c5fd' },
@@ -138,7 +141,7 @@ function injectBadgesForSelector<T>(
   document.querySelectorAll(selector).forEach((activity) => {
     const link = activity.querySelector('a') as HTMLAnchorElement | null;
     const nameEl = activity.querySelector('.instancename');
-    if (!link || !nameEl) return;
+    if (!link || !nameEl || link.matches(UNAVAILABLE_LINK_SELECTOR)) return;
 
     const url = normalizeUrl(link.href);
 
