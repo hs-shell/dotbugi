@@ -3,7 +3,7 @@
 // 새 로그인이 400 invalid_request 로 막힌다(#196). 대신 웹 애플리케이션 client 로 launchWebAuthFlow 를 쓴다.
 
 // 웹 애플리케이션 유형 client. 리디렉션 URI 에 정식·베타 확장의 https://<ID>.chromiumapp.org/ 가 등록돼 있다
-export const WEB_CLIENT_ID = '';
+export const WEB_CLIENT_ID = '804067218183-19qe8qsr37q988i48tru6nro57enouio.apps.googleusercontent.com';
 const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
 const SCOPE = 'https://www.googleapis.com/auth/calendar.events';
 const CACHE_KEY = 'webAuthToken';
