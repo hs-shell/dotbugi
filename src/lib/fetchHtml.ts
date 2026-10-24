@@ -22,8 +22,15 @@ export async function fetchHtml(link: string, signal?: AbortSignal): Promise<Doc
       const response = await fetch(url, {
         method: 'GET',
         credentials: 'include',
+        // 리다이렉트를 따라가면 출처 검사 뒤에 다른 호스트로 요청이 나갈 수 있다 — 받기만 하고 오류로 끝낸다
+        redirect: 'manual',
         signal,
       });
+
+      // manual 리다이렉트는 opaqueredirect(status 0)로 온다. 'HTTP ' 로 시작해 재시도하지 않는다
+      if (response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
+        throw new Error(`HTTP 3xx: 리다이렉트는 따라가지 않음: ${link}`);
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${link}`);

@@ -4,7 +4,9 @@ import { fetchHtml } from '@/lib/fetchHtml';
 
 // 쿠키를 실어 요청하므로 LMS 출처만 허용하는지
 describe('fetchHtml 출처 검사', () => {
-  const fetchMock = vi.fn<(url: string) => Promise<Response>>(async () => new Response('<p>ok</p>'));
+  const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
+    async () => new Response('<p>ok</p>')
+  );
   vi.stubGlobal('fetch', fetchMock);
 
   afterEach(() => fetchMock.mockClear());
@@ -25,4 +27,11 @@ describe('fetchHtml 출처 검사', () => {
       expect(fetchMock).not.toHaveBeenCalled();
     }
   );
+
+  it('리다이렉트는 따라가지 않고 재시도 없이 실패한다', async () => {
+    fetchMock.mockResolvedValueOnce({ type: 'opaqueredirect', status: 0, ok: false } as Response);
+    await expect(fetchHtml('/course/view.php?id=1')).rejects.toThrow('HTTP 3xx');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ redirect: 'manual', credentials: 'include' });
+  });
 });
