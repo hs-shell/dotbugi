@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.3.1](https://github.com/hs-shell/dotbugi/compare/v5.3.0...v5.3.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* security-audit 후속 — 배포 워크플로 main 제한·apply-pr-reviews 작성자 필터 등 ([#201](https://github.com/hs-shell/dotbugi/issues/201)) ([8612ba2](https://github.com/hs-shell/dotbugi/commit/8612ba227646e9274b312dacb03c4bd284f88b0a))
+* 아직 공개 전 동영상 강의에 시청 배지·다운로드 버튼을 붙이지 않음 ([#204](https://github.com/hs-shell/dotbugi/issues/204)) ([71f134d](https://github.com/hs-shell/dotbugi/commit/71f134d007ff5bad646bf4558656566a67506f50))
+* 플레이어 iframe 주소를 LMS 출처로 제한 ([#199](https://github.com/hs-shell/dotbugi/issues/199)) ([0d22964](https://github.com/hs-shell/dotbugi/commit/0d22964821491b8c739f1a22d288654dd7507279))
+
 ## [5.3.0](https://github.com/hs-shell/dotbugi/compare/v5.2.1...v5.3.0) (2026-10-24)
 
 
