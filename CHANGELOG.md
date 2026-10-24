@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.3.0](https://github.com/hs-shell/dotbugi/compare/v5.2.1...v5.3.0) (2026-10-24)
+
+
+### Features
+
+* 열람 기간이 지난(dimmed) VOD 에도 다운로드 버튼 표시 ([#194](https://github.com/hs-shell/dotbugi/issues/194)) ([14ff75b](https://github.com/hs-shell/dotbugi/commit/14ff75b682f4b6d8c26a722665f83267d44d33f4))
+
+
+### Bug Fixes
+
+* Chrome 이 아닌 브라우저에서 캘린더 새 로그인이 400 으로 막히는 문제 ([#197](https://github.com/hs-shell/dotbugi/issues/197)) ([1826089](https://github.com/hs-shell/dotbugi/commit/1826089935dac87673f28129032de6d2f68dfb8d))
+
 ## [5.2.1](https://github.com/hs-shell/dotbugi/compare/v5.2.0...v5.2.1) (2026-10-23)
 
 
