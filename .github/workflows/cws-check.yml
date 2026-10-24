@@ -16,6 +16,8 @@ permissions:
 
 jobs:
   check:
+    # 다른 브랜치에서 dispatch 해 스토어 자격증명을 받지 못하게 main 만 허용한다
+    if: github.ref == 'refs/heads/main'
     # 게시 잡과 같은 환경을 써야 WIF 조건(환경 이름)과 승인 흐름까지 같이 검증된다.
     environment: ${{ inputs.channel }}
     runs-on: ubuntu-latest

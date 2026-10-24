@@ -15,7 +15,11 @@ const launchWebAuthFlow = vi.fn(async ({ url }: { url: string }) => {
 const session: Record<string, unknown> = {};
 
 vi.stubGlobal('chrome', {
-  runtime: { onMessage: { addListener: (l: Listener) => (onMessage = l) }, onInstalled: { addListener: () => {} } },
+  runtime: {
+    id: 'own-ext-id',
+    onMessage: { addListener: (l: Listener) => (onMessage = l) },
+    onInstalled: { addListener: () => {} },
+  },
   action: { onClicked: { addListener: () => {} } },
   identity: {
     getAuthToken,
@@ -38,7 +42,8 @@ const setBrands = (brands: string[]) =>
     configurable: true,
   });
 
-const send = (message: unknown) => new Promise((resolve) => expect(onMessage(message, {}, resolve)).toBe(true));
+const send = (message: unknown) =>
+  new Promise((resolve) => expect(onMessage(message, { id: 'own-ext-id' }, resolve)).toBe(true));
 
 describe('background OAuth 경로', () => {
   beforeAll(async () => {
@@ -72,6 +77,16 @@ describe('background OAuth 경로', () => {
     expect(session).toEqual({});
     expect(getAuthToken).not.toHaveBeenCalled();
     expect(removeCachedAuthToken).not.toHaveBeenCalled();
+  });
+
+  it('다른 확장·출처가 보낸 메시지는 무시한다', () => {
+    setBrands(['Chromium', 'Google Chrome']);
+    const sendResponse = vi.fn();
+
+    expect(onMessage({ action: 'getAuthToken' }, { id: 'other-ext-id' }, sendResponse)).toBeUndefined();
+    expect(onMessage({ action: 'getAuthToken' }, {}, sendResponse)).toBeUndefined();
+    expect(getAuthToken).not.toHaveBeenCalled();
+    expect(sendResponse).not.toHaveBeenCalled();
   });
 
   it('웹 흐름 실패는 기존과 같은 { token: null, error } 로 돌려준다', async () => {

@@ -70,6 +70,6 @@ jobs:
             const res = await fetch(webhook, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ embeds: [embed] }),
+              body: JSON.stringify({ embeds: [embed], allowed_mentions: { parse: [] } }), // PR 제목 등의 @everyone·멘션 무력화
             });
             if (!res.ok) core.warning(`Discord 알림 실패: ${res.status}`);
