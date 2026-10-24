@@ -8,6 +8,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEn
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableItem from './SortableItem';
 import { useTranslation } from 'react-i18next';
+import { isLmsUrl } from '@/lib/lmsUrl';
 
 interface PlayerPopoverContentProps {
   isPopoverOpen: boolean;
@@ -103,6 +104,10 @@ export default function PlayerPopoverContent({
           ? t('doneWatching')
           : t('startWatching');
 
+  // 목록 단계에서도 거르지만 iframe 은 페이지 안에 다른 출처를 띄우므로 src 를 넣기 직전에 한 번 더 막는다
+  const currentSrc = vods[currentVideoIndex]?.url.replace('view', 'viewer');
+  const videoSrc = isLmsUrl(currentSrc) ? currentSrc : '';
+
   return (
     <PopoverContent
       side="right"
@@ -123,11 +128,7 @@ export default function PlayerPopoverContent({
           <div className="w-full h-full flex flex-col">
             <div className="flex w-full overflow-hidden flex-1 min-h-0 space-x-4">
               <div className="w-2/3 shrink-0">
-                <PlayerIframe
-                  videoSrc={vods[currentVideoIndex]?.url.replace('view', 'viewer')}
-                  onNextVideo={onNextVideo}
-                  isPlaying={isPlaying}
-                />
+                <PlayerIframe videoSrc={videoSrc} onNextVideo={onNextVideo} isPlaying={isPlaying} />
               </div>
 
               <div className="w-1/3 flex flex-col py-4 px-4 min-w-0 bg-zinc-50 rounded-xl">
