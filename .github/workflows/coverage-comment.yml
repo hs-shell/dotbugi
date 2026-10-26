@@ -57,7 +57,7 @@ jobs:
             const files = await github.paginate(github.rest.pulls.listFiles, { ...context.repo, pull_number: number, per_page: 100 });
             const entries = Object.entries(summary).filter(([k]) => k !== 'total');
             const changed = files
-              .filter((f) => f.status !== 'removed' && /^src\/.*\.tsx?$/.test(f.filename) && !/\.test\.tsx?$|^src\/__tests__\//.test(f.filename))
+              .filter((f) => f.status !== 'removed' && /^src\/.*\.tsx?$/.test(f.filename) && !/\.(test|spec)\.tsx?$|\.d\.ts$|^src\/__tests__\//.test(f.filename))
               .map((f) => [f.filename, entries.find(([k]) => k.replace(/\\/g, '/').endsWith(`/${f.filename}`))?.[1]]);
 
             const marker = '<!-- dotbugi-coverage -->';

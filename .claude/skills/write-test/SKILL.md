@@ -18,7 +18,7 @@ description: 사용자가 "테스트 써줘", "테스트 추가", "커버리지 
 - `src/__tests__/setup.ts` 가 i18n 을 키 그대로 돌려주게 막는다 — 문구는 번역 키로 단언한다.
 - 설명은 한국어로, 동작이 드러나게 쓴다.
 - **순수 함수**(`src/lib`): 경계·이상 입력으로 직접 부르고 결과를 단언한다 (`dateUtils.test.ts`, `stringUtils.test.ts`).
-- **LMS HTML 파싱**: 픽스처 디렉토리 없이 인라인 HTML 을 `new DOMParser().parseFromString(html, 'text/html')` 로 만든다. LMS 파서 자체는 `@dotbugi/lms-parser` 저장소에서 테스트한다.
+- **LMS HTML 파싱**: 픽스처 디렉토리 없이 인라인 HTML 을 `document.body.innerHTML` 에 넣거나 `new DOMParser().parseFromString(html, 'text/html')` 로 만든다 (`injectBadges.test.ts`, `vodDownload.test.ts`). LMS 파서 자체는 `@dotbugi/lms-parser` 저장소에서 테스트한다.
 - **chrome.\* API**: `vi.stubGlobal('chrome', …)` 등으로 필요한 메서드만 가짜로 만든다 (`storage.test.ts`, `backgroundAuthRouting.test.ts` 참고). 네트워크는 `fetch` 를 막는다.
 - **훅·컴포넌트**: `@testing-library/react` 는 없다. `react-dom/client` 의 `createRoot` + `act` 로 작은 하네스 컴포넌트를 그려 확인한다 (`useCourseDataRefresh.test.tsx` 참고). 새 의존성은 넣지 않는다. shadcn 래퍼(`components/ui`)처럼 동작이 없는 UI 는 테스트하지 않는다.
 - 시간: `vi.useFakeTimers()` / `vi.setSystemTime()`.
