@@ -50,9 +50,6 @@ const setBrands = (brands: string[]) =>
     configurable: true,
   });
 
-const getAuthTokenFails = () =>
-  getAuthToken.mockImplementationOnce((_opts: unknown, cb: (token?: string) => void) => cb(undefined));
-
 const send = (message: unknown) =>
   new Promise((resolve) => expect(onMessage(message, { id: 'own-ext-id' }, resolve)).toBe(true));
 
@@ -109,6 +106,12 @@ describe('background OAuth 경로', () => {
       error: 'The user did not approve access.',
     });
   });
+
+  it('Chrome 에서 토큰을 못 받으면 { token: null } 로 돌려준다', async () => {
+    setBrands(['Google Chrome']);
+    getAuthToken.mockImplementationOnce((_opts: unknown, cb: (token?: string) => void) => cb(undefined));
+    expect(await send({ action: 'getAuthToken', interactive: false })).toEqual({ token: null, error: undefined });
+  });
 });
 
 describe('background 설치·아이콘 클릭', () => {
@@ -136,11 +139,10 @@ describe('background 설치·아이콘 클릭', () => {
     local.language = 'ko';
     onClicked();
     expect(tabsCreate).toHaveBeenLastCalledWith({ url: 'https://hs-shell.github.io/dotbugi/' });
-  });
 
-  it('Chrome 에서 토큰을 못 받으면 { token: null } 로 돌려준다', async () => {
-    setBrands(['Google Chrome']);
-    getAuthTokenFails();
-    expect(await send({ action: 'getAuthToken', interactive: false })).toEqual({ token: null, error: undefined });
+    delete local.language;
+    onClicked();
+    expect(tabsCreate).toHaveBeenLastCalledWith({ url: 'https://hs-shell.github.io/dotbugi/' });
+    expect(tabsCreate).toHaveBeenCalledTimes(3);
   });
 });

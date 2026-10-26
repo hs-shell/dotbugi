@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { parseCoursesFromDOM } from '@dotbugi/lms-parser';
 
 import { injectCourseToggles } from '@/lib/injectCourseToggles';
@@ -23,6 +23,11 @@ function renderList(ids: string[]) {
 }
 
 const toggleOf = (id: string) => document.querySelector(`[data-dotbugi-toggle="${id}"]`) as HTMLElement | null;
+
+afterEach(() => {
+  document.body.innerHTML = '';
+  vi.unstubAllGlobals();
+});
 
 beforeEach(() => {
   Object.keys(store).forEach((k) => delete store[k]);

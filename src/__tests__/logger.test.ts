@@ -124,9 +124,13 @@ describe('logger', () => {
 describe('downloadLogs', () => {
   function captureDownload() {
     const blobs: Blob[] = [];
+    // 진짜 URL 을 고치지 않도록 하위 클래스로 바꿔 끼운다 (unstubAllGlobals 로 원래대로)
     vi.stubGlobal(
       'URL',
-      Object.assign(URL, { createObjectURL: vi.fn((b: Blob) => (blobs.push(b), 'blob:x')), revokeObjectURL: vi.fn() })
+      class extends URL {
+        static createObjectURL = (b: Blob) => (blobs.push(b), 'blob:x');
+        static revokeObjectURL = () => {};
+      }
     );
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     return { blobs, click };

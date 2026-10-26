@@ -1,7 +1,15 @@
 import { act, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
+import { afterEach } from 'vitest';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+// 테스트가 끝나면 마운트한 훅을 모두 내려 리스너·비동기 효과가 다음 테스트로 새지 않게 한다
+const mounted = new Set<Root>();
+afterEach(async () => {
+  for (const root of mounted) await act(async () => root.unmount());
+  mounted.clear();
+});
 
 /** @testing-library 없이 훅을 마운트한다. result.current 는 커밋된 최신 반환값 */
 export async function renderHook<P, R>(hook: (props: P) => R, initialProps: NoInfer<P>) {
@@ -14,11 +22,11 @@ export async function renderHook<P, R>(hook: (props: P) => R, initialProps: NoIn
     return null;
   }
   const root = createRoot(document.createElement('div'));
+  mounted.add(root);
   await act(async () => root.render(<Harness props={initialProps} />));
   return {
     result,
     rerender: (props: P) => act(async () => root.render(<Harness props={props} />)),
-    unmount: () => act(async () => root.unmount()),
   };
 }
 
@@ -41,5 +49,5 @@ export function stubChromeStorage(store: Record<string, unknown>) {
   };
   const emitChange = (changes: Record<string, chrome.storage.StorageChange>) =>
     act(async () => changeListeners.forEach((fn) => fn(changes)));
-  return { chromeStub, changeListeners, emitChange };
+  return { chromeStub, emitChange };
 }

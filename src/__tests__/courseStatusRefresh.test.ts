@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { injectCourseStatus } from '@/lib/courseStatus';
 import { scrapeCourseData } from '@/lib/fetchCourseData';
@@ -101,6 +101,10 @@ describe('강의 상세 페이지 — 자동 새로고침 켜짐', () => {
     vi.mocked(loadAutoRefresh).mockResolvedValue(true);
   });
 
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
   it('강의 페이지가 아니면 아무것도 하지 않는다', async () => {
     window.history.pushState({}, '', '/my/');
     await injectCourseStatus();
@@ -132,7 +136,6 @@ describe('강의 상세 페이지 — 자동 새로고침 켜짐', () => {
     ]);
     expect(setFetchCache).toHaveBeenCalledWith(COURSE_ID);
     expect(showStatusBar).toHaveBeenLastCalledWith('success');
-    document.body.innerHTML = '';
   });
 
   it('추적하지 않는 과목은 결과를 탭 sessionStorage 에만 임시 저장한다', async () => {

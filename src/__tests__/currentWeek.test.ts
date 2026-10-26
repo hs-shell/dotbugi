@@ -180,10 +180,12 @@ describe('highlightCurrentWeek', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 2, 20, 12, 0, 0));
+    // jsdom 에는 scrollIntoView 가 없다
     Element.prototype.scrollIntoView = vi.fn();
   });
 
   afterEach(() => {
+    delete (Element.prototype as Partial<Element>).scrollIntoView;
     vi.useRealTimers();
     document.body.innerHTML = '';
   });

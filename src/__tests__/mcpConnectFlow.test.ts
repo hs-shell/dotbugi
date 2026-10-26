@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  CALLBACK_TIMEOUT_MS,
   CONNECT_MESSAGE_TYPE,
   CONNECT_PAGE_PATH,
   getPendingStorageKey,
@@ -35,7 +34,8 @@ describe('sendSessionToMcp', () => {
     expect(init.method).toBe('POST');
     expect(init.redirect).toBe('error');
     expect(JSON.parse(init.body)).toEqual({ code: CODE, session: SESSION });
-    expect(CALLBACK_TIMEOUT_MS).toBeGreaterThan(0);
+    // 응답 없는 포트에 매달리지 않도록 시간 제한 신호를 건다
+    expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
   it('실패 응답은 상태 코드로, 네트워크 오류는 network 로 알린다', async () => {

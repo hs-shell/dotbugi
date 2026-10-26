@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchHtml } from '@/lib/fetchHtml';
 
@@ -7,9 +7,13 @@ describe('fetchHtml 출처 검사', () => {
   const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
     async () => new Response('<p>ok</p>')
   );
-  vi.stubGlobal('fetch', fetchMock);
+  // 아래 재시도 테스트가 fetch 를 바꿔 끼우므로 테스트마다 다시 꽂는다 (순서 무관)
+  beforeEach(() => vi.stubGlobal('fetch', fetchMock));
 
-  afterEach(() => fetchMock.mockClear());
+  afterEach(() => {
+    fetchMock.mockClear();
+    vi.unstubAllGlobals();
+  });
 
   it('LMS 절대·상대 주소는 LMS 출처로 요청한다', async () => {
     await fetchHtml('https://learn.hansung.ac.kr/course/view.php?id=1');
@@ -39,6 +43,7 @@ describe('fetchHtml 출처 검사', () => {
 describe('fetchHtml 재시도', () => {
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it('네트워크 오류는 최대 2회 다시 시도하고, 성공하면 파싱한 문서를 돌려준다', async () => {
