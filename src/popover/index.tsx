@@ -10,6 +10,9 @@ import PlayerApp from '@/popover/player/App';
 import { injectCourseToggles } from '@/lib/injectCourseToggles';
 import { injectCourseStatus } from '@/lib/courseStatus';
 import { relayConnectRequest } from '@/lib/mcpConnect/relayConnectRequest';
+import { loadAutoRefresh, REFRESH_REQUEST_KEY } from '@/lib/autoRefreshSetting';
+import { renderAutoRefreshBanner } from '@/lib/autoRefreshBanner';
+import { getLastRequestTime } from '@/lib/cache';
 
 const HANSUNG_URL = 'https://learn.hansung.ac.kr/';
 const footer = document.getElementById('page-footer');
@@ -59,9 +62,23 @@ if (footer && url === HANSUNG_URL) {
   );
 }
 
+const isCoursePage = url.includes('/course/view.php?id=') && url.startsWith(HANSUNG_URL);
+
 // 강의 페이지에서 트래킹 상태 배지 주입
-if (url.includes('/course/view.php?id=') && url.startsWith(HANSUNG_URL)) {
+if (isCoursePage) {
   injectCourseStatus();
+}
+
+// 대시보드·강의 페이지는 각자 배너를 띄운다. 그 밖의 페이지에서는 메인 페이지로 가서 새로고침한다
+if (url !== HANSUNG_URL && !isCoursePage && url.startsWith(HANSUNG_URL)) {
+  loadAutoRefresh().then((enabled) => {
+    if (enabled) return;
+    const lastRequest = getLastRequestTime();
+    renderAutoRefreshBanner(lastRequest ? new Date(lastRequest).toLocaleTimeString() : null, 'idle', () => {
+      sessionStorage.setItem(REFRESH_REQUEST_KEY, '1');
+      location.href = HANSUNG_URL;
+    });
+  });
 }
 
 if (leftMenus.length === 2 && url.startsWith(HANSUNG_URL)) {

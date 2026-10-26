@@ -39,11 +39,14 @@ export function showStatusBar(state: 'loading' | 'success' | 'error') {
     navbar.style.top = `${STATUS_BAR_HEIGHT}px`;
   }
 
-  if (state !== 'loading') {
-    setTimeout(() => {
-      bar!.style.height = '0';
-      bar!.style.opacity = '0';
-      if (navbar) navbar.style.top = '0';
-    }, 2000);
-  }
+  if (state !== 'loading') setTimeout(hideStatusBar, 2000);
+}
+
+export function hideStatusBar() {
+  const bar = document.getElementById(STATUS_BAR_ID);
+  if (!bar) return;
+  bar.style.height = '0';
+  bar.style.opacity = '0';
+  const navbar = document.querySelector<HTMLElement>('.navbar-fixed-top');
+  if (navbar) navbar.style.top = '0';
 }

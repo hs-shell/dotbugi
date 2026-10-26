@@ -29,3 +29,19 @@ describe('scrapeCourseData 주입', () => {
     expect(warn).toHaveBeenNthCalledWith(2, 'raw');
   });
 });
+
+describe('scrapeCourseData 중단', () => {
+  it('signal 을 fetchHtml 에 넘기고, 중단되면 파서가 빈 값으로 끝내도 reject 한다', async () => {
+    const controller = new AbortController();
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new DOMException('aborted', 'AbortError'));
+    // 파서는 부분 실패를 빈 값으로 채워 resolve 한다 — 그대로 저장하면 기존 데이터가 지워진다
+    vi.mocked(scrapeLmsCourseData).mockImplementation(async (passedFetch) => {
+      controller.abort();
+      await passedFetch('/course/view.php?id=1').catch(() => {});
+      return { vodDataArray: [], vodAttendanceArray: [], assignDataArray: [], quizDataArray: [] } as never;
+    });
+
+    await expect(scrapeCourseData('1', undefined, false, controller.signal)).rejects.toThrow();
+    expect(fetchSpy.mock.calls[0][1]?.signal).toBe(controller.signal);
+  });
+});

@@ -8,6 +8,8 @@ import { mergeVodWithAttendance, mergeDueDateItems } from '@/lib/transformCourse
 import { deduplicateInto } from '@/lib/deduplicateInto';
 import { loadMockData } from '@/mocks/loadMockData';
 import { logger } from '@/lib/logger';
+import { abortOnLeave } from '@/lib/abortOnLeave';
+import { loadAutoRefresh, saveAutoRefresh, REFRESH_REQUEST_KEY } from '@/lib/autoRefreshSetting';
 import {
   REFRESH_INTERVAL_MS,
   CACHE_TTL_MINUTES,
@@ -46,6 +48,14 @@ export function useCourseData(courses: CourseBase[]) {
   const [remainingTime, setRemainingTime] = useState(0);
   const [isError, setIsError] = useState(false);
   const [pendingCourseIds, setPendingCourseIds] = useState<Set<string>>(new Set());
+  const [autoRefresh, setAutoRefreshState] = useState(true);
+  useEffect(() => {
+    loadAutoRefresh().then(setAutoRefreshState);
+  }, []);
+  const setAutoRefresh = useCallback((enabled: boolean) => {
+    setAutoRefreshState(enabled);
+    saveAutoRefresh(enabled);
+  }, []);
   // 초기 로드(또는 그에 준하는 첫 과목 추가)가 끝났는지
   const initialLoadDone = useRef(false);
 
@@ -74,6 +84,23 @@ export function useCourseData(courses: CourseBase[]) {
     };
   }, [useMockData]);
 
+  // 저장된 데이터를 추적 과목만 골라 화면에 올린다 (캐시 사용·새로고침 중단 시 이전 상태 복원)
+  const showStoredData = useCallback((targetCourses: CourseBase[]) => {
+    const trackedIds = new Set(targetCourses.map((c) => c.courseId));
+    const byTracked = <T extends { courseId: string }>(items: T[]) =>
+      items.filter((item) => trackedIds.has(item.courseId));
+
+    loadDataFromStorage<Vod[]>('vod', (data) => {
+      if (data) setVods(filterVodsForDisplay(byTracked(data)));
+    });
+    loadDataFromStorage<Assign[]>('assign', (data) => {
+      if (data) setAssigns(filterItemsForDisplay(byTracked(data)));
+    });
+    loadDataFromStorage<Quiz[]>('quiz', (data) => {
+      if (data) setQuizzes(filterItemsForDisplay(byTracked(data)));
+    });
+  }, []);
+
   // 초기 로드는 과목 목록 state 가 반영되기 전에 시작되므로 대상 과목을 인자로 받는다.
   const refreshCourseData = useCallback(
     async (targetCourses: CourseBase[] = courses) => {
@@ -85,6 +112,7 @@ export function useCourseData(courses: CourseBase[]) {
         return;
       }
 
+      const { signal, dispose } = abortOnLeave();
       try {
         setIsError(false);
         setIsPending(true);
@@ -110,7 +138,8 @@ export function useCourseData(courses: CourseBase[]) {
             const scraped = await scrapeCourseData(
               course.courseId,
               cachedQuizMap.get(course.courseId),
-              course.isCommunity
+              course.isCommunity,
+              signal
             );
 
             deduplicateInto(
@@ -161,20 +190,27 @@ export function useCourseData(courses: CourseBase[]) {
         setLastRequestTime(fetchedAt);
         saveDataToStorage('lastRequestTime', fetchedAt.toString());
       } catch (error) {
+        // 페이지 이동으로 중단: 아무것도 쓰지 않았으니 저장된 데이터로 되돌리고, 마지막 새로고침 시각도 그대로 둔다
+        if (signal.aborted) {
+          showStoredData(targetCourses);
+          return;
+        }
         logger.course.error('강의 데이터 새로고침 실패:', error);
         clearLastRequestTime();
         setIsError(true);
       } finally {
+        dispose();
         setIsPending(false);
       }
     },
-    [courses, applyMock, useMockData]
+    [courses, applyMock, useMockData, showStoredData]
   );
 
   const addCourseData = useCallback(async (course: CourseBase) => {
     setPendingCourseIds((prev) => new Set(prev).add(course.courseId));
+    const { signal, dispose } = abortOnLeave();
     try {
-      const scraped = await scrapeCourseData(course.courseId, undefined, course.isCommunity);
+      const scraped = await scrapeCourseData(course.courseId, undefined, course.isCommunity, signal);
 
       const newVods = mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray);
       const newAssigns = mergeDueDateItems(course, scraped.assignDataArray);
@@ -237,8 +273,9 @@ export function useCourseData(courses: CourseBase[]) {
         saveDataToStorage('lastRequestTime', fetchedAt.toString());
       }
     } catch (error) {
-      logger.course.warn('강의 추가 데이터 fetch 실패:', error);
+      if (!signal.aborted) logger.course.warn('강의 추가 데이터 fetch 실패:', error);
     } finally {
+      dispose();
       setPendingCourseIds((prev) => {
         const next = new Set(prev);
         next.delete(course.courseId);
@@ -281,13 +318,14 @@ export function useCourseData(courses: CourseBase[]) {
   useEffect(() => {
     // 캐시가 만료됐으면 바로 갱신을 시작하고, 아니면 한 주기 뒤에 경과 시간을 1 올린다.
     // effect 안에서 직접 상태를 바꾸지 않도록 두 경우 모두 타이머 콜백에서 처리한다.
-    const expired = remainingTime >= CACHE_TTL_MINUTES;
+    // 자동 새로고침을 끄면 경과 시간만 센다
+    const expired = autoRefresh && remainingTime >= CACHE_TTL_MINUTES;
     const timer = setTimeout(
       () => (expired ? refreshCourseData() : setRemainingTime((prev) => prev + 1)),
       expired ? 0 : REFRESH_INTERVAL_MS
     );
     return () => clearTimeout(timer);
-  }, [remainingTime, refreshCourseData]);
+  }, [remainingTime, refreshCourseData, autoRefresh]);
 
   // 탭이 다시 보일 때 캐시 만료 확인 후 즉시 갱신
   useEffect(() => {
@@ -296,7 +334,7 @@ export function useCourseData(courses: CourseBase[]) {
       const lastRequest = getLastRequestTime();
       if (!lastRequest) return;
       const elapsed = Date.now() - lastRequest;
-      if (elapsed >= CACHE_TTL_MS) {
+      if (autoRefresh && elapsed >= CACHE_TTL_MS) {
         refreshCourseData();
       } else {
         setRemainingTime(elapsed / REFRESH_INTERVAL_MS);
@@ -304,15 +342,21 @@ export function useCourseData(courses: CourseBase[]) {
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [refreshCourseData]);
+  }, [refreshCourseData, autoRefresh]);
 
   // 초기 로드: 캐시 확인 후 fetch 또는 캐시 사용 (최초 1회만 실행)
   // 과목 목록 초기화가 끝나는 시점(useGetCourses 의 onInitialized)에 호출된다.
   const loadInitialData = useCallback(
-    (initialCourses: CourseBase[]) => {
+    async (initialCourses: CourseBase[]) => {
       if (initialCourses.length === 0) return;
       if (initialLoadDone.current) return;
       initialLoadDone.current = true;
+
+      const enabled = await loadAutoRefresh();
+      setAutoRefreshState(enabled);
+      // 자동 새로고침이 꺼져 있어도 다른 페이지 배너의 새로고침 요청은 따른다
+      const requested = sessionStorage.getItem(REFRESH_REQUEST_KEY) !== null;
+      sessionStorage.removeItem(REFRESH_REQUEST_KEY);
 
       const lastRequest = getLastRequestTime();
       const now = Date.now();
@@ -321,29 +365,17 @@ export function useCourseData(courses: CourseBase[]) {
         setRefreshTime(new Date(lastRequest).toLocaleTimeString());
       }
 
-      if (!lastRequest || now - lastRequest >= CACHE_TTL_MS) {
+      if (requested || (enabled && (!lastRequest || now - lastRequest >= CACHE_TTL_MS))) {
         setIsPending(true);
         // 추적 과목 state 가 아직 커밋되지 않았을 수 있어, 새로고침 결과를 거르는 기준을 먼저 맞춘다
         coursesRef.current = initialCourses;
         refreshCourseData(initialCourses);
       } else {
-        const trackedIds = new Set(initialCourses.map((c) => c.courseId));
-        const byTracked = <T extends { courseId: string }>(items: T[]) =>
-          items.filter((item) => trackedIds.has(item.courseId));
-
-        setRemainingTime((now - lastRequest) / REFRESH_INTERVAL_MS);
-        loadDataFromStorage<Vod[]>('vod', (data) => {
-          if (data) setVods(filterVodsForDisplay(byTracked(data)));
-        });
-        loadDataFromStorage<Assign[]>('assign', (data) => {
-          if (data) setAssigns(filterItemsForDisplay(byTracked(data)));
-        });
-        loadDataFromStorage<Quiz[]>('quiz', (data) => {
-          if (data) setQuizzes(filterItemsForDisplay(byTracked(data)));
-        });
+        if (lastRequest) setRemainingTime((now - lastRequest) / REFRESH_INTERVAL_MS);
+        showStoredData(initialCourses);
       }
     },
-    [refreshCourseData]
+    [refreshCourseData, showStoredData]
   );
 
   return {
@@ -359,5 +391,7 @@ export function useCourseData(courses: CourseBase[]) {
     addCourseData,
     removeCourseData,
     pendingCourseIds,
+    autoRefresh,
+    setAutoRefresh,
   };
 }

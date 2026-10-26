@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, changeLanguage, type LanguageCode } from '@/i18n';
-import { Globe, X, Download } from 'lucide-react';
+import { Globe, X, Download, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,8 @@ interface SettingProps {
   onCalendarLogout: () => void;
   hiddenTasks?: HiddenTaskInfo[];
   onUnhideTask?: (url: string) => void;
+  autoRefresh: boolean;
+  onAutoRefreshChange: (enabled: boolean) => void;
 }
 
 export default function Setting({
@@ -35,6 +37,8 @@ export default function Setting({
   onCalendarLogout,
   hiddenTasks,
   onUnhideTask,
+  autoRefresh,
+  onAutoRefreshChange,
 }: SettingProps) {
   const { i18n, t } = useTranslation('common');
 
@@ -92,6 +96,26 @@ export default function Setting({
             ))}
           </SelectContent>
         </Select>
+      </Card>
+
+      {/* 자동 새로고침 */}
+      <Card className="bg-white rounded-2xl w-full border-0 shadow-none px-1.5 py-1.5">
+        <button
+          role="switch"
+          aria-checked={autoRefresh}
+          onClick={() => onAutoRefreshChange(!autoRefresh)}
+          className="flex items-center w-full h-14 rounded-2xl px-4 py-3 gap-x-3 cursor-pointer bg-white hover:bg-zinc-100 transition-colors duration-500"
+        >
+          <RefreshCw className="w-5 h-5 text-zinc-500 shrink-0" />
+          <span className="flex-1 text-lg font-semibold text-zinc-600 text-left">{t('autoRefresh.label')}</span>
+          <span
+            className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition-colors duration-200 ${autoRefresh ? 'bg-zinc-900' : 'bg-zinc-300'}`}
+          >
+            <span
+              className={`absolute top-1 left-1 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${autoRefresh ? 'translate-x-5' : ''}`}
+            />
+          </span>
+        </button>
       </Card>
 
       {/* 문의하기 */}

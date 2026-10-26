@@ -32,6 +32,7 @@ import {
 } from '@/lib/calendarUtils';
 import { vodGroupsToEvents, dueDateItemToEvent } from '@/lib/transformCalendarEvents';
 import { logger } from '@/lib/logger';
+import { renderAutoRefreshBanner, removeAutoRefreshBanner } from '@/lib/autoRefreshBanner';
 
 const BUBBLE_DISMISS_KEY = 'dotbugi_bubble_dismissed';
 const BUBBLE_DISMISS_DURATION = import.meta.env.VITE_MOCK ? 1000 * 30 : 1000 * 60 * 60; // mock: 30초, prod: 1시간
@@ -66,12 +67,15 @@ export default function Dashboard() {
     quizzes,
     isPending,
     remainingTime,
+    refreshTime,
     isError,
     refreshCourseData,
     loadInitialData,
     addCourseData,
     removeCourseData,
     pendingCourseIds,
+    autoRefresh,
+    setAutoRefresh,
   } = useCourseData(trackedCourses);
   // MOCK_COURSES 모드는 useGetCourses 의 마운트 effect 에서 초기화 콜백을 부르므로, 그보다 먼저 도는 layout effect 로 연결한다.
   useLayoutEffect(() => {
@@ -183,6 +187,15 @@ export default function Dashboard() {
       }
     });
   }, [pendingCourseIds, updateNotification]);
+
+  // 자동 새로고침이 꺼져 있으면 페이지 상단에 배너를 계속 띄운다
+  useEffect(() => {
+    if (autoRefresh) {
+      removeAutoRefreshBanner();
+      return;
+    }
+    renderAutoRefreshBanner(refreshTime, isPending ? 'loading' : isError ? 'error' : 'idle', () => refreshCourseData());
+  }, [autoRefresh, refreshTime, isPending, isError, refreshCourseData]);
 
   // 새로고침 시작/완료 시 NotificationBubble 표시
   const refreshNotifRef = useRef<string | null>(null);
@@ -522,6 +535,8 @@ export default function Dashboard() {
                     onCalendarLogout={handleCalendarLogout}
                     hiddenTasks={hiddenTaskInfos}
                     onUnhideTask={unhideTask}
+                    autoRefresh={autoRefresh}
+                    onAutoRefreshChange={setAutoRefresh}
                   />
                 )}
               </>
