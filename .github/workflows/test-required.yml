@@ -1,0 +1,42 @@
+name: 테스트 필수
+
+# 소스(src/)를 바꾼 PR 은 테스트 파일도 함께 바꿔야 한다.
+# 테스트가 필요 없는 변경(문구·스타일만 등)은 메인테이너가 `no-test` 라벨을 붙여 통과시킨다.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches:
+      - main
+
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: test-required-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  test-required:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 테스트 변경 확인
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (pr.labels.some((l) => l.name === 'no-test')) {
+              core.info('`no-test` 라벨 — 검사 생략');
+              return;
+            }
+            const files = await github.paginate(github.rest.pulls.listFiles, { ...context.repo, pull_number: pr.number, per_page: 100 });
+            const isTest = (f) => /\.test\.tsx?$/.test(f) || f.startsWith('src/__tests__/');
+            const src = files
+              .filter((f) => f.status !== 'removed')
+              .map((f) => f.filename)
+              .filter((f) => /^src\/.*\.tsx?$/.test(f) && !/\.d\.ts$/.test(f) && !isTest(f));
+            if (src.length && !files.some((f) => isTest(f.filename))) {
+              core.setFailed(
+                `소스를 바꿨지만 테스트 변경이 없습니다:\n${src.map((f) => `  - ${f}`).join('\n')}\n` +
+                  '바뀐 동작을 확인하는 테스트를 추가·수정해 주세요. (테스트가 필요 없는 변경이면 메인테이너에게 `no-test` 라벨을 요청)'
+              );
+            }

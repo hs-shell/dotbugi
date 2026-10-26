@@ -35,7 +35,8 @@ jobs:
               core.info('Dependabot PR — 이슈 참조 검사 생략');
               return;
             }
-            const body = context.payload.pull_request.body || '';
+            // 템플릿 주석 안의 예시(`#123`)로 통과하지 않도록 HTML 주석을 빼고 본다
+            const body = (context.payload.pull_request.body || '').replace(/<!--[\s\S]*?-->/g, '');
             // "#123", "Closes #123", "Fixes #45", "Resolves: #6" 등 + 전체 URL 형태 모두 허용
             const ref = /(close[sd]?|fix(e[sd])?|resolve[sd]?)?\s*:?\s*#\d+/i.test(body)
               || /github\.com\/[^/]+\/[^/]+\/issues\/\d+/i.test(body);
@@ -77,5 +78,22 @@ jobs:
       - name: 릴리즈 manifest 검사 (key 미포함)
         run: node .github/scripts/check-release-manifest.mjs
 
-      - name: 테스트
-        run: npm run test
+      # 커버리지는 coverage-comment.yml 이 PR 댓글로 올린다
+      - name: 테스트 + 커버리지
+        run: npm run test:coverage
+
+      - name: 커버리지 결과 저장
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "$PR_NUMBER" > coverage/pr-number
+          node -e 'const t=require("./coverage/coverage-summary.json").total;console.log("## 테스트 커버리지\n\n| 항목 | % |\n| --- | --- |\n"+["lines","statements","branches","functions"].map(k=>`| ${k} | ${t[k].pct} |`).join("\n"))' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 커버리지 업로드
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: |
+            coverage/coverage-summary.json
+            coverage/pr-number
+          retention-days: 7

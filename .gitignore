@@ -3,6 +3,7 @@ node_modules/
 
 # 빌드 및 배포 산출물
 dist/
+coverage/
 
 # Vite 캐시 (만약 사용 중이라면)
 .vite/
@@ -56,3 +57,4 @@ docs/.vitepress/cache/
 
 # Claude Code 로컬 개인 설정
 .claude/settings.local.json
+.claude/worktrees/
