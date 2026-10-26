@@ -65,6 +65,17 @@
   "language": "언어",
   "contact": "문의하기",
   "downloadLogs": "로그 다운로드",
+  "autoRefresh": {
+    "label": "자동 새로고침",
+    "banner": {
+      "off": "자동 새로고침 꺼짐",
+      "last": "마지막 새로고침 {{time}}",
+      "never": "새로고침 기록 없음",
+      "refresh": "새로고침",
+      "loading": "새로고침 중",
+      "error": "새로고침 실패"
+    }
+  },
   "vodDownload": {
     "button": "강의 다운로드",
     "started": "다운로드 중…",

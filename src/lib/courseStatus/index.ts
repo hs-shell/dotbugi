@@ -2,6 +2,10 @@ import { CourseBase, Quiz } from '@/types';
 import { scrapeCourseData } from '@/lib/fetchCourseData';
 import { mergeVodWithAttendance, mergeDueDateItems } from '@/lib/transformCourseData';
 import { logger } from '@/lib/logger';
+import { abortOnLeave } from '@/lib/abortOnLeave';
+import { loadAutoRefresh } from '@/lib/autoRefreshSetting';
+import { renderAutoRefreshBanner } from '@/lib/autoRefreshBanner';
+import { getLastRequestTime } from '@/lib/cache';
 
 import {
   load,
@@ -15,7 +19,7 @@ import {
 } from './storage';
 import { injectBadgesIntoDOM } from './badge';
 import { highlightCurrentWeek } from './currentWeek';
-import { showStatusBar } from './statusBar';
+import { showStatusBar, hideStatusBar } from './statusBar';
 import { injectDownloadButtons } from './injectDownloadButtons';
 
 // Course info from DOM
@@ -31,8 +35,20 @@ function parseCourseInfoFromDOM(courseId: string): CourseBase {
 
 // Fetch & inject
 
-async function fetchAndInject(courseId: string, course: CourseBase, isTracked: boolean, isCommunity: boolean) {
-  showStatusBar('loading');
+type FetchState = 'loading' | 'success' | 'error' | 'aborted';
+
+/** 자동 새로고침이 켜져 있을 때의 진행 표시 — 잠깐 떴다 사라지는 상태 바 */
+const reportToStatusBar = (state: FetchState) => (state === 'aborted' ? hideStatusBar() : showStatusBar(state));
+
+async function fetchAndInject(
+  courseId: string,
+  course: CourseBase,
+  isTracked: boolean,
+  isCommunity: boolean,
+  report: (state: FetchState) => void = reportToStatusBar
+) {
+  report('loading');
+  const { signal, dispose } = abortOnLeave();
 
   const [hiddenUrls, cachedQuizzes] = await Promise.all([
     load<string[]>('hiddenTaskUrls'),
@@ -40,7 +56,7 @@ async function fetchAndInject(courseId: string, course: CourseBase, isTracked: b
   ]);
 
   try {
-    const scraped = await scrapeCourseData(courseId, cachedQuizzes, isCommunity);
+    const scraped = await scrapeCourseData(courseId, cachedQuizzes, isCommunity, signal);
     const newVods = mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray);
     const newAssigns = mergeDueDateItems(course, scraped.assignDataArray);
     const newQuizzes = mergeDueDateItems(course, scraped.quizDataArray);
@@ -56,11 +72,30 @@ async function fetchAndInject(courseId: string, course: CourseBase, isTracked: b
 
     injectBadgesIntoDOM(newVods, newAssigns, newQuizzes, new Set(hiddenUrls ?? []));
     setFetchCache(courseId);
-    showStatusBar('success');
+    report('success');
   } catch (error) {
+    // 페이지 이동으로 중단: 아무것도 저장하지 않았으므로 이미 표시한 저장 데이터가 그대로 이전 상태다
+    if (signal.aborted) {
+      report('aborted');
+      return;
+    }
     logger.course.error('강의 데이터 로드 오류:', error);
-    showStatusBar('error');
+    report('error');
+  } finally {
+    dispose();
   }
+}
+
+/** 자동 새로고침 꺼짐: 상단 배너를 띄우고, 배너의 새로고침 링크로만 조회한다 */
+function showManualRefreshBanner(courseId: string, isTracked: boolean, isCommunity: boolean) {
+  let lastRefreshed = getLastRequestTime();
+
+  const refresh = () =>
+    fetchAndInject(courseId, parseCourseInfoFromDOM(courseId), isTracked, isCommunity, (state) => {
+      if (state === 'success') lastRefreshed = Date.now();
+      renderAutoRefreshBanner(lastRefreshed, state === 'loading' || state === 'error' ? state : 'idle', refresh);
+    });
+  renderAutoRefreshBanner(lastRefreshed, 'idle', refresh);
 }
 
 // Main entry point
@@ -74,15 +109,16 @@ export async function injectCourseStatus() {
   highlightCurrentWeek();
   injectDownloadButtons(parseCourseInfoFromDOM(courseId).courseTitle);
 
-  const [trackedIds, communityIds] = await Promise.all([
+  const [trackedIds, communityIds, autoRefresh] = await Promise.all([
     load<string[]>('trackedCourseIds'),
     load<string[]>('communityIds'),
+    loadAutoRefresh(),
   ]);
   const isTracked = trackedIds?.includes(courseId) ?? false;
   const isCommunity = communityIds?.includes(courseId) ?? false;
 
   // 뒤로가기/앞으로가기 → 캐시 사용
-  if (isFetchCacheValid(courseId)) {
+  if (autoRefresh && isFetchCacheValid(courseId)) {
     if (isTracked) {
       const data = await loadCourseData(courseId);
       if (data.vods.length || data.assigns.length || data.quizzes.length) {
@@ -105,6 +141,17 @@ export async function injectCourseStatus() {
     if (data.vods.length || data.assigns.length || data.quizzes.length) {
       injectBadgesIntoDOM(data.vods, data.assigns, data.quizzes, data.hiddenUrls);
     }
+  }
+
+  if (!autoRefresh) {
+    // 비트래킹 강의는 이 탭에서 마지막으로 조회한 임시 캐시가 저장 데이터다
+    const cached = isTracked ? null : loadSessionCourseData(courseId);
+    if (cached) {
+      const hiddenUrls = await load<string[]>('hiddenTaskUrls');
+      injectBadgesIntoDOM(cached.vods, cached.assigns, cached.quizzes, new Set(hiddenUrls ?? []));
+    }
+    showManualRefreshBanner(courseId, isTracked, isCommunity);
+    return;
   }
 
   // 최신 데이터 fetch

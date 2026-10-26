@@ -65,6 +65,17 @@
   "language": "Language",
   "contact": "Contact Us",
   "downloadLogs": "Download Logs",
+  "autoRefresh": {
+    "label": "Auto refresh",
+    "banner": {
+      "off": "Auto refresh is off",
+      "last": "Last refreshed {{time}}",
+      "never": "Never refreshed",
+      "refresh": "Refresh",
+      "loading": "Refreshing",
+      "error": "Refresh failed"
+    }
+  },
   "vodDownload": {
     "button": "Download lecture",
     "started": "Downloading…",

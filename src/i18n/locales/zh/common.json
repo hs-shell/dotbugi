@@ -66,6 +66,17 @@
   "language": "语言",
   "contact": "联系我们",
   "downloadLogs": "下载日志",
+  "autoRefresh": {
+    "label": "自动刷新",
+    "banner": {
+      "off": "自动刷新已关闭",
+      "last": "上次刷新 {{time}}",
+      "never": "暂无刷新记录",
+      "refresh": "刷新",
+      "loading": "刷新中",
+      "error": "刷新失败"
+    }
+  },
   "vodDownload": {
     "button": "下载课程",
     "started": "下载中…",

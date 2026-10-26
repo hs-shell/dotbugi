@@ -65,6 +65,17 @@
   "language": "言語",
   "contact": "お問い合わせ",
   "downloadLogs": "ログダウンロード",
+  "autoRefresh": {
+    "label": "自動更新",
+    "banner": {
+      "off": "自動更新オフ",
+      "last": "最終更新 {{time}}",
+      "never": "更新履歴なし",
+      "refresh": "更新",
+      "loading": "更新中",
+      "error": "更新に失敗しました"
+    }
+  },
   "vodDownload": {
     "button": "講義をダウンロード",
     "started": "ダウンロード中…",
