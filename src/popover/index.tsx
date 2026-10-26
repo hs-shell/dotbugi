@@ -73,8 +73,7 @@ if (isCoursePage) {
 if (url !== HANSUNG_URL && !isCoursePage && url.startsWith(HANSUNG_URL)) {
   loadAutoRefresh().then((enabled) => {
     if (enabled) return;
-    const lastRequest = getLastRequestTime();
-    renderAutoRefreshBanner(lastRequest ? new Date(lastRequest).toLocaleTimeString() : null, 'idle', () => {
+    renderAutoRefreshBanner(getLastRequestTime(), 'idle', () => {
       sessionStorage.setItem(REFRESH_REQUEST_KEY, '1');
       location.href = HANSUNG_URL;
     });

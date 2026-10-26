@@ -73,7 +73,7 @@
       "last": "上次刷新 {{time}}",
       "never": "暂无刷新记录",
       "refresh": "刷新",
-      "loading": "刷新中...",
+      "loading": "刷新中",
       "error": "刷新失败"
     }
   },

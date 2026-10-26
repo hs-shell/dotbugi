@@ -72,7 +72,7 @@
       "last": "Last refreshed {{time}}",
       "never": "Never refreshed",
       "refresh": "Refresh",
-      "loading": "Refreshing...",
+      "loading": "Refreshing",
       "error": "Refresh failed"
     }
   },

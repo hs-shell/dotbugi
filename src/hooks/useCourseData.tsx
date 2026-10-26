@@ -43,7 +43,7 @@ export function useCourseData(courses: CourseBase[]) {
   useEffect(() => {
     coursesRef.current = courses;
   }, [courses]);
-  const [refreshTime, setRefreshTime] = useState<string | null>(null);
+  const [refreshTime, setRefreshTime] = useState<number | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
   const [isError, setIsError] = useState(false);
@@ -76,7 +76,7 @@ export function useCourseData(courses: CourseBase[]) {
       setVods(mock.vods);
       setAssigns(mock.assigns);
       setQuizzes(mock.quizzes);
-      setRefreshTime(new Date().toLocaleTimeString());
+      setRefreshTime(Date.now());
       setRemainingTime(5);
     });
     return () => {
@@ -106,7 +106,7 @@ export function useCourseData(courses: CourseBase[]) {
     async (targetCourses: CourseBase[] = courses) => {
       if (useMockData) {
         await applyMock();
-        setRefreshTime(new Date().toLocaleTimeString());
+        setRefreshTime(Date.now());
         setRemainingTime(0);
         setIsPending(false);
         return;
@@ -185,7 +185,7 @@ export function useCourseData(courses: CourseBase[]) {
           return [...kept, ...filterItemsForDisplay(quizzes.filter((q) => isTracked(q.courseId)))];
         });
 
-        setRefreshTime(new Date(fetchedAt).toLocaleTimeString());
+        setRefreshTime(fetchedAt);
         setRemainingTime(0);
         setLastRequestTime(fetchedAt);
         saveDataToStorage('lastRequestTime', fetchedAt.toString());
@@ -267,7 +267,7 @@ export function useCourseData(courses: CourseBase[]) {
       if (!initialLoadDone.current) {
         initialLoadDone.current = true;
         const fetchedAt = Date.now();
-        setRefreshTime(new Date(fetchedAt).toLocaleTimeString());
+        setRefreshTime(fetchedAt);
         setRemainingTime(0);
         setLastRequestTime(fetchedAt);
         saveDataToStorage('lastRequestTime', fetchedAt.toString());
@@ -362,7 +362,7 @@ export function useCourseData(courses: CourseBase[]) {
       const now = Date.now();
 
       if (lastRequest) {
-        setRefreshTime(new Date(lastRequest).toLocaleTimeString());
+        setRefreshTime(lastRequest);
       }
 
       if (requested || (enabled && (!lastRequest || now - lastRequest >= CACHE_TTL_MS))) {

@@ -88,12 +88,11 @@ async function fetchAndInject(
 
 /** 자동 새로고침 꺼짐: 상단 배너를 띄우고, 배너의 새로고침 링크로만 조회한다 */
 function showManualRefreshBanner(courseId: string, isTracked: boolean, isCommunity: boolean) {
-  const lastRequest = getLastRequestTime();
-  let lastRefreshed = lastRequest ? new Date(lastRequest).toLocaleTimeString() : null;
+  let lastRefreshed = getLastRequestTime();
 
   const refresh = () =>
     fetchAndInject(courseId, parseCourseInfoFromDOM(courseId), isTracked, isCommunity, (state) => {
-      if (state === 'success') lastRefreshed = new Date().toLocaleTimeString();
+      if (state === 'success') lastRefreshed = Date.now();
       renderAutoRefreshBanner(lastRefreshed, state === 'loading' || state === 'error' ? state : 'idle', refresh);
     });
   renderAutoRefreshBanner(lastRefreshed, 'idle', refresh);
