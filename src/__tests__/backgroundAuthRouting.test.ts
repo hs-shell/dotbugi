@@ -5,6 +5,10 @@ vi.mock('@/lib/mcpConnect/registerConnectListener', () => ({ registerConnectList
 
 type Listener = (message: unknown, sender: unknown, sendResponse: (r: unknown) => void) => boolean | undefined;
 let onMessage: Listener;
+let onInstalled: (details: { reason: string }) => void;
+let onClicked: () => void;
+const tabsCreate = vi.fn();
+const local: Record<string, unknown> = {};
 
 const getAuthToken = vi.fn((_opts: unknown, cb: (token?: string) => void) => cb('chrome-token'));
 const removeCachedAuthToken = vi.fn((_opts: unknown, cb: () => void) => cb());
@@ -18,9 +22,10 @@ vi.stubGlobal('chrome', {
   runtime: {
     id: 'own-ext-id',
     onMessage: { addListener: (l: Listener) => (onMessage = l) },
-    onInstalled: { addListener: () => {} },
+    onInstalled: { addListener: (l: typeof onInstalled) => (onInstalled = l) },
   },
-  action: { onClicked: { addListener: () => {} } },
+  action: { onClicked: { addListener: (l: typeof onClicked) => (onClicked = l) } },
+  tabs: { create: tabsCreate },
   identity: {
     getAuthToken,
     removeCachedAuthToken,
@@ -28,6 +33,9 @@ vi.stubGlobal('chrome', {
     getRedirectURL: () => 'https://abc.chromiumapp.org/',
   },
   storage: {
+    local: {
+      get: (key: string, cb: (r: Record<string, unknown>) => void) => cb(key in local ? { [key]: local[key] } : {}),
+    },
     session: {
       get: async (key: string) => (key in session ? { [key]: session[key] } : {}),
       set: async (items: Record<string, unknown>) => Object.assign(session, items),
@@ -97,5 +105,44 @@ describe('background OAuth 경로', () => {
       token: null,
       error: 'The user did not approve access.',
     });
+  });
+
+  it('Chrome 에서 토큰을 못 받으면 { token: null } 로 돌려준다', async () => {
+    setBrands(['Google Chrome']);
+    getAuthToken.mockImplementationOnce((_opts: unknown, cb: (token?: string) => void) => cb(undefined));
+    expect(await send({ action: 'getAuthToken', interactive: false })).toEqual({ token: null, error: undefined });
+  });
+});
+
+describe('background 설치·아이콘 클릭', () => {
+  beforeAll(async () => {
+    await import('@/background');
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    for (const key of Object.keys(local)) delete local[key];
+  });
+
+  it('처음 설치할 때만 안내 문서를 연다', () => {
+    onInstalled({ reason: 'update' });
+    expect(tabsCreate).not.toHaveBeenCalled();
+    onInstalled({ reason: 'install' });
+    expect(tabsCreate).toHaveBeenCalledWith({ url: 'https://hs-shell.github.io/dotbugi/' });
+  });
+
+  it('아이콘을 누르면 설정한 언어의 문서를 열고, 한국어·미설정이면 기본 문서를 연다', () => {
+    local.language = 'ja';
+    onClicked();
+    expect(tabsCreate).toHaveBeenLastCalledWith({ url: 'https://hs-shell.github.io/dotbugi/ja/' });
+
+    local.language = 'ko';
+    onClicked();
+    expect(tabsCreate).toHaveBeenLastCalledWith({ url: 'https://hs-shell.github.io/dotbugi/' });
+
+    delete local.language;
+    onClicked();
+    expect(tabsCreate).toHaveBeenLastCalledWith({ url: 'https://hs-shell.github.io/dotbugi/' });
+    expect(tabsCreate).toHaveBeenCalledTimes(3);
   });
 });

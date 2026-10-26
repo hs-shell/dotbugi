@@ -8,6 +8,8 @@ import { logger } from '@/lib/logger';
 vi.mock('@dotbugi/lms-parser', () => ({ scrapeCourseData: vi.fn() }));
 
 afterEach(() => {
+  // 파서 mock 의 호출 기록·구현이 다음 테스트로 넘어가지 않게 (순서 무관)
+  vi.resetAllMocks();
   vi.restoreAllMocks();
 });
 
