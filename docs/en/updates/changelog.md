@@ -1,5 +1,33 @@
 # Update Log
 
+## v5.3.1
+
+- Fixed watch badges and download buttons appearing on video lectures that are not yet published
+- Improved security by restricting the player to LMS addresses only
+
+## v5.3.0
+
+- Show the download button on video lectures whose viewing period has ended
+- Fixed Google Calendar sign-in failing in browsers other than Chrome
+
+## v5.2.1
+
+- Fixed the closed player window blocking clicks on the main page
+
+## v5.2.0
+
+- Added a download button for video lectures (saved as MP4; unencrypted videos only)
+- Dashboard and player windows now open and close with a smooth fade, and no longer jump when opening
+- Fixed the dashboard appearing empty after the first refresh
+- Fixed some course toggles not showing and the player not opening the first time
+- Due dates are now calculated in Korea time, and quiz loading failures are handled better
+- The dotbugi-mcp connection success window now closes automatically after 5 seconds
+
+## v5.1.0
+
+- Added dotbugi-mcp connection (view your LMS to-dos from AI tools such as Claude)
+- Improved security by checking where LMS links point before opening them
+
 ## v5.0.5
 
 - Fixed autoplay end time shifting forward when advancing to the next video
