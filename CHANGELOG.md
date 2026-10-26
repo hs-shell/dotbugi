@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.4.0](https://github.com/hs-shell/dotbugi/compare/v5.3.1...v5.4.0) (2026-10-26)
+
+
+### Features
+
+* 새로고침 중 페이지 이동 시 중단하고 자동 새로고침 끄기 설정 추가 ([#206](https://github.com/hs-shell/dotbugi/issues/206)) ([9367518](https://github.com/hs-shell/dotbugi/commit/9367518c9822ddccd0f69d6d6a5ea1c1ecd1ed0f))
+
 ## [5.3.1](https://github.com/hs-shell/dotbugi/compare/v5.3.0...v5.3.1) (2026-10-24)
 
 
