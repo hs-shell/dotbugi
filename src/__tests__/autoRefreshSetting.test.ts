@@ -29,4 +29,12 @@ describe('자동 새로고침 설정', () => {
     saveAutoRefresh(true);
     expect(await loadAutoRefresh()).toBe(true);
   });
+
+  it('읽기에 실패하면(lastError) 멈추지 않고 기본값(켜짐)으로 끝난다', async () => {
+    vi.stubGlobal('chrome', {
+      runtime: { lastError: { message: 'storage read failed' } },
+      storage: { local: { get: vi.fn((_keys: string[], cb: (result?: unknown) => void) => cb(undefined)) } },
+    });
+    expect(await loadAutoRefresh()).toBe(true);
+  });
 });

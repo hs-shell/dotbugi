@@ -9,7 +9,11 @@ export const REFRESH_REQUEST_KEY = 'dotbugi_refresh_request';
 export function loadAutoRefresh(): Promise<boolean> {
   // loadDataFromStorage 는 false 를 null 로 바꾸므로 직접 읽는다
   return new Promise((resolve) =>
-    chrome.storage.local.get([AUTO_REFRESH_KEY], (result) => resolve(result[AUTO_REFRESH_KEY] !== false))
+    chrome.storage.local.get([AUTO_REFRESH_KEY], (result) => {
+      // 읽기 실패는 예외 없이 lastError 로만 알린다. 기본값(켜짐)으로 끝내야 배지 주입·초기 로드가 멈추지 않는다
+      if (chrome.runtime?.lastError) return resolve(true);
+      resolve(result?.[AUTO_REFRESH_KEY] !== false);
+    })
   );
 }
 
