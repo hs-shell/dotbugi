@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
+import { highlightCurrentWeek } from '@/lib/courseStatus/currentWeek';
 
 const MONTH_NAMES: Record<string, number> = {
   january: 1,
@@ -162,5 +163,73 @@ describe('parseSectionDateRange', () => {
     expect(result!.end.getHours()).toBe(23);
     expect(result!.end.getMinutes()).toBe(59);
     expect(result!.end.getSeconds()).toBe(59);
+  });
+});
+
+describe('highlightCurrentWeek', () => {
+  const section = (id: number, name: string, dateLabel = '') => `
+    <li id="section-${id}">
+      ${dateLabel ? `<span class="text-ubstrap">${dateLabel}</span>` : ''}
+      <div class="content"><h3 class="sectionname"><span>${name}</span></h3></div>
+    </li>`;
+
+  function render(sections: string, current = true) {
+    document.body.innerHTML = `${current ? '<div class="course_box_current"></div>' : ''}<ul>${sections}</ul>`;
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 20, 12, 0, 0));
+    Element.prototype.scrollIntoView = vi.fn();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    document.body.innerHTML = '';
+  });
+
+  it('오늘이 포함된 주차에만 표시를 달고, 이동 버튼을 누르면 그 주차로 스크롤한다', () => {
+    render(section(1, '1주차 [3월11일 - 3월17일]') + section(2, '2주차 [3월18일 - 3월24일]'));
+    highlightCurrentWeek();
+
+    const markers = document.querySelectorAll('[data-dotbugi-current-week]');
+    expect(markers).toHaveLength(1);
+    expect(document.querySelector('#section-2 [data-dotbugi-current-week]')?.textContent).toBe(
+      'courseStatus.currentWeek'
+    );
+    expect((document.querySelector('#section-2 .content') as HTMLElement).style.borderLeft).toContain('4px');
+
+    const btn = document.getElementById('dotbugi-scroll-current-week')!;
+    btn.click();
+    expect(document.getElementById('section-2')!.scrollIntoView).toHaveBeenCalled();
+  });
+
+  it('다시 불러도 표시와 버튼을 중복해서 만들지 않는다', () => {
+    render(section(2, '2주차 [3월18일 - 3월24일]'));
+    highlightCurrentWeek();
+    highlightCurrentWeek();
+
+    expect(document.querySelectorAll('[data-dotbugi-current-week]')).toHaveLength(1);
+    expect(document.querySelectorAll('#dotbugi-scroll-current-week')).toHaveLength(1);
+  });
+
+  it('주차의 연도 표기(YYYY-)로 날짜 범위를 판단한다', () => {
+    // 섹션에 2025년이 적혀 있으면 2026년 3월 20일은 범위 밖이다
+    render(section(2, '2주차 [3월18일 - 3월24일]', '2025-03-18'));
+    highlightCurrentWeek();
+    expect(document.querySelector('[data-dotbugi-current-week]')).toBeNull();
+    expect(document.getElementById('dotbugi-scroll-current-week')).toBeNull();
+  });
+
+  it('현재 학기 강의가 아니면(.course_box_current 없음) 아무것도 하지 않는다', () => {
+    render(section(2, '2주차 [3월18일 - 3월24일]'), false);
+    highlightCurrentWeek();
+    expect(document.querySelector('[data-dotbugi-current-week]')).toBeNull();
+  });
+
+  it('날짜 범위가 없는 섹션은 건너뛴다', () => {
+    render(section(0, '일반') + section(1, '1주차'));
+    highlightCurrentWeek();
+    expect(document.querySelector('[data-dotbugi-current-week]')).toBeNull();
   });
 });
