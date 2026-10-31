@@ -4,7 +4,7 @@ name: 테스트 필수
 # 테스트가 필요 없는 변경(문구·스타일만 등)은 메인테이너가 `no-test` 라벨을 붙여 통과시킨다.
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
     branches:
       - main
 

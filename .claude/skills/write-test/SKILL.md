@@ -26,7 +26,7 @@ description: 사용자가 "테스트 써줘", "테스트 추가", "커버리지 
 ## 4단계: 실행
 
 ```
-npx vitest run src/__tests__/<파일>.test.ts   # 이 파일만
+npx vitest run src/__tests__/<파일명>   # 이 파일만 (.test.ts / .test.tsx 전체 이름)
 npm run test:coverage                          # 전체 + 커버리지
 ```
 

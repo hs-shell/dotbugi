@@ -12,8 +12,9 @@ git branch --show-current
 ```
 
 - **`main` 이면 멈춘다.** 리베이스는 작업 브랜치에서만 한다.
-- 커밋하지 않은 변경이 있으면 사용자에게 묻고 **WIP 커밋**으로 남긴다 (`git commit -m "wip"`). `git stash` 는 쓰지 않는다 — stash 는 모든 worktree 가 함께 쓰므로 다른 작업을 꺼낼 수 있다.
+- 커밋하지 않은 변경이 있으면 사용자와 포함할 파일을 정해 `git add <파일>` 로 스테이징하고 **WIP 커밋**으로 남긴다 (`git commit -m "wip"`). 이후 `git status` 로 작업 트리가 깨끗한지 확인한다. `git stash` 는 쓰지 않는다 — stash 는 모든 worktree 가 함께 쓰므로 다른 작업을 꺼낼 수 있다.
 - 되돌릴 지점을 기억해 둔다: `git rev-parse HEAD` (문제가 생기면 `git reset --hard <그 SHA>`).
+- 이미 push 한 브랜치면 원격 tip 도 기록해 둔다: `git fetch origin <브랜치> && git rev-parse origin/<브랜치>` (4단계 lease 기대값).
 
 ## 1단계: 리베이스
 
@@ -55,15 +56,16 @@ node .github/scripts/check-release-manifest.mjs
 
 ## 4단계: push
 
-이미 push 한 브랜치면 히스토리가 바뀌었으므로 강제 push 가 필요하다. **다른 사람의 커밋을 덮지 않게 반드시 `--force-with-lease`** 를 쓴다.
+0단계에서 WIP 커밋을 만들었다면 **push 전에** 처리한다. `git log --oneline origin/main..HEAD` 로 WIP 커밋을 찾아, 맨 위면 `git reset --soft HEAD~1` 로 풀지 사용자에게 묻는다 (그 위에 수정 커밋이 쌓였으면 SHA 로 식별해 사용자와 정한다). 처리 후 이력을 다시 확인한다.
+
+이미 push 한 브랜치면 히스토리가 바뀌었으므로 강제 push 가 필요하다. **다른 사람의 커밋을 덮지 않게 반드시 0단계에서 기록한 원격 tip 을 명시한 lease** 를 쓴다. 인자 없는 `--force-with-lease` 는 백그라운드 fetch 로 갱신된 추적 ref 를 기대값으로 삼아 남의 커밋을 덮을 수 있다.
 
 ```
-git push --force-with-lease
+git push --force-with-lease=<브랜치>:<0단계 원격 tip SHA> origin <브랜치>
 ```
 
-push 전에 사용자에게 한 번 확인받는다.
+원격 tip 이 기록한 SHA 와 다르면 push 가 거부된다 — 강제로 밀지 말고 사용자에게 알린다. push 전에 사용자에게 한 번 확인받는다.
 
 ## 5단계: 결과
 
 - 다시 쌓은 커밋 목록(`git log --oneline origin/main..HEAD`)과 충돌을 어떻게 풀었는지 파일별로 한 줄씩 알려 준다.
-- 0단계에서 WIP 커밋을 만들었다면 `git reset --soft HEAD~1` 로 풀지 사용자에게 묻는다.
