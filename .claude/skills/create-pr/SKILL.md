@@ -2,54 +2,56 @@
 description: 사용자가 "PR 만들어", "PR 생성", "push and create PR" 등을 요청하거나, 구현 완료 후 PR 생성이 필요할 때 사용
 ---
 
-현재 브랜치에서 GitHub Pull Request를 생성하는 스킬. (저장소: `hs-shell/dotbugi`)
+현재 브랜치로 Pull Request 를 만든다. (저장소: `hs-shell/dotbugi`)
 
 ## 0단계: 리팩토링
 
-`/refactor` 스킬을 실행해 변경 코드가 프로젝트 rules에 부합하는지 검사·수정한다. 수정이 생기면 커밋에 포함되도록 staging한다.
+`/refactor` 스킬로 변경 코드가 `.claude/rules/` 에 맞는지 검사·수정한다. 수정이 생기면 커밋에 포함한다.
 
-## 1단계: 현재 상태 파악
+## 1단계: 상태 파악
 
-아래를 병렬 실행한다:
+병렬로 실행한다:
 
 - `git status`
-- `git log main..HEAD --oneline`
-- `git diff main...HEAD`
+- `git log origin/main..HEAD --oneline`
+- `git diff origin/main...HEAD --stat`
 
-## 2단계: PR 제목 결정 (★ 중요: 스쿼시 머지 + release-please)
+main 브랜치라면 멈추고 `<type>/<설명>` 브랜치를 먼저 만든다.
 
-이 저장소는 **스쿼시 머지**만 허용하고, 스쿼시 커밋 제목 = **PR 제목**이 main 히스토리에 남는다. release-please가 그 제목을 읽어 버전을 산출하므로 **PR 제목은 반드시 Conventional Commits**여야 한다.
+## 2단계: PR 전 검사 (CI 와 같은 조건)
 
-- 형식: `<type>: <description>` (필요시 `<type>(<scope>): ...`)
-- type (허용 목록 기준은 `.github/workflows/pr-title.yml`): `feat` / `fix` / `docs` / `refactor` / `perf` / `test` / `chore` / `ci` / `style` / `build` / `revert`
-- 영어, 명령형, 70자 이내 권장
-- 예: `feat: 과제 마감 D-day 알림 추가`
-- `feat`→minor, `fix`→patch, `feat!:`/`BREAKING CHANGE`→major 로 버전이 정해진다.
+```
+npx prettier --check . && npm run lint && npm run build && npm run test:coverage
+```
 
-## 3단계: remote push
+- 실패하면 고치고 다시 돌린다.
+- **테스트 필수**: `src/` 를 바꿨는데 `*.test.ts(x)` 변경이 없으면 `테스트 필수` 검사가 실패한다. `/write-test`(버그는 `/repro-test`)로 먼저 테스트를 쓴다. 정말 필요 없는 변경이면 본문에 이유를 적고 메인테이너에게 `no-test` 라벨을 요청한다.
+- `/ponytail-review` 로 변경을 훑고 필요 없는 코드는 지운다.
 
-remote tracking branch가 없으면 먼저 push한다:
+## 3단계: PR 제목
+
+스쿼시 머지만 쓰므로 **PR 제목 = main 커밋 제목**이고 release-please 가 이걸로 버전을 정한다.
+
+- `<type>: <설명>` (Conventional Commits). type 은 `.github/workflows/pr-title.yml` 목록: `feat`/`fix`/`docs`/`refactor`/`perf`/`test`/`chore`/`ci`/`style`/`build`/`revert`
+- 예: `feat: 과제 마감 D-day 알림 추가`. `feat` → minor, `fix` → patch, `feat!:`/`BREAKING CHANGE` → major.
+- 타입 라벨은 `pr-autolabel` 이 붙인다.
+
+## 4단계: 본문
+
+`.github/PULL_REQUEST_TEMPLATE.md` 는 주석으로 된 안내다. 주석 속 질문에 답하는 본문을 쓴다 (한국어 가능, 주석은 지워도 된다).
+
+- 무엇을 해결하는지, 검토한 다른 방법, 리뷰어가 볼 부분, 추가·수정한 테스트. UI 변경이면 전후 스크린샷.
+- **`Closes #<번호>` 필수**. `issue-link` 검사는 주석 밖의 본문만 본다. 이슈가 없으면 `/create-issue` 로 먼저 만든다.
+- 브랜치·본문에서 이슈 번호를 찾으면 `gh issue view <번호> --json labels` 로 이슈 라벨을 상속한다.
+- 끝에 시스템이 지정한 attribution 줄이 있으면 붙인다.
+
+## 5단계: push + 생성
 
 ```
 git push -u origin HEAD
+gh pr create --repo hs-shell/dotbugi --base main --title "<제목>" --body-file <본문 파일> --assignee @me --label "<상속한 라벨>"
 ```
 
-## 4단계: 본문 작성 + 라벨
+## 6단계: 결과
 
-- 본문은 `.github/PULL_REQUEST_TEMPLATE.md`의 모든 섹션을 diff 기반으로 채운다. **관련 이슈를 `Closes #<번호>`로 반드시 참조**한다(없으면 `pr-checks`의 이슈 가드가 실패).
-- 라벨: 브랜치/본문에서 이슈 번호를 찾으면 `gh issue view <번호> --json labels`로 이슈 라벨을 상속한다.
-- 타입 라벨(`feat`/`bug` 등)은 **`pr-autolabel` 워크플로가 PR 제목 prefix로 자동 부착**하므로 수동 지정 불필요.
-
-## 5단계: PR 생성
-
-```
-gh pr create --repo hs-shell/dotbugi --base main \
-  --title "<conventional 제목>" \
-  --body "<채운 본문>" \
-  --assignee @me \
-  --label "<상속한 이슈 라벨들>"
-```
-
-## 6단계: 결과 출력
-
-생성된 PR URL을 출력한다. (병합은 스쿼시 머지로 진행됨을 안내)
+PR URL 을 알려 준다. CodeRabbit 리뷰와 커버리지 댓글이 자동으로 달리고, `verify`·`issue-link`·`CodeRabbit`·`test-required` 통과 + 승인 1 이면 스쿼시 머지할 수 있다고 안내한다.

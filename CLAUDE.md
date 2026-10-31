@@ -85,7 +85,7 @@ npm run build         # TypeScript check + Vite production build (store upload)
 npm run build:mock    # Dev build via .env.mock: fetch real LMS data for VITE_MOCK_COURSES, skip date filter (LMS login still required)
 npm run build:local   # Local test build: manifest `key` → same extension ID as store, DEV icon/name (never upload)
 npm run lint          # ESLint
-npm run test          # Vitest (test:watch for watch mode)
+npm run test          # Vitest (test:watch for watch mode, test:coverage for coverage)
 npm run format        # Prettier write
 npm run preview       # vite preview (extension build has no HTML entry; not useful in practice)
 npm run docs:dev      # VitePress docs dev server (docs:build / docs:preview)
@@ -123,13 +123,15 @@ To test the extension, load `dist/` as an unpacked extension in Chrome (`chrome:
 
 - Every change needs an **issue first**. PRs must reference it (`Closes #123`) — `pr-checks.yml` fails otherwise.
 - New issues are scanned for duplicates by `issue-dedup.yml` (GitHub Models) and may get a similar-issue comment plus the `possible-duplicate` label.
-- PRs get automated review from **CodeRabbit** (free on public repos) plus `verify` (prettier/lint/build/manifest-key check/test). `main` is protected: required checks are `verify`, `issue-link`, `CodeRabbit` + 1 approval (`validate` PR-title check also runs).
+- PRs get automated review from **CodeRabbit** (free on public repos) plus `verify` (prettier/lint/build/manifest-key check/test). `main` is protected: required checks are `verify`, `issue-link`, `CodeRabbit`, `test-required` + 1 approval (`validate` PR-title check also runs).
 
 ## CI/CD
 
 Workflows live in `.github/workflows/`:
 
-- **`pr-checks.yml`** — on PRs: issue-reference guard (`issue-link`, skipped for Release PRs and Dependabot) + `verify` (Prettier/ESLint/build/`check-release-manifest.mjs`/test).
+- **`pr-checks.yml`** — on PRs: issue-reference guard (`issue-link`, skipped for Release PRs and Dependabot) + `verify` (Prettier/ESLint/build/`check-release-manifest.mjs`/test with coverage, uploaded as an artifact). The issue-link guard ignores HTML comments so the template's example can't satisfy it.
+- **`test-required.yml`** — fails a PR that changes `src/` without touching any `*.test.ts(x)`; maintainers bypass with the `no-test` label.
+- **`coverage-comment.yml`** — `workflow_run` after `PR 검사`: posts/updates one PR comment with total and changed-file coverage (runs from main, never executes PR code; works for fork PRs).
 - **`pr-title.yml`** — PR title must be Conventional Commits (`validate`); the squash title drives release-please.
 - **`release-please.yml`** — trunk-based releases via [release-please](https://github.com/googleapis/release-please). Merging PRs to `main` only updates a maintained **Release PR** (version + CHANGELOG, derived from Conventional Commits); merging that Release PR creates the tag + GitHub Release, then a `publish` job builds, checks the manifest has no `key`, and attaches the zip (sha256 recorded); a separate `store` job (behind `vars.ENABLE_STORE_PUBLISH` + `stable` environment approval) verifies the hash and uploads/submits to the Chrome Web Store via GCP Workload Identity Federation (no long-lived secrets). Version derives from commit types — no `🔖` labels. Config: `release-please-config.json` + `.release-please-manifest.json`. Uses a **GitHub App** token (`APP_ID`/`APP_PRIVATE_KEY` repo secrets) so the Release PR triggers CI; App needs Contents + Pull requests write.
 - **`release-beta.yml`** — manual `workflow_dispatch`; publishes a `vX.Y.Z-beta.N` prerelease from `main` (no separate beta branch). A `store` job (behind `vars.ENABLE_STORE_PUBLISH` + `beta` environment approval) uploads the same zip to the separate beta Web Store item (`BETA_EXTENSION_ID`) via GCP WIF.

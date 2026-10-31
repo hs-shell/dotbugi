@@ -1,0 +1,75 @@
+name: 커버리지 댓글
+
+# PR 검사가 올린 커버리지 결과를 PR 댓글로 남긴다.
+# 포크 PR 의 pull_request 토큰은 댓글을 못 쓰므로 workflow_run 으로 분리한다.
+# 이 워크플로는 PR 코드를 체크아웃·실행하지 않고, artifact 는 숫자만 읽는 데이터로 다룬다.
+on:
+  workflow_run:
+    workflows: ['PR 검사']
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  comment:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      # 테스트가 실패하면 커버리지가 없다 — 그때는 댓글을 남기지 않는다
+      - name: 커버리지 받기
+        id: dl
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: coverage
+          path: ${{ runner.temp }}/coverage
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: PR 댓글
+        if: steps.dl.outcome == 'success'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          COVERAGE_DIR: ${{ runner.temp }}/coverage
+        with:
+          script: |
+            const fs = require('fs');
+            const dir = process.env.COVERAGE_DIR;
+            const run = context.payload.workflow_run;
+            const number = Number(fs.readFileSync(`${dir}/pr-number`, 'utf8').trim());
+            if (!Number.isInteger(number) || number <= 0) return core.setFailed('PR 번호가 올바르지 않습니다');
+
+            // artifact 의 PR 번호는 포크가 바꿀 수 있다 — 실행한 커밋이 그 PR 의 head 일 때만 댓글을 단다
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: number });
+            if (pr.head.sha !== run.head_sha) return core.info(`PR #${number} head 가 바뀜 — 건너뜀`);
+
+            const summary = JSON.parse(fs.readFileSync(`${dir}/coverage-summary.json`, 'utf8'));
+            const pct = (m) => (Number.isFinite(Number(m?.pct)) ? `${Number(m.pct).toFixed(1)}%` : '-');
+            const keys = ['lines', 'statements', 'branches', 'functions'];
+            const row = (name, m) => `| ${name} | ${keys.map((k) => pct(m[k])).join(' | ')} |`;
+            const head = `| | ${keys.join(' | ')} |\n| --- | ${keys.map(() => '---:').join(' | ')} |`;
+
+            // 이 PR 에서 바뀐 src 파일만 따로 보여 준다 (파일명은 API 값, artifact 의 경로는 비교에만 사용)
+            const files = await github.paginate(github.rest.pulls.listFiles, { ...context.repo, pull_number: number, per_page: 100 });
+            const entries = Object.entries(summary).filter(([k]) => k !== 'total');
+            const changed = files
+              .filter((f) => f.status !== 'removed' && /^src\/.*\.tsx?$/.test(f.filename) && !/\.(test|spec)\.tsx?$|\.d\.ts$|^src\/__tests__\//.test(f.filename))
+              .map((f) => [f.filename, entries.find(([k]) => k.replace(/\\/g, '/').endsWith(`/${f.filename}`))?.[1]]);
+
+            const marker = '<!-- dotbugi-coverage -->';
+            let body = `${marker}\n## 테스트 커버리지\n\n${head}\n${row('**전체**', summary.total)}\n`;
+            if (changed.length) {
+              body += `\n### 이 PR 에서 바뀐 파일\n\n${head}\n`;
+              body += changed.map(([name, m]) => (m ? row(`\`${name}\``, m) : `| \`${name}\` | 테스트에서 불러오지 않음 | | | |`)).join('\n');
+              body += '\n';
+            }
+            body += `\n<sub>커밋 ${run.head_sha.slice(0, 7)} · [실행 기록](${run.html_url})</sub>`;
+
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: number, per_page: 100 });
+            const prev = comments.find((c) => c.user?.type === 'Bot' && c.body?.startsWith(marker));
+            if (prev) await github.rest.issues.updateComment({ ...context.repo, comment_id: prev.id, body });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number: number, body });

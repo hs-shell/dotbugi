@@ -73,10 +73,13 @@ RELEASE_CHANNEL=beta npm run build:local     # 베타 항목과 같은 확장 ID
 3. PR을 올립니다.
    - **제목**: Conventional Commits 형식 (스쿼시 머지 시 이 제목이 커밋 메시지가 되고, 버전 산출에 쓰입니다)
    - **본문**: 연결된 이슈를 `Closes #123` 형식으로 적습니다.
+   - **테스트**: `src/` 를 바꿨다면 바뀐 동작을 확인하는 테스트(`*.test.ts(x)`)도 함께 바꿉니다. 테스트가 필요 없는 변경(문구·스타일만 등)은 PR 에 이유를 적으면 메인테이너가 `no-test` 라벨을 붙입니다.
 4. 필수 검사를 통과하고 승인 1건을 받아야 머지됩니다.
    - 이슈 참조 확인 (`issue-link`)
-   - `prettier` / `lint` / `build` / manifest 검사 / `test` (`verify`)
+   - `prettier` / `lint` / `build` / manifest 검사 / `test` + 커버리지 (`verify`)
+   - 소스 변경에 테스트 변경이 있는지 (`test-required`)
    - CodeRabbit AI 코드 리뷰
+   - 커버리지는 전체 수치와 이 PR 에서 바뀐 파일의 수치가 PR 댓글로 달립니다.
    - PR 제목 검사(`validate`)도 함께 실행되니 통과시켜 주세요.
 5. 리뷰 피드백을 반영하면 메인테이너가 머지합니다.
 
