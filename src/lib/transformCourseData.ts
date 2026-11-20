@@ -15,14 +15,16 @@ export function mergeVodWithAttendance(
     watchedTime?: string;
   }[]
 ): Vod[] {
-  const attendanceByKey = new Map<string, (typeof attendanceList)[number]>();
+  // 출석부 표에는 URL 이 없어 같은 주차·같은 제목 강의는 나온 순서대로 짝짓는다 (#225)
+  const attendanceByKey = new Map<string, (typeof attendanceList)[number][]>();
   for (const att of attendanceList) {
-    attendanceByKey.set(`${att.title}-${att.week}`, att);
+    const key = `${att.title}-${att.week}`;
+    attendanceByKey.set(key, [...(attendanceByKey.get(key) ?? []), att]);
   }
 
   const results: Vod[] = [];
   for (const vod of vodList) {
-    const attendance = attendanceByKey.get(`${vod.title}-${vod.week}`);
+    const attendance = attendanceByKey.get(`${vod.title}-${vod.week}`)?.shift();
     if (!attendance) continue;
     results.push({
       ...course,

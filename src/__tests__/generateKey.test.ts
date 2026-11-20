@@ -2,16 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { makeVodKey, makeItemKey, makeVodGroupKey } from '@/lib/generateKey';
 
 describe('makeVodKey', () => {
-  it('courseId-title-week 형식의 키 생성', () => {
-    expect(makeVodKey('123', '강의1', 3)).toBe('123-강의1-3');
-  });
-
-  it('빈 문자열도 키 생성', () => {
-    expect(makeVodKey('', '', 0)).toBe('--0');
-  });
-
-  it('특수문자 포함', () => {
-    expect(makeVodKey('c-1', 'A/B', 1)).toBe('c-1-A/B-1');
+  it('courseId-url 형식의 키 생성', () => {
+    expect(makeVodKey('123', '/mod/vod/view.php?id=1')).toBe('123-/mod/vod/view.php?id=1');
   });
 });
 
@@ -49,9 +41,9 @@ describe('makeVodGroupKey', () => {
 
 describe('키 충돌 검증', () => {
   it('makeVodKey - 서로 다른 입력은 다른 키 생성', () => {
-    expect(makeVodKey('C1', '강의1', 1)).not.toBe(makeVodKey('C1', '강의1', 2));
-    expect(makeVodKey('C1', '강의1', 1)).not.toBe(makeVodKey('C2', '강의1', 1));
-    expect(makeVodKey('C1', '강의1', 1)).not.toBe(makeVodKey('C1', '강의2', 1));
+    // #225: 제목이 같아도 강의(URL)가 다르면 다른 키여야 중복 제거에서 빠지지 않는다
+    expect(makeVodKey('C1', '/v1')).not.toBe(makeVodKey('C1', '/v2'));
+    expect(makeVodKey('C1', '/v1')).not.toBe(makeVodKey('C2', '/v1'));
   });
 
   it('makeItemKey - 서로 다른 입력은 다른 키 생성', () => {

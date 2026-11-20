@@ -51,14 +51,31 @@ describe('mergeVodWithAttendance', () => {
     expect(result).toEqual([]);
   });
 
-  it('동일 title+week 출석이 여러 개면 마지막이 사용됨 (Map 덮어쓰기)', () => {
+  it('동일 title+week 출석이 VOD 보다 많으면 앞에서부터 순서대로 사용됨', () => {
     const vodList = [{ week: 1, subject: '1주차', title: '강의1', url: '/v1', range: null, length: '30:00' }];
     const attendanceList = [
       { title: '강의1', isAttendance: 'X', weeklyAttendance: 'X', week: 1 },
       { title: '강의1', isAttendance: 'O', weeklyAttendance: 'O', week: 1 },
     ];
     const result = mergeVodWithAttendance(baseCourse, vodList, attendanceList);
-    expect(result[0].isAttendance).toBe('O');
+    expect(result[0].isAttendance).toBe('X');
+  });
+
+  // #225: 같은 주차에 제목이 같은 강의가 여럿이면, 마지막 출석 행이 모든 강의에 덮어씌워지면 안 된다
+  it('같은 title+week 강의가 여러 개면 각자 순서에 맞는 출석 상태를 받는다', () => {
+    const vodList = [
+      { week: 1, subject: '1주차', title: '강의', url: '/v1', range: null, length: '30:00' },
+      { week: 1, subject: '1주차', title: '강의', url: '/v2', range: null, length: '30:00' },
+    ];
+    const attendanceList = [
+      { title: '강의', isAttendance: 'O', weeklyAttendance: 'X', week: 1 },
+      { title: '강의', isAttendance: 'X', weeklyAttendance: 'X', week: 1 },
+    ];
+    const result = mergeVodWithAttendance(baseCourse, vodList, attendanceList);
+    expect(result.map((v) => [v.url, v.isAttendance])).toEqual([
+      ['/v1', 'O'],
+      ['/v2', 'X'],
+    ]);
   });
 
   it('course 정보가 결과에 포함됨', () => {

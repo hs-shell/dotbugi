@@ -146,7 +146,7 @@ export function useCourseData(courses: CourseBase[]) {
               vods,
               mergeVodWithAttendance(course, scraped.vodDataArray, scraped.vodAttendanceArray),
               seenVods,
-              (v) => makeVodKey(v.courseId, v.title, v.week)
+              (v) => makeVodKey(v.courseId, v.url)
             );
             deduplicateInto(assigns, mergeDueDateItems(course, scraped.assignDataArray), seenAssigns, (a) =>
               makeItemKey(a.courseId, a.title, a.dueDate ?? '')
@@ -219,8 +219,8 @@ export function useCourseData(courses: CourseBase[]) {
       // Storage: 전체 데이터 저장
       loadDataFromStorage<Vod[]>('vod', (stored) => {
         const all = [...(stored ?? [])];
-        const seen = new Set(all.map((v) => makeVodKey(v.courseId, v.title, v.week)));
-        deduplicateInto(all, newVods, seen, (v) => makeVodKey(v.courseId, v.title, v.week));
+        const seen = new Set(all.map((v) => makeVodKey(v.courseId, v.url)));
+        deduplicateInto(all, newVods, seen, (v) => makeVodKey(v.courseId, v.url));
         saveDataToStorage('vod', all);
       });
       loadDataFromStorage<Assign[]>('assign', (stored) => {
@@ -242,9 +242,9 @@ export function useCourseData(courses: CourseBase[]) {
       const filteredNewQuizzes = filterItemsForDisplay(newQuizzes);
 
       setVods((prev) => {
-        const seen = new Set(prev.map((v) => makeVodKey(v.courseId, v.title, v.week)));
+        const seen = new Set(prev.map((v) => makeVodKey(v.courseId, v.url)));
         const merged = [...prev];
-        deduplicateInto(merged, filteredNewVods, seen, (v) => makeVodKey(v.courseId, v.title, v.week));
+        deduplicateInto(merged, filteredNewVods, seen, (v) => makeVodKey(v.courseId, v.url));
         return merged;
       });
 
