@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.4.1](https://github.com/hs-shell/dotbugi/compare/v5.4.0...v5.4.1) (2026-11-20)
+
+
+### Bug Fixes
+
+* 같은 제목의 동영상 강의가 하나만 표시되는 문제 수정 ([#226](https://github.com/hs-shell/dotbugi/issues/226)) ([bdbe729](https://github.com/hs-shell/dotbugi/commit/bdbe729c4d8cc01941c62a3dcb3d77f1ac443929)), closes [#225](https://github.com/hs-shell/dotbugi/issues/225)
+
 ## [5.4.0](https://github.com/hs-shell/dotbugi/compare/v5.3.1...v5.4.0) (2026-10-26)
 
 
