@@ -148,6 +148,26 @@ describe('useCourseData — 새로고침 결과 반영', () => {
     expect(getLastRequestTime()).toBeGreaterThan(STALE_TIME);
   });
 
+  // #225: 중복 제거 키가 제목 기반이라 같은 주차·같은 제목 강의가 하나로 합쳐지면 안 된다
+  it('같은 주차에 제목이 같은 강의가 여러 개면 모두 저장·표시한다', async () => {
+    vi.mocked(loadAutoRefresh).mockResolvedValue(true);
+    const vod = { week: 1, subject: '1주차', title: '같은 제목', range: NOW_RANGE, length: '10:00' };
+    const att = { week: 1, title: '같은 제목', isAttendance: 'X', weeklyAttendance: 'X' };
+    vi.mocked(scrapeCourseData).mockResolvedValue({
+      ...EMPTY_SCRAPE,
+      vodDataArray: [
+        { ...vod, url: 'u-1' },
+        { ...vod, url: 'u-2' },
+      ],
+      vodAttendanceArray: [att, att],
+    } as never);
+
+    await mountAndLoad();
+
+    expect((savedOf('vod') as Vod[]).map((v) => v.url)).toEqual(['u-1', 'u-2']);
+    expect(result.vods.map((v) => v.url)).toEqual(['u-1', 'u-2']);
+  });
+
   it('가져오기에 실패하면 오류 상태로 두고 마지막 새로고침 시각을 지워 다음에 다시 시도하게 한다', async () => {
     vi.mocked(loadAutoRefresh).mockResolvedValue(true);
     vi.mocked(scrapeCourseData).mockRejectedValue(new Error('500'));
